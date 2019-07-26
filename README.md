@@ -5,6 +5,14 @@ basic toy-tests like [OpenAI Gym](https://gym.openai.com/) and [DeepMind Control
 Moreover, RLzoo supports large-scale distributed training framework for more realistic scenarios with [Unity 3D](https://github.com/Unity-Technologies/ml-agents), 
 [Mujoco](http://www.mujoco.org/), [Bullet Physics](https://github.com/bulletphysics/bullet3), and robotic learning tasks with [Vrep](http://www.coppeliarobotics.com/)/[Pyrep](https://github.com/stepjam/PyRep), etc.
 
+- [Contents](#contents)
+  - [Algorithms](##1.algorithms)
+  - [Applications](##2.applications)
+- [Prerequisites](#prerequisites)
+- [Usage](#usage)
+- [Troubleshooting](#troubleshooting)
+- [Citing](#citing)
+
 ## Contents:
 ### 1. Algorithms:
 
@@ -53,7 +61,7 @@ Moreover, RLzoo supports large-scale distributed training framework for more rea
 
 `python main.py --env=FrozenLake-v0 --algorithm=dqn --train_episodes=6000 --mode=train`
 
-## Trouble Shooting:
+## Troubleshooting:
 
 * If you meet the error`AttributeError: module 'tensorflow' has no attribute 'contrib'` when running the code after installing tensorflow-probability, try:
 `pip install --upgrade tf-nightly-2.0-preview tfp-nightly`
