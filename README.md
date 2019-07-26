@@ -1,5 +1,5 @@
 # Reinforcement Learning Algorithms Zoo
-RLzoo is a collection of most practical reinforcement learning algorithms, frameworks and applications. It is implemented with Tensorfow 2.0
+RLzoo is a collection of most practical reinforcement learning algorithms, frameworks and applications. It is implemented with Tensorflow 2.0
 and API of neural network layers in TensorLayer 2, to provide a hands-on fast-developing approach for reinforcement learning practices. It supports
 both toy tests like [OpenAI Gym](https://gym.openai.com/) and [DeepMind Control Suite](https://github.com/deepmind/dm_control) with very simple configurations.
 Moreover, RLzoo supports large-scale distributed training framework for more realistic scenarios with [Unity 3D](https://github.com/Unity-Technologies/ml-agents), 
