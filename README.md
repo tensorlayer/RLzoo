@@ -6,17 +6,16 @@ Moreover, RLzoo supports large-scale distributed training framework for more rea
 [Mujoco](http://www.mujoco.org/), [Bullet Physics](https://github.com/bulletphysics/bullet3), and robotic learning tasks with [Vrep](http://www.coppeliarobotics.com/)/[Pyrep](https://github.com/stepjam/PyRep), etc.
 
 - [Contents](#contents)
-  - [Algorithms](##1.algorithms)
-  - [Applications](##2.applications)
+  - [Algorithms](##algorithms)
+  - [Applications](##applications)
 - [Prerequisites](#prerequisites)
 - [Usage](#usage)
 - [Troubleshooting](#troubleshooting)
 - [Citing](#citing)
 
 ## Contents:
-### 1.Algorithms:
+### Algorithms:
 
-### value-based
 | Algorithms      | Action Space | Tutorial Env   | Papers |
 | --------------- | ------------ | -------------- | -------|
 |**value-based**||||
@@ -40,7 +39,7 @@ Moreover, RLzoo supports large-scale distributed training framework for more rea
 |TD3|Discrete/Continuous |Pendulum|[Addressing function approximation error in actor-critic methods. Fujimoto et al. 2018.](https://arxiv.org/pdf/1802.09477.pdf)|
 |Soft Actor-Critic (SAC)|Discrete/Continuous |Pendulum|[Soft actor-critic algorithms and applications. Haarnoja et al. 2018.](https://arxiv.org/abs/1812.05905)|
 
-### 2.Applications:
+### Applications:
 
 ## Prerequisites:
 
