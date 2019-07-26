@@ -6,8 +6,8 @@ Moreover, RLzoo supports large-scale distributed training framework for more rea
 [Mujoco](http://www.mujoco.org/), [Bullet Physics](https://github.com/bulletphysics/bullet3), and robotic learning tasks with [Vrep](http://www.coppeliarobotics.com/)/[Pyrep](https://github.com/stepjam/PyRep), etc.
 
 - [Contents](#contents)
-  - [Algorithms](##1.algorithms)
-  - [Applications](##2.applications)
+  - [Algorithms](##1. algorithms)
+  - [Applications](##2. applications)
 - [Prerequisites](#prerequisites)
 - [Usage](#usage)
 - [Troubleshooting](#troubleshooting)
