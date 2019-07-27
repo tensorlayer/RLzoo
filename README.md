@@ -52,13 +52,13 @@ Moreover, RLzoo supports large-scale distributed training framework for more rea
 `pip install -r requirements.txt`
 
 ## Usage:
-`python main.py --env=Pendulum-v0 --algorithm=td3 --train_episodes=600 --mode=train`
 
-`python main.py --env=BipedalWalker-v2 --algorithm=a3c --train_episodes=600 --mode=train --number_workers=2`
-
-`python main.py --env=CartPole-v0 --algorithm=ac --train_episodes=600 --mode=train`
-
-`python main.py --env=FrozenLake-v0 --algorithm=dqn --train_episodes=6000 --mode=train`
+```bash
+python3 main.py --env=Pendulum-v0 --algorithm=td3 --train_episodes=600 --mode=train
+python3 main.py --env=BipedalWalker-v2 --algorithm=a3c --train_episodes=600 --mode=train --number_workers=2
+python3 main.py --env=CartPole-v0 --algorithm=ac --train_episodes=600 --mode=train
+python3 main.py --env=FrozenLake-v0 --algorithm=dqn --train_episodes=6000 --mode=train
+```
 
 ## Troubleshooting:
 
