@@ -13,6 +13,11 @@ Moreover, RLzoo supports large-scale distributed training framework for more rea
 - [Troubleshooting](#troubleshooting)
 - [Citing](#citing)
 
+Please note that this repository using RL algorithms with **high-level API**. So if you want to get familiar with each algorithm more quickly, please look at our **[RL tutorials](https://github.com/tensorlayer/tensorlayer/tree/master/examples/reinforcement_learning)** where each algorithm is implemented individually in a more straightforward manner.
+
+## Status: Work-in-Progress:
+Currently the repository is still in development, and there may be some envrionments incompatible with our algorithms. If you find any problems or have any suggestions, feel free to contact with us!
+
 ## Contents:
 ### Algorithms:
 
@@ -58,7 +63,7 @@ python3 main.py --env=Pendulum-v0 --algorithm=td3 --train_episodes=600 --mode=tr
 python3 main.py --env=BipedalWalker-v2 --algorithm=a3c --train_episodes=600 --mode=train --number_workers=2
 python3 main.py --env=CartPole-v0 --algorithm=ac --train_episodes=600 --mode=train
 python3 main.py --env=FrozenLake-v0 --algorithm=dqn --train_episodes=6000 --mode=train
-```
+``` 
 
 ## Troubleshooting:
 
