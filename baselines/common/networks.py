@@ -95,7 +95,7 @@ class QNetwork(Model):
     ''' 
     network for estimating Q(s,a).
     '''
-    def __init__(self, state_dim, action_dim, hidden_dim, num_hidden_layer, scope=None):
+    def __init__(self, state_dim, action_dim, hidden_dim, num_hidden_layer=3, scope=None):
         super(QNetwork, self).__init__()
         self.input_dim=state_dim + action_dim
         self.hidden_dim=hidden_dim

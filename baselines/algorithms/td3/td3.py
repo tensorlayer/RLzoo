@@ -54,7 +54,8 @@ from tensorlayer.layers import Dense
 from tensorlayer.models import Model
 from common.utils import *
 from common.buffer import *
-from common.networks import *
+from common.value_networks import *
+from common.policy_networks import *
 
 tfd = tfp.distributions
 Normal = tfd.Normal
@@ -65,86 +66,89 @@ tl.logging.set_verbosity(tl.logging.DEBUG)
 ###############################  TD3  ####################################
 
 
-class PolicyNetwork(Model):
-    ''' the network for generating non-determinstic (Gaussian distributed) action from the state input '''
+# class PolicyNetwork(Model):
+#     ''' the network for generating non-determinstic (Gaussian distributed) action from the state input '''
 
-    def __init__(self, num_inputs, num_actions, hidden_dim, action_range=1., init_w=3e-3):
-        super(PolicyNetwork, self).__init__()
+#     def __init__(self, num_inputs, num_actions, hidden_dim, action_range=1., init_w=3e-3):
+#         super(PolicyNetwork, self).__init__()
 
-        # w_init = tf.keras.initializers.glorot_normal(seed=None)
-        w_init = tf.random_uniform_initializer(-init_w, init_w)
+#         # w_init = tf.keras.initializers.glorot_normal(seed=None)
+#         w_init = tf.random_uniform_initializer(-init_w, init_w)
 
-        self.linear1 = Dense(n_units=hidden_dim, act=tf.nn.relu, W_init=w_init, in_channels=num_inputs, name='policy1')
-        self.linear2 = Dense(n_units=hidden_dim, act=tf.nn.relu, W_init=w_init, in_channels=hidden_dim, name='policy2')
-        self.linear3 = Dense(n_units=hidden_dim, act=tf.nn.relu, W_init=w_init, in_channels=hidden_dim, name='policy3')
+#         self.linear1 = Dense(n_units=hidden_dim, act=tf.nn.relu, W_init=w_init, in_channels=num_inputs, name='policy1')
+#         self.linear2 = Dense(n_units=hidden_dim, act=tf.nn.relu, W_init=w_init, in_channels=hidden_dim, name='policy2')
+#         self.linear3 = Dense(n_units=hidden_dim, act=tf.nn.relu, W_init=w_init, in_channels=hidden_dim, name='policy3')
 
-        self.output_linear = Dense(n_units=num_actions, W_init=w_init, \
-        b_init=tf.random_uniform_initializer(-init_w, init_w), in_channels=hidden_dim, name='policy_output')
+#         self.output_linear = Dense(n_units=num_actions, W_init=w_init, \
+#         b_init=tf.random_uniform_initializer(-init_w, init_w), in_channels=hidden_dim, name='policy_output')
 
-        self.action_range = action_range
-        self.num_actions = num_actions
+#         self.action_range = action_range
+#         self.num_actions = num_actions
 
-    def forward(self, state):
-        x = self.linear1(state)
-        x = self.linear2(x)
-        x = self.linear3(x)
+#     def forward(self, state):
+#         x = self.linear1(state)
+#         x = self.linear2(x)
+#         x = self.linear3(x)
 
-        output = tf.nn.tanh(self.output_linear(x))  # unit range output [-1, 1]
+#         output = tf.nn.tanh(self.output_linear(x))  # unit range output [-1, 1]
 
-        return output
+#         return output
 
-    def evaluate(self, state, eval_noise_scale):
-        ''' 
-        generate action with state for calculating gradients;
-        eval_noise_scale: as the trick of target policy smoothing, for generating noisy actions.
-        '''
-        state = state.astype(np.float32)
-        action = self.forward(state)
+#     def evaluate(self, state, eval_noise_scale):
+#         ''' 
+#         generate action with state for calculating gradients;
+#         eval_noise_scale: as the trick of target policy smoothing, for generating noisy actions.
+#         '''
+#         state = state.astype(np.float32)
+#         action = self.forward(state)
 
-        action = self.action_range * action
+#         action = self.action_range * action
 
-        # add noise
-        normal = Normal(0, 1)
-        eval_noise_clip = 2 * eval_noise_scale
-        noise = normal.sample(action.shape) * eval_noise_scale
-        noise = tf.clip_by_value(noise, -eval_noise_clip, eval_noise_clip)
-        action = action + noise
+#         # add noise
+#         normal = Normal(0, 1)
+#         eval_noise_clip = 2 * eval_noise_scale
+#         noise = normal.sample(action.shape) * eval_noise_scale
+#         noise = tf.clip_by_value(noise, -eval_noise_clip, eval_noise_clip)
+#         action = action + noise
 
-        return action
+#         return action
 
-    def get_action(self, state, explore_noise_scale):
-        ''' generate action with state for interaction with envronment '''
-        action = self.forward([state])
-        action = action.numpy()[0]
+#     def get_action(self, state, explore_noise_scale):
+#         ''' generate action with state for interaction with envronment '''
+#         action = self.forward([state])
+#         action = action.numpy()[0]
 
-        # add noise
-        normal = Normal(0, 1)
-        noise = normal.sample(action.shape) * explore_noise_scale
-        action = self.action_range * action + noise
+#         # add noise
+#         normal = Normal(0, 1)
+#         noise = normal.sample(action.shape) * explore_noise_scale
+#         action = self.action_range * action + noise
 
-        return action.numpy()
+#         return action.numpy()
 
-    def sample_action(self, ):
-        ''' generate random actions for exploration '''
-        a = tf.random.uniform([self.num_actions], -1, 1)
+#     def sample_action(self, ):
+#         ''' generate random actions for exploration '''
+#         a = tf.random.uniform([self.num_actions], -1, 1)
 
-        return self.action_range * a.numpy()
+#         return self.action_range * a.numpy()
 
 
 class TD3_Trainer():
 
     def __init__(
-            self, replay_buffer, hidden_dim, state_dim, action_dim, action_range, policy_target_update_interval=1, q_lr=3e-4, policy_lr=3e-4
+            self, replay_buffer, hidden_dim, state_dim, action_dim, num_hidden_layer, action_range, policy_target_update_interval=1, q_lr=3e-4, policy_lr=3e-4
     ):
         self.replay_buffer = replay_buffer
+        self.action_dim = action_dim
+        self.action_range = action_range
+        name='td3'
 
         # initialize all networks
-        self.q_net1 = QNetwork(state_dim, action_dim, hidden_dim)
-        self.q_net2 = QNetwork(state_dim, action_dim, hidden_dim)
-        self.target_q_net1 = QNetwork(state_dim, action_dim, hidden_dim)
-        self.target_q_net2 = QNetwork(state_dim, action_dim, hidden_dim)
-        self.policy_net = PolicyNetwork(state_dim, action_dim, hidden_dim, action_range)
-        self.target_policy_net = PolicyNetwork(state_dim, action_dim, hidden_dim, action_range)
+        self.q_net1 = MlpQNetwork(state_dim, action_dim, num_hidden_layer*[hidden_dim], name=name+'_q1')
+        self.q_net2 = MlpQNetwork(state_dim, action_dim, num_hidden_layer*[hidden_dim], name=name+'_q2')
+        self.target_q_net1 = MlpQNetwork(state_dim, action_dim, num_hidden_layer*[hidden_dim], name=name+'_target_q1')
+        self.target_q_net2 = MlpQNetwork(state_dim, action_dim, num_hidden_layer*[hidden_dim], name=name+'_target_q2')
+        self.policy_net = DeterministicPolicyNetwork(state_dim, action_dim, num_hidden_layer*[hidden_dim], name=name+'_policy')
+        self.target_policy_net = DeterministicPolicyNetwork(state_dim, action_dim, num_hidden_layer*[hidden_dim], name=name+'_target_policy')
         print('Q Network (1,2): ', self.q_net1)
         print('Policy Network: ', self.policy_net)
 
@@ -159,6 +163,46 @@ class TD3_Trainer():
         self.q_optimizer1 = tf.optimizers.Adam(q_lr)
         self.q_optimizer2 = tf.optimizers.Adam(q_lr)
         self.policy_optimizer = tf.optimizers.Adam(policy_lr)
+
+    def evaluate(self, state, eval_noise_scale, target=False):
+        ''' 
+        generate action with state for calculating gradients;
+        eval_noise_scale: as the trick of target policy smoothing, for generating noisy actions.
+        '''
+        state = state.astype(np.float32)
+        if target:
+            action = self.target_policy_net(state)
+        else:
+            action = self.policy_net(state)
+
+        action = self.action_range * action
+
+        # add noise
+        normal = Normal(0, 1)
+        eval_noise_clip = 2 * eval_noise_scale
+        noise = normal.sample(action.shape) * eval_noise_scale
+        noise = tf.clip_by_value(noise, -eval_noise_clip, eval_noise_clip)
+        action = action + noise
+
+        return action
+
+    def get_action(self, state, explore_noise_scale):
+        ''' generate action with state for interaction with envronment '''
+        action = self.policy_net(np.array([state]))
+        action = action.numpy()[0]
+
+        # add noise
+        normal = Normal(0, 1)
+        noise = normal.sample(action.shape) * explore_noise_scale
+        action = self.action_range * action + noise
+
+        return action.numpy()
+
+    def sample_action(self, ):
+        ''' generate random actions for exploration '''
+        a = tf.random.uniform([self.action_dim], -self.action_range, self.action_range)
+
+        return self.action_range * a.numpy()
 
     def target_ini(self, net, target_net):
         ''' hard-copy update for initializing target networks '''
@@ -182,8 +226,8 @@ class TD3_Trainer():
         reward = reward[:, np.newaxis]  # expand dim
         done = done[:, np.newaxis]
 
-        new_next_action = self.target_policy_net.evaluate(
-            next_state, eval_noise_scale=eval_noise_scale
+        new_next_action = self.evaluate(
+            next_state, eval_noise_scale=eval_noise_scale, target=True
         )  # clipped normal noise
         reward = reward_scale * (reward -
                                  np.mean(reward, axis=0)) / (np.std(reward, axis=0)+1e-6)  # normalize with batch mean and std; plus a small number to prevent numerical problem
@@ -210,8 +254,8 @@ class TD3_Trainer():
         # Training Policy Function
         if self.update_cnt % self.policy_target_update_interval == 0:
             with tf.GradientTape() as p_tape:
-                new_action = self.policy_net.evaluate(
-                    state, eval_noise_scale=0.0
+                new_action = self.evaluate(
+                    state, eval_noise_scale=0.0, target=False
                 )  # no noise, deterministic policy gradients
                 new_q_input = tf.concat([state, new_action], 1)
                 # ''' implementation 1 '''
@@ -245,8 +289,8 @@ class TD3_Trainer():
 
 
 def learn(env_id, train_episodes, test_episodes=1000, max_steps=150, batch_size=64, explore_steps=500, update_itr=3, hidden_dim=32, \
-    q_lr = 3e-4, policy_lr = 3e-4, policy_target_update_interval = 3, action_range = 1., \
-    replay_buffer_size = 5e5, reward_scale = 1. , seed=2, save_interval=500, explore_noise_scale = 1.0, eval_noise_scale = 0.5, mode='train'):
+    num_hidden_layer=3, q_lr = 3e-4, policy_lr = 3e-4, policy_target_update_interval = 3, action_range = 1., \
+    replay_buffer_size = 5e5, reward_scale = 1. , seed=2, save_interval=5, explore_noise_scale = 1.0, eval_noise_scale = 0.5, mode='train'):
     '''
     parameters
     ----------
@@ -258,6 +302,7 @@ def learn(env_id, train_episodes, test_episodes=1000, max_steps=150, batch_size=
     explore_steps:  for random action sampling in the beginning of training
     update_itr: repeated updates for single step
     hidden_dim:  size of hidden layers for networks
+    num_hidden_layer: number of hidden layers
     q_lr: q_net learning rate
     policy_lr: policy_net learning rate
     policy_target_update_interval: delayed update for the policy network and target networks
@@ -281,16 +326,15 @@ def learn(env_id, train_episodes, test_episodes=1000, max_steps=150, batch_size=
     # initialization of buffer
     replay_buffer = ReplayBuffer(replay_buffer_size)
     # initialization of trainer
-    td3_trainer=TD3_Trainer(replay_buffer, hidden_dim=hidden_dim, state_dim=state_dim, action_dim=action_dim, policy_target_update_interval=policy_target_update_interval, \
-    action_range=action_range, q_lr=q_lr, policy_lr=policy_lr )
-    # set train mode
+    td3_trainer=TD3_Trainer(replay_buffer, hidden_dim=hidden_dim, state_dim=state_dim, action_dim=action_dim, num_hidden_layer=num_hidden_layer, \
+    policy_target_update_interval=policy_target_update_interval, action_range=action_range, q_lr=q_lr, policy_lr=policy_lr )
+    # set test mode
     td3_trainer.q_net1.train()
     td3_trainer.q_net2.train()
     td3_trainer.target_q_net1.train()
     td3_trainer.target_q_net2.train()
     td3_trainer.policy_net.train()
     td3_trainer.target_policy_net.train()
-
     # training loop
     if mode=='train':
         frame_idx = 0
@@ -300,17 +344,12 @@ def learn(env_id, train_episodes, test_episodes=1000, max_steps=150, batch_size=
             state = env.reset()
             state = state.astype(np.float32)
             episode_reward = 0
-            if frame_idx < 1:
-                _ = td3_trainer.policy_net(
-                    [state]
-                )  # need an extra call here to make inside functions be able to use model.forward
-                _ = td3_trainer.target_policy_net([state])
 
             for step in range(max_steps):
                 if frame_idx > explore_steps:
-                    action = td3_trainer.policy_net.get_action(state, explore_noise_scale=1.0)
+                    action = td3_trainer.get_action(state, explore_noise_scale=1.0)
                 else:
-                    action = td3_trainer.policy_net.sample_action()
+                    action = td3_trainer.sample_action()
 
                 next_state, reward, done, _ = env.step(action)
                 next_state = next_state.astype(np.float32)
@@ -345,19 +384,21 @@ def learn(env_id, train_episodes, test_episodes=1000, max_steps=150, batch_size=
         t0 = time.time()
 
         td3_trainer.load_weights()
+        # set test mode
+        td3_trainer.q_net1.eval()
+        td3_trainer.q_net2.eval()
+        td3_trainer.target_q_net1.eval()
+        td3_trainer.target_q_net2.eval()
+        td3_trainer.policy_net.eval()
+        td3_trainer.target_policy_net.eval()
 
         for eps in range(test_episodes):
             state = env.reset()
             state = state.astype(np.float32)
             episode_reward = 0
-            if frame_idx < 1:
-                _ = td3_trainer.policy_net(
-                    [state]
-                )  # need an extra call to make inside functions be able to use forward
-                _ = td3_trainer.target_policy_net([state])
 
             for step in range(max_steps):
-                action = td3_trainer.policy_net.get_action(state, explore_noise_scale=1.0)
+                action = td3_trainer.get_action(state, explore_noise_scale=1.0)
                 next_state, reward, done, _ = env.step(action)
                 next_state = next_state.astype(np.float32)
                 env.render()

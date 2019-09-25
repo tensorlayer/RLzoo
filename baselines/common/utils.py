@@ -37,6 +37,25 @@ def plot(episode_rewards, Algorithm_name, Env_name):
     plt.savefig('./img/' + Algorithm_name + '.png')
 
 
+def plot_save_log(episode_rewards, Algorithm_name, Env_name):
+    '''
+    plot the learning curve, saved as ./img/Algorithm_name-Env_name.png, 
+    and save the rewards log as ./log/Algorithm_name-Env_name.npz
+    :episode_rewards: array of floats
+    :Algorithm_name: string
+    :Env_name: string
+    '''
+    plt.figure(figsize=(10, 5))
+    plt.title(Algorithm_name + '-' + Env_name)
+    plt.plot(np.arange(len(episode_rewards)), episode_rewards)
+    plt.xlabel('Episode')
+    plt.ylabel('Episode Reward')
+    if not os.path.exists('img'):
+        os.makedirs('img')
+    plt.savefig('./img/' + Algorithm_name + '-' + Env_name + '.png')
+    plt.save('./log/'+ Algorithm_name + '-' + Env_name, rewards)
+
+
 def save_model(model, Model_name, Algorithm_name):
     '''
     save trained neural network model
