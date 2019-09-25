@@ -53,7 +53,7 @@ def plot_save_log(episode_rewards, Algorithm_name, Env_name):
     if not os.path.exists('img'):
         os.makedirs('img')
     plt.savefig('./img/' + Algorithm_name + '-' + Env_name + '.png')
-    plt.save('./log/'+ Algorithm_name + '-' + Env_name, rewards)
+    np.save('./log/'+ Algorithm_name + '-' + Env_name, episode_rewards)
 
 
 def save_model(model, Model_name, Algorithm_name):

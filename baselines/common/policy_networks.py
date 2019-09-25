@@ -56,7 +56,7 @@ class DeterministicPolicyNetwork(Model):
     ''' deterministic continuous policy network for generating action according to the state '''
 
     def __init__(self, state_dim, action_dim, hidden_dim_list, weights_initialization='Random Uniform', \
-         activation = 'Relu', log_std_min=-20, log_std_max=2, name='', trainable = True):
+         activation = 'Relu', name='', trainable = True):
         if weights_initialization == 'Glorot Normal' or weights_initialization == None:  # glorot normal as default
             w_init = tf.keras.initializers.glorot_normal(
                 seed=None
@@ -73,7 +73,7 @@ class DeterministicPolicyNetwork(Model):
         for i in range(len(hidden_dim_list)):
             suffix = '_hidden_layer%d' % (i+1)
             l = Dense(n_units=hidden_dim_list[i], act=act, W_init=w_init, name=name+suffix)(l)
-        outputs = Dense(n_units=action_dim, W_init=w_init, name=name+'_output_layer')(l)
+        outputs = Dense(n_units=action_dim, act=tf.nn.tanh, W_init=w_init, name=name+'_output_layer')(l)
 
         super().__init__(inputs=inputs, outputs=outputs)
         if trainable:

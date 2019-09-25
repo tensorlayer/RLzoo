@@ -22,6 +22,7 @@ tfd = tfp.distributions
 Normal = tfd.Normal
 
 class MlpValueNetwork(Model):
+    ''' value network with multi-layer perceptron '''
     def __init__(self, state_dim, hidden_dim_list, name='', \
         weights_initialization='Glorot Normal', activation = 'Relu', trainable = True):
         
@@ -48,6 +49,7 @@ class MlpValueNetwork(Model):
             self.eval()    
 
 class MlpQNetwork(Model):
+    ''' Q-value network with multi-layer perceptron '''
     def __init__(self, action_dim, state_dim, hidden_dim_list, name='', \
         weights_initialization='Glorot Normal', activation = 'Relu', trainable = True):
         input_dim = action_dim + state_dim

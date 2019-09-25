@@ -132,23 +132,22 @@ tl.logging.set_verbosity(tl.logging.DEBUG)
 #         return self.action_range * a.numpy()
 
 
-class TD3_Trainer():
-
-    def __init__(
-            self, replay_buffer, hidden_dim, state_dim, action_dim, num_hidden_layer, action_range, policy_target_update_interval=1, q_lr=3e-4, policy_lr=3e-4
-    ):
-        self.replay_buffer = replay_buffer
+class TD3():
+    ''' twin-delayed ddpg '''
+    def __init__(self, QNetwork, PolicyNetwork, state_dim, action_dim, replay_buffer_capacity=5e5, num_hidden_layer=3,\
+                 hidden_dim=32, action_range=1., policy_target_update_interval=5, q_lr=3e-4, policy_lr=3e-4 ):
+        self.replay_buffer = ReplayBuffer(replay_buffer_capacity)
         self.action_dim = action_dim
         self.action_range = action_range
         name='td3'
 
         # initialize all networks
-        self.q_net1 = MlpQNetwork(state_dim, action_dim, num_hidden_layer*[hidden_dim], name=name+'_q1')
-        self.q_net2 = MlpQNetwork(state_dim, action_dim, num_hidden_layer*[hidden_dim], name=name+'_q2')
-        self.target_q_net1 = MlpQNetwork(state_dim, action_dim, num_hidden_layer*[hidden_dim], name=name+'_target_q1')
-        self.target_q_net2 = MlpQNetwork(state_dim, action_dim, num_hidden_layer*[hidden_dim], name=name+'_target_q2')
-        self.policy_net = DeterministicPolicyNetwork(state_dim, action_dim, num_hidden_layer*[hidden_dim], name=name+'_policy')
-        self.target_policy_net = DeterministicPolicyNetwork(state_dim, action_dim, num_hidden_layer*[hidden_dim], name=name+'_target_policy')
+        self.q_net1 = QNetwork(state_dim, action_dim, num_hidden_layer*[hidden_dim], name=name+'_q1')
+        self.q_net2 = QNetwork(state_dim, action_dim, num_hidden_layer*[hidden_dim], name=name+'_q2')
+        self.target_q_net1 = QNetwork(state_dim, action_dim, num_hidden_layer*[hidden_dim], name=name+'_target_q1')
+        self.target_q_net2 = QNetwork(state_dim, action_dim, num_hidden_layer*[hidden_dim], name=name+'_target_q2')
+        self.policy_net = PolicyNetwork(state_dim, action_dim, num_hidden_layer*[hidden_dim], name=name+'_policy')
+        self.target_policy_net = PolicyNetwork(state_dim, action_dim, num_hidden_layer*[hidden_dim], name=name+'_target_policy')
         print('Q Network (1,2): ', self.q_net1)
         print('Policy Network: ', self.policy_net)
 
@@ -218,7 +217,7 @@ class TD3_Trainer():
             )
         return target_net
 
-    def update(self, batch_size, eval_noise_scale, reward_scale=10., gamma=0.9, soft_tau=1e-2):
+    def update(self, batch_size, eval_noise_scale, reward_scale=1., gamma=0.9, soft_tau=1e-2):
         ''' update all networks in TD3 '''
         self.update_cnt += 1
         state, action, reward, next_state, done = self.replay_buffer.sample(batch_size)
@@ -288,131 +287,107 @@ class TD3_Trainer():
         load_model(self.target_policy_net, 'model_target_policy_net', 'TD3')
 
 
-def learn(env_id, train_episodes, test_episodes=1000, max_steps=150, batch_size=64, explore_steps=500, update_itr=3, hidden_dim=32, \
-    num_hidden_layer=3, q_lr = 3e-4, policy_lr = 3e-4, policy_target_update_interval = 3, action_range = 1., \
-    replay_buffer_size = 5e5, reward_scale = 1. , seed=2, save_interval=5, explore_noise_scale = 1.0, eval_noise_scale = 0.5, mode='train'):
-    '''
-    parameters
-    ----------
-    env: learning environment
-    train_episodes:  total number of episodes for training
-    test_episodes:  total number of episodes for testing
-    max_steps:  maximum number of steps for one episode
-    batch_size:  udpate batchsize
-    explore_steps:  for random action sampling in the beginning of training
-    update_itr: repeated updates for single step
-    hidden_dim:  size of hidden layers for networks
-    num_hidden_layer: number of hidden layers
-    q_lr: q_net learning rate
-    policy_lr: policy_net learning rate
-    policy_target_update_interval: delayed update for the policy network and target networks
-    action_range: range of action value
-    replay_buffer_size: size of replay buffer
-    reward_scale: value range of reward
-    save_interval: timesteps for saving the weights and plotting the results
-    explore_noise_scale: range of action noise for exploration
-    eval_noise_scale: range of action noise for evaluation of action value
-    mode: train or test
+    def learn(self, env, train_episodes, test_episodes=1000, max_steps=150, batch_size=64, explore_steps=500, update_itr=3, 
+        reward_scale = 1. , seed=2, save_interval=10, explore_noise_scale = 1.0, eval_noise_scale = 0.5, mode='train'):
+        '''
+        parameters
+        ----------
+        env: learning environment
+        train_episodes:  total number of episodes for training
+        test_episodes:  total number of episodes for testing
+        max_steps:  maximum number of steps for one episode
+        batch_size:  udpate batchsize
+        explore_steps:  for random action sampling in the beginning of training
+        update_itr: repeated updates for single step
+        reward_scale: value range of reward
+        save_interval: timesteps for saving the weights and plotting the results
+        explore_noise_scale: range of action noise for exploration
+        eval_noise_scale: range of action noise for evaluation of action value
+        mode: 'train' or 'test'
 
-    '''
-    env = make_env(env_id)  # make env with common.utils and wrappers
-    action_dim = env.action_space.shape[0]
-    state_dim = env.observation_space.shape[0]
+        '''
+        random.seed(seed)
+        np.random.seed(seed)
+        tf.random.set_seed(seed)  # reproducible
 
-    random.seed(seed)
-    np.random.seed(seed)
-    tf.random.set_seed(seed)  # reproducible
+        # training loop
+        if mode=='train':
+            frame_idx = 0
+            rewards = []
+            t0 = time.time()
+            for eps in range(train_episodes):
+                state = env.reset()
+                state = state.astype(np.float32)
+                episode_reward = 0
 
-    # initialization of buffer
-    replay_buffer = ReplayBuffer(replay_buffer_size)
-    # initialization of trainer
-    td3_trainer=TD3_Trainer(replay_buffer, hidden_dim=hidden_dim, state_dim=state_dim, action_dim=action_dim, num_hidden_layer=num_hidden_layer, \
-    policy_target_update_interval=policy_target_update_interval, action_range=action_range, q_lr=q_lr, policy_lr=policy_lr )
-    # set test mode
-    td3_trainer.q_net1.train()
-    td3_trainer.q_net2.train()
-    td3_trainer.target_q_net1.train()
-    td3_trainer.target_q_net2.train()
-    td3_trainer.policy_net.train()
-    td3_trainer.target_policy_net.train()
-    # training loop
-    if mode=='train':
-        frame_idx = 0
-        rewards = []
-        t0 = time.time()
-        for eps in range(train_episodes):
-            state = env.reset()
-            state = state.astype(np.float32)
-            episode_reward = 0
+                for step in range(max_steps):
+                    if frame_idx > explore_steps:
+                        action = self.get_action(state, explore_noise_scale=explore_noise_scale)
+                    else:
+                        action = self.sample_action()
 
-            for step in range(max_steps):
-                if frame_idx > explore_steps:
-                    action = td3_trainer.get_action(state, explore_noise_scale=1.0)
-                else:
-                    action = td3_trainer.sample_action()
+                    next_state, reward, done, _ = env.step(action)
+                    next_state = next_state.astype(np.float32)
+                    env.render()
+                    done = 1 if done ==True else 0
 
-                next_state, reward, done, _ = env.step(action)
-                next_state = next_state.astype(np.float32)
-                env.render()
-                done = 1 if done ==True else 0
+                    self.replay_buffer.push(state, action, reward, next_state, done)
 
-                replay_buffer.push(state, action, reward, next_state, done)
+                    state = next_state
+                    episode_reward += reward
+                    frame_idx += 1
 
-                state = next_state
-                episode_reward += reward
-                frame_idx += 1
+                    if len(self.replay_buffer) > batch_size:
+                        for i in range(update_itr):
+                            self.update(batch_size, eval_noise_scale=eval_noise_scale, reward_scale=reward_scale)
 
-                if len(replay_buffer) > batch_size:
-                    for i in range(update_itr):
-                        td3_trainer.update(batch_size, eval_noise_scale=0.5, reward_scale=1.)
+                    if done:
+                        break
 
-                if done:
-                    break
+                if eps % int(save_interval) == 0:
+                    plot_save_log(rewards, Algorithm_name='TD3', Env_name=env.spec.id)
+                    self.save_weights()
 
-            if eps % int(save_interval) == 0:
-                plot(rewards, Algorithm_name='TD3', Env_name=env_id)
-                td3_trainer.save_weights()
+                print('Episode: {}/{}  | Episode Reward: {:.4f}  | Running Time: {:.4f}'\
+                .format(eps, train_episodes, episode_reward, time.time()-t0 ))
+                rewards.append(episode_reward)
+            self.save_weights()
 
-            print('Episode: {}/{}  | Episode Reward: {:.4f}  | Running Time: {:.4f}'\
-            .format(eps, train_episodes, episode_reward, time.time()-t0 ))
-            rewards.append(episode_reward)
-        td3_trainer.save_weights()
+        if mode=='test':
+            frame_idx = 0
+            rewards = []
+            t0 = time.time()
 
-    if mode=='test':
-        frame_idx = 0
-        rewards = []
-        t0 = time.time()
+            self.load_weights()
+            # set test mode
+            self.q_net1.eval()
+            self.q_net2.eval()
+            self.target_q_net1.eval()
+            self.target_q_net2.eval()
+            self.policy_net.eval()
+            self.target_policy_net.eval()
 
-        td3_trainer.load_weights()
-        # set test mode
-        td3_trainer.q_net1.eval()
-        td3_trainer.q_net2.eval()
-        td3_trainer.target_q_net1.eval()
-        td3_trainer.target_q_net2.eval()
-        td3_trainer.policy_net.eval()
-        td3_trainer.target_policy_net.eval()
+            for eps in range(test_episodes):
+                state = env.reset()
+                state = state.astype(np.float32)
+                episode_reward = 0
 
-        for eps in range(test_episodes):
-            state = env.reset()
-            state = state.astype(np.float32)
-            episode_reward = 0
+                for step in range(max_steps):
+                    action = self.get_action(state, explore_noise_scale=1.0)
+                    next_state, reward, done, _ = env.step(action)
+                    next_state = next_state.astype(np.float32)
+                    env.render()
+                    done = 1 if done ==True else 0
 
-            for step in range(max_steps):
-                action = td3_trainer.get_action(state, explore_noise_scale=1.0)
-                next_state, reward, done, _ = env.step(action)
-                next_state = next_state.astype(np.float32)
-                env.render()
-                done = 1 if done ==True else 0
+                    state = next_state
+                    episode_reward += reward
+                    frame_idx += 1
 
-                state = next_state
-                episode_reward += reward
-                frame_idx += 1
+                    # if frame_idx % 50 == 0:
+                    #     plot(frame_idx, rewards)
 
-                # if frame_idx % 50 == 0:
-                #     plot(frame_idx, rewards)
-
-                if done:
-                    break
-            print('Episode: {}/{}  | Episode Reward: {:.4f}  | Running Time: {:.4f}'\
-            .format(eps, test_episodes, episode_reward, time.time()-t0 ) )
-            rewards.append(episode_reward)
+                    if done:
+                        break
+                print('Episode: {}/{}  | Episode Reward: {:.4f}  | Running Time: {:.4f}'\
+                .format(eps, test_episodes, episode_reward, time.time()-t0 ) )
+                rewards.append(episode_reward)
