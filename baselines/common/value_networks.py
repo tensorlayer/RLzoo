@@ -17,30 +17,29 @@ import tensorflow_probability as tfp
 import tensorlayer as tl
 from tensorlayer.layers import Dense, Input
 from tensorlayer.models import Model
+from common.basic_nets import * 
 
 tfd = tfp.distributions
 Normal = tfd.Normal
 
 class MlpValueNetwork(Model):
-    ''' value network with multi-layer perceptron '''
-    def __init__(self, state_dim, hidden_dim_list, name='', \
-        weights_initialization='Glorot Normal', activation = 'Relu', trainable = True):
+    def __init__(self, state_shape, hidden_dim_list, name='', w_init=tf.keras.initializers.glorot_normal(), \
+        activation = tf.nn.relu, trainable = True):
+        """ Value network with multiple fully-connected layers 
         
-        if weights_initialization == 'Glorot Normal' or weights_initialization == None:  # glorot normal as default
-            w_init = tf.keras.initializers.glorot_normal(
-                seed=None
-            )
-        # add other options
-        
-        if activation == 'Relu' or activation == None:  # relu as default
-            act= tf.nn.relu
-        # add other options
-        
-        l = inputs = Input([None, state_dim], name=name+'_input_layer')
-        for i in range(len(hidden_dim_list)):
-            suffix = '_hidden_layer%d' % (i+1)
-            l = Dense(n_units=hidden_dim_list[i], act=act, W_init=w_init, name=name+suffix)(l)
-        outputs = Dense(n_units=1, act=act, W_init=w_init, name=name+'_output_layer')(l)
+        Args:
+            state_shape (tuple[int]): shape of the state, for example, (state_dim, ) for single-dimensional state
+            hidden_dim_list (list[int]): a list of dimensions of hidden layers
+            w_init (callable): weights initialization
+            activation (callable): activation function
+            name (str): name prefix
+            trainable (bool): set training and evaluation mode
+        """
+
+        state_dim = state_shape[0]
+
+        inputs, l = MLP(state_dim, hidden_dim_list, w_init, activation, name)
+        outputs = Dense(n_units=1, act=activation, W_init=w_init, name=name+'_output_layer')(l)
 
         super().__init__(inputs=inputs, outputs=outputs)
         if trainable:
@@ -49,25 +48,25 @@ class MlpValueNetwork(Model):
             self.eval()    
 
 class MlpQNetwork(Model):
-    ''' Q-value network with multi-layer perceptron '''
-    def __init__(self, action_dim, state_dim, hidden_dim_list, name='', \
-        weights_initialization='Glorot Normal', activation = 'Relu', trainable = True):
-        input_dim = action_dim + state_dim
-        if weights_initialization == 'Glorot Normal' or weights_initialization == None:  # glorot normal as default
-            w_init = tf.keras.initializers.glorot_normal(
-                seed=None
-            )
-        # add other options
+    def __init__(self, state_shape, action_shape, hidden_dim_list, name='', \
+        w_init=tf.keras.initializers.glorot_normal(), activation = tf.nn.relu, trainable = True):
+        """ Q-value network with multiple fully-connected layers 
         
-        if activation == 'Relu' or activation == None:  # relu as default
-            act= tf.nn.relu
-        # add other options
+        Args:
+            state_shape (tuple[int]): shape of the state, for example, (state_dim, ) for single-dimensional state
+            action_shape (tuple[int]): shape of the action, for example, (action_dim, ) for single-dimensional action
+            hidden_dim_list (list[int]): a list of dimensions of hidden layers
+            w_init (callable): weights initialization
+            activation (callable): activation function
+            name (str): name prefix
+            trainable (bool): set training and evaluation mode
+        """
+
+        input_shape = tuple(map(sum,zip(action_shape,state_shape)))
+        input_dim = input_shape[0]
         
-        l = inputs = Input([None, input_dim], name=name+'_input_layer')
-        for i in range(len(hidden_dim_list)):
-            suffix = '_hidden_layer%d' % (i+1)
-            l = Dense(n_units=hidden_dim_list[i], act=act, W_init=w_init, name=name+suffix)(l)
-        outputs = Dense(n_units=1, act=act, W_init=w_init, name=name+'_output_layer')(l)
+        inputs, l = MLP(input_dim, hidden_dim_list, w_init, activation, name)
+        outputs = Dense(n_units=1, act=activation, W_init=w_init, name=name+'_output_layer')(l)
 
         super().__init__(inputs=inputs, outputs=outputs)
         if trainable:

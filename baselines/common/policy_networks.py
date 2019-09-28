@@ -17,30 +17,32 @@ import tensorflow_probability as tfp
 import tensorlayer as tl
 from tensorlayer.layers import Dense, Input
 from tensorlayer.models import Model
-
+from common.basic_nets import * 
 
 tfd = tfp.distributions
 Normal = tfd.Normal
 
 class StochasticPolicyNetwork(Model):
-    ''' stochastic continuous policy network for generating action according to the state '''
-
-    def __init__(self, state_dim, action_dim, hidden_dim_list, weights_initialization='Glorot Normal', \
-         activation = 'Relu', log_std_min=-20, log_std_max=2, name='', trainable=True):
-        if weights_initialization == 'Glorot Normal' or weights_initialization == None:  # glorot normal as default
-            w_init = tf.keras.initializers.glorot_normal(
-                seed=None
-            )
-        # add other options
+    def __init__(self, state_shape, action_shape, hidden_dim_list, w_init=tf.keras.initializers.glorot_normal(), \
+        activation = tf.nn.relu, log_std_min=-20, log_std_max=2, name='', trainable=True):
+        """ Stochastic continuous policy network with multiple fully-connected layers 
         
-        if activation == 'Relu' or activation == None:  # relu as default
-            act= tf.nn.relu
-        # add other options
+        Args:
+            state_shape (tuple[int]): shape of the state, for example, (state_dim, ) for single-dimensional state
+            action_shape (tuple[int]): shape of the action, for example, (action_dim, ) for single-dimensional action
+            hidden_dim_list (list[int]): a list of dimensions of hidden layers
+            w_init (callable): weights initialization
+            activation (callable): activation function
+            log_std_min (float): lower bound of standard deviation of action
+            log_std_max (float): upper bound of standard deviation of action
+            name (str): name prefix
+            trainable (bool): set training and evaluation mode
+        """
 
-        l = inputs = Input([None, state_dim], name=name+'_input_layer')
-        for i in range(len(hidden_dim_list)):
-            suffix = '_hidden_layer%d' % (i+1)
-            l = Dense(n_units=hidden_dim_list[i], act=act, W_init=w_init, name=name+suffix)(l)
+        action_dim = action_shape[0]
+        state_dim = state_shape[0]  # need modification for cnn
+
+        inputs, l = MLP(state_dim, hidden_dim_list, w_init, activation, name)
         mean_linear = Dense(n_units=action_dim, W_init=w_init, name=name+'_mean')(l)
         log_std_linear = Dense(n_units=action_dim, W_init=w_init, name=name+'_std')(l)  
         log_std_linear = tl.layers.Lambda(lambda x: tf.clip_by_value(x, log_std_min, log_std_max), 
@@ -53,26 +55,24 @@ class StochasticPolicyNetwork(Model):
             self.eval()    
 
 class DeterministicPolicyNetwork(Model):
-    ''' deterministic continuous policy network for generating action according to the state '''
-
-    def __init__(self, state_dim, action_dim, hidden_dim_list, weights_initialization='Random Uniform', \
-         activation = 'Relu', name='', trainable = True):
-        if weights_initialization == 'Glorot Normal' or weights_initialization == None:  # glorot normal as default
-            w_init = tf.keras.initializers.glorot_normal(
-                seed=None
-            )
-        elif weights_initialization== 'Random Uniform':
-            w_init=tf.random_uniform_initializer(-3e-3, 3e-3)
-        # add other options
+    def __init__(self, state_shape, action_shape, hidden_dim_list, w_init=tf.keras.initializers.glorot_normal(), \
+        activation = tf.nn.relu, name='', trainable = True):
+        """ Deterministic continuous policy network with multiple fully-connected layers 
         
-        if activation == 'Relu' or activation == None:  # relu as default
-            act= tf.nn.relu
-        # add other options
+        Args:
+            state_shape (tuple[int]): shape of the state, for example, (state_dim, ) for single-dimensional state
+            action_shape (tuple[int]): shape of the action, for example, (action_dim, ) for single-dimensional action
+            hidden_dim_list (list[int]): a list of dimensions of hidden layers
+            w_init (callable): weights initialization
+            activation (callable): activation function
+            name (str): name prefix
+            trainable (bool): set training and evaluation mode
+        """
 
-        l = inputs = Input([None, state_dim], name=name+'_input_layer')
-        for i in range(len(hidden_dim_list)):
-            suffix = '_hidden_layer%d' % (i+1)
-            l = Dense(n_units=hidden_dim_list[i], act=act, W_init=w_init, name=name+suffix)(l)
+        action_dim = action_shape[0]
+        state_dim = state_shape[0]
+        
+        inputs, l = MLP(state_dim, hidden_dim_list, w_init, activation, name)
         outputs = Dense(n_units=action_dim, act=tf.nn.tanh, W_init=w_init, name=name+'_output_layer')(l)
 
         super().__init__(inputs=inputs, outputs=outputs)
@@ -80,3 +80,4 @@ class DeterministicPolicyNetwork(Model):
             self.train()
         else:
             self.eval()   
+

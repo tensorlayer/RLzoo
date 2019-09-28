@@ -40,7 +40,7 @@ def plot(episode_rewards, Algorithm_name, Env_name):
 def plot_save_log(episode_rewards, Algorithm_name, Env_name):
     '''
     plot the learning curve, saved as ./img/Algorithm_name-Env_name.png, 
-    and save the rewards log as ./log/Algorithm_name-Env_name.npz
+    and save the rewards log as ./log/Algorithm_name-Env_name.npy
     :episode_rewards: array of floats
     :Algorithm_name: string
     :Env_name: string
@@ -53,6 +53,8 @@ def plot_save_log(episode_rewards, Algorithm_name, Env_name):
     if not os.path.exists('img'):
         os.makedirs('img')
     plt.savefig('./img/' + Algorithm_name + '-' + Env_name + '.png')
+    if not os.path.exists('log'):
+        os.makedirs('log')
     np.save('./log/'+ Algorithm_name + '-' + Env_name, episode_rewards)
 
 
@@ -127,3 +129,10 @@ def learn(env_id, algorithm, train_episodes, **kwargs):
 def get_algorithm_module(algorithm, submodule):
     """ Get algorithm module in the corresponding folder """
     return import_module('.'.join(['algorithms', algorithm, submodule]))
+
+
+def flatten_dims(shapes):  # will be moved to common
+    dim = 1
+    for s in shapes:
+        dim *= s
+    return dim

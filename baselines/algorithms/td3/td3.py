@@ -66,88 +66,17 @@ tl.logging.set_verbosity(tl.logging.DEBUG)
 ###############################  TD3  ####################################
 
 
-# class PolicyNetwork(Model):
-#     ''' the network for generating non-determinstic (Gaussian distributed) action from the state input '''
-
-#     def __init__(self, num_inputs, num_actions, hidden_dim, action_range=1., init_w=3e-3):
-#         super(PolicyNetwork, self).__init__()
-
-#         # w_init = tf.keras.initializers.glorot_normal(seed=None)
-#         w_init = tf.random_uniform_initializer(-init_w, init_w)
-
-#         self.linear1 = Dense(n_units=hidden_dim, act=tf.nn.relu, W_init=w_init, in_channels=num_inputs, name='policy1')
-#         self.linear2 = Dense(n_units=hidden_dim, act=tf.nn.relu, W_init=w_init, in_channels=hidden_dim, name='policy2')
-#         self.linear3 = Dense(n_units=hidden_dim, act=tf.nn.relu, W_init=w_init, in_channels=hidden_dim, name='policy3')
-
-#         self.output_linear = Dense(n_units=num_actions, W_init=w_init, \
-#         b_init=tf.random_uniform_initializer(-init_w, init_w), in_channels=hidden_dim, name='policy_output')
-
-#         self.action_range = action_range
-#         self.num_actions = num_actions
-
-#     def forward(self, state):
-#         x = self.linear1(state)
-#         x = self.linear2(x)
-#         x = self.linear3(x)
-
-#         output = tf.nn.tanh(self.output_linear(x))  # unit range output [-1, 1]
-
-#         return output
-
-#     def evaluate(self, state, eval_noise_scale):
-#         ''' 
-#         generate action with state for calculating gradients;
-#         eval_noise_scale: as the trick of target policy smoothing, for generating noisy actions.
-#         '''
-#         state = state.astype(np.float32)
-#         action = self.forward(state)
-
-#         action = self.action_range * action
-
-#         # add noise
-#         normal = Normal(0, 1)
-#         eval_noise_clip = 2 * eval_noise_scale
-#         noise = normal.sample(action.shape) * eval_noise_scale
-#         noise = tf.clip_by_value(noise, -eval_noise_clip, eval_noise_clip)
-#         action = action + noise
-
-#         return action
-
-#     def get_action(self, state, explore_noise_scale):
-#         ''' generate action with state for interaction with envronment '''
-#         action = self.forward([state])
-#         action = action.numpy()[0]
-
-#         # add noise
-#         normal = Normal(0, 1)
-#         noise = normal.sample(action.shape) * explore_noise_scale
-#         action = self.action_range * action + noise
-
-#         return action.numpy()
-
-#     def sample_action(self, ):
-#         ''' generate random actions for exploration '''
-#         a = tf.random.uniform([self.num_actions], -1, 1)
-
-#         return self.action_range * a.numpy()
-
-
 class TD3():
     ''' twin-delayed ddpg '''
-    def __init__(self, QNetwork, PolicyNetwork, state_dim, action_dim, replay_buffer_capacity=5e5, num_hidden_layer=3,\
-                 hidden_dim=32, action_range=1., policy_target_update_interval=5, q_lr=3e-4, policy_lr=3e-4 ):
+    def __init__(self, net_list, state_dim, action_dim, replay_buffer_capacity=5e5, \
+        action_range=1., policy_target_update_interval=5, q_lr=3e-4, policy_lr=3e-4 ):
         self.replay_buffer = ReplayBuffer(replay_buffer_capacity)
         self.action_dim = action_dim
         self.action_range = action_range
-        name='td3'
 
-        # initialize all networks
-        self.q_net1 = QNetwork(state_dim, action_dim, num_hidden_layer*[hidden_dim], name=name+'_q1')
-        self.q_net2 = QNetwork(state_dim, action_dim, num_hidden_layer*[hidden_dim], name=name+'_q2')
-        self.target_q_net1 = QNetwork(state_dim, action_dim, num_hidden_layer*[hidden_dim], name=name+'_target_q1')
-        self.target_q_net2 = QNetwork(state_dim, action_dim, num_hidden_layer*[hidden_dim], name=name+'_target_q2')
-        self.policy_net = PolicyNetwork(state_dim, action_dim, num_hidden_layer*[hidden_dim], name=name+'_policy')
-        self.target_policy_net = PolicyNetwork(state_dim, action_dim, num_hidden_layer*[hidden_dim], name=name+'_target_policy')
+        # get all networks
+        [self.q_net1, self.q_net2, self.target_q_net1, self.target_q_net2, self.policy_net, self.target_policy_net]=net_list
+       
         print('Q Network (1,2): ', self.q_net1)
         print('Policy Network: ', self.policy_net)
 
@@ -173,9 +102,7 @@ class TD3():
             action = self.target_policy_net(state)
         else:
             action = self.policy_net(state)
-
         action = self.action_range * action
-
         # add noise
         normal = Normal(0, 1)
         eval_noise_clip = 2 * eval_noise_scale
@@ -300,6 +227,7 @@ class TD3():
         explore_steps:  for random action sampling in the beginning of training
         update_itr: repeated updates for single step
         reward_scale: value range of reward
+        seed: random seed
         save_interval: timesteps for saving the weights and plotting the results
         explore_noise_scale: range of action noise for exploration
         eval_noise_scale: range of action noise for evaluation of action value

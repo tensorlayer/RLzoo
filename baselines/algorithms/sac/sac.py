@@ -44,18 +44,14 @@ tl.logging.set_verbosity(tl.logging.DEBUG)
 
 class SAC():
     ''' Soft Actor-Critic '''
-    def __init__(self, QNetwork, PolicyNetwork, state_dim, action_dim, replay_buffer_capacity=5e5, action_range=1., hidden_dim=32, num_hidden_layer=3, soft_q_lr=3e-4, policy_lr=3e-4, alpha_lr=3e-4):
+    def __init__(self, net_list, state_dim, action_dim, replay_buffer_capacity=5e5, action_range=1., hidden_dim=32, num_hidden_layer=3, soft_q_lr=3e-4, policy_lr=3e-4, alpha_lr=3e-4):
         self.replay_buffer = ReplayBuffer(replay_buffer_capacity)
         self.action_dim = action_dim
         self.action_range = action_range
-        name='sac'
 
-        # initialize all networks
-        self.soft_q_net1 = QNetwork(state_dim, action_dim, num_hidden_layer*[hidden_dim], name=name+'_q1')
-        self.soft_q_net2 = QNetwork(state_dim, action_dim, num_hidden_layer*[hidden_dim], name=name+'_q2')
-        self.target_soft_q_net1 = QNetwork(state_dim, action_dim, num_hidden_layer*[hidden_dim], name=name+'_target_q1')
-        self.target_soft_q_net2 = QNetwork(state_dim, action_dim, num_hidden_layer*[hidden_dim], name=name+'_target_q2')
-        self.policy_net = PolicyNetwork(state_dim, action_dim, num_hidden_layer*[hidden_dim], name=name+'_policy')
+        # get all networks
+        [self.soft_q_net1, self.soft_q_net2, self.target_soft_q_net1, self.target_soft_q_net2, self.policy_net]=net_list
+       
         self.log_alpha = tf.Variable(0, dtype=np.float32, name='log_alpha')
         self.alpha = tf.math.exp(self.log_alpha)
         print('Soft Q Network (1,2): ', self.soft_q_net1)
@@ -216,6 +212,7 @@ class SAC():
         update_itr: repeated updates for single step
         policy_target_update_interval: delayed update for the policy network and target networks
         reward_scale: value range of reward
+        seed: random seed
         save_interval: timesteps for saving the weights and plotting the results
         mode: 'train' or 'test'
         AUTO_ENTROPY: automatically udpating variable alpha for entropy

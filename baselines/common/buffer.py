@@ -16,42 +16,7 @@ import numpy as np
 import tensorlayer as tl
 
 
-class ReplayBuffer:
-    '''
-    a ring buffer for storing transitions and sampling for training
-    :state: (state_dim,)
-    :action: (action_dim,)
-    :reward: (,), scalar
-    :next_state: (state_dim,)
-    :done: (,), scalar (0 and 1) or bool (True and False)
-    '''
-
-    def __init__(self, capacity):
-        self.capacity = capacity
-        self.buffer = []
-        self.position = 0
-
-    def push(self, state, action, reward, next_state, done):
-        if len(self.buffer) < self.capacity:
-            self.buffer.append(None)
-        self.buffer[self.position] = (state, action, reward, next_state, done)
-        self.position = int((self.position + 1) % self.capacity)  # as a ring buffer
-
-    def sample(self, batch_size):
-        batch = random.sample(self.buffer, batch_size)
-        state, action, reward, next_state, done = map(np.stack, zip(*batch))  # stack for each element
-        ''' 
-        the * serves as unpack: sum(a,b) <=> batch=(a,b), sum(*batch) ;
-        zip: a=[1,2], b=[2,3], zip(a,b) => [(1, 2), (2, 3)] ;
-        the map serves as mapping the function on each list element: map(square, [2,3]) => [4,9] ;
-        np.stack((1,2)) => array([1, 2])
-        '''
-        return state, action, reward, next_state, done
-
-    def __len__(self):
-        return len(self.buffer)
-
-# class ReplayBuffer(object):
+# class ReplayBuffer:
 #     '''
 #     a ring buffer for storing transitions and sampling for training
 #     :state: (state_dim,)
@@ -62,9 +27,9 @@ class ReplayBuffer:
 #     '''
 
 #     def __init__(self, capacity):
-#         self.capacity = capacity  # mamimum number of samples
+#         self.capacity = capacity
 #         self.buffer = []
-#         self.position = 0  # pointer
+#         self.position = 0
 
 #     def push(self, state, action, reward, next_state, done):
 #         if len(self.buffer) < self.capacity:
@@ -73,31 +38,65 @@ class ReplayBuffer:
 #         self.position = int((self.position + 1) % self.capacity)  # as a ring buffer
 
 #     def sample(self, batch_size):
-#         indexes = range(len(self))
-#         print(len(self))
-#         # sample with replacement
-#         idxes = [random.choice(indexes) for _ in range(batch_size)]
-#         return self._encode_sample(idxes)
-
-#     def _encode_sample(self, idxes):
-#         states, actions, rewards, next_states, dones = [], [], [], [], []
-#         for i in idxes:
-#             state, action, reward, next_state, done = self.buffer[i]
-#             states.append(state)
-#             actions.append(action)
-#             rewards.append(reward)
-#             next_states.append(next_state)
-#             dones.append(done)
-#         return (
-#             np.stack(states),
-#             np.stack(actions),
-#             np.stack(rewards),
-#             np.stack(next_states),
-#             np.stack(dones),
-#         )
+#         batch = random.sample(self.buffer, batch_size)
+#         state, action, reward, next_state, done = map(np.stack, zip(*batch))  # stack for each element
+#         ''' 
+#         the * serves as unpack: sum(a,b) <=> batch=(a,b), sum(*batch) ;
+#         zip: a=[1,2], b=[2,3], zip(a,b) => [(1, 2), (2, 3)] ;
+#         the map serves as mapping the function on each list element: map(square, [2,3]) => [4,9] ;
+#         np.stack((1,2)) => array([1, 2])
+#         '''
+#         return state, action, reward, next_state, done
 
 #     def __len__(self):
 #         return len(self.buffer)
+
+class ReplayBuffer(object):
+    '''
+    a ring buffer for storing transitions and sampling for training
+    :state: (state_dim,)
+    :action: (action_dim,)
+    :reward: (,), scalar
+    :next_state: (state_dim,)
+    :done: (,), scalar (0 and 1) or bool (True and False)
+    '''
+
+    def __init__(self, capacity):
+        self.capacity = capacity  # mamimum number of samples
+        self.buffer = []
+        self.position = 0  # pointer
+
+    def push(self, state, action, reward, next_state, done):
+        if len(self.buffer) < self.capacity:
+            self.buffer.append(None)
+        self.buffer[self.position] = (state, action, reward, next_state, done)
+        self.position = int((self.position + 1) % self.capacity)  # as a ring buffer
+
+    def sample(self, batch_size):
+        indexes = range(len(self))
+        # sample with replacement
+        idxes = [random.choice(indexes) for _ in range(batch_size)]
+        return self._encode_sample(idxes)
+
+    def _encode_sample(self, idxes):
+        states, actions, rewards, next_states, dones = [], [], [], [], []
+        for i in idxes:
+            state, action, reward, next_state, done = self.buffer[i]
+            states.append(state)
+            actions.append(action)
+            rewards.append(reward)
+            next_states.append(next_state)
+            dones.append(done)
+        return (
+            np.stack(states),
+            np.stack(actions),
+            np.stack(rewards),
+            np.stack(next_states),
+            np.stack(dones),
+        )
+
+    def __len__(self):
+        return len(self.buffer)
 
 
 class SegmentTree(object):
