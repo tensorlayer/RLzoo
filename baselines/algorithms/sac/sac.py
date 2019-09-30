@@ -266,7 +266,7 @@ class SAC():
                 rewards.append(episode_reward)
             self.save_weights()
 
-        if mode=='test':
+        elif mode=='test':
             frame_idx = 0
             rewards = []
             t0 = time.time()
@@ -302,3 +302,6 @@ class SAC():
                 print('Episode: {}/{}  | Episode Reward: {:.4f}  | Running Time: {:.4f}'\
                 .format(eps, test_episodes, episode_reward, time.time()-t0 ) )
                 rewards.append(episode_reward)
+
+        elif mode is not 'test':
+            print('unknow mode type, activate test mode as default')

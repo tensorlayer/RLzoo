@@ -1,35 +1,28 @@
 """
 Asynchronous Advantage Actor Critic (A3C) with Continuous Action Space.
-
 Actor Critic History
 ----------------------
 A3C > DDPG (for continuous action space) > AC
-
 Advantage
 ----------
 Train faster and more stable than AC.
-
 Disadvantage
 -------------
 Have bias.
-
 Reference
 ----------
 Original Paper: https://arxiv.org/pdf/1602.01783.pdf
 MorvanZhou's tutorial: https://morvanzhou.github.io/tutorials/
 MorvanZhou's code: https://github.com/MorvanZhou/Reinforcement-learning-with-tensorflow/blob/master/experiments/Solve_BipedalWalker/A3C.py
-
 Environment
 -----------
 BipedalWalker-v2 : https://gym.openai.com/envs/BipedalWalker-v2
-
 Reward is given for moving forward, total 300+ points up to the far end.
 If the robot falls, it gets -100. Applying motor torque costs a small amount of
 points, more optimal agent will get better score. State consists of hull angle
 speed, angular velocity, horizontal speed, vertical speed, position of joints
 and joints angular speed, legs contact with ground, and 10 lidar rangefinder
 measurements. There's no coordinates in the state vector.
-
 Prerequisites
 --------------
 tensorflow 2.0.0a0
@@ -37,7 +30,6 @@ tensorflow-probability 0.6.0
 tensorlayer 2.0.0
 &&
 pip install box2d box2d-kengz --user
-
 """
 
 import argparse
@@ -51,30 +43,54 @@ import gym
 import tensorflow as tf
 import tensorflow_probability as tfp
 import tensorlayer as tl
-import copy
 from tensorlayer.layers import DenseLayer, InputLayer
 from tensorlayer.models import Model
 from common.utils import *
 from common.buffer import *
+from common.value_networks import *
+from common.policy_networks import *
 
 tfd = tfp.distributions
 
 # tl.logging.set_verbosity(tl.logging.DEBUG)
+
 ###################  Asynchronous Advantage Actor Critic (A3C)  ####################################
 class ACNet(object):
 
-    def __init__(self, net_list, scope, entropy_beta, action_bound, globalAC=None):
+    def __init__(self, scope, entropy_beta, action_dim, state_dim, actor_hidden_dim, actor_hidden_layer,
+        critic_hidden_dim, critic_hidden_layer, action_bound, globalAC=None):
         self.scope = scope  # the scope is for naming networks for each worker differently
         self.save_path = './model'
         self.ENTROPY_BETA=entropy_beta
+        self.N_A = action_dim
+        self.N_S = state_dim
         self.A_BOUND = action_bound 
-        # self.actor = StochasticPolicyNetwork(self.N_S, self.N_A, actor_hidden_dim, actor_hidden_layer, scope=self.scope).model() # call the network model in common functions
+
+        # w_init = tf.keras.initializers.glorot_normal(seed=None)  # initializer, glorot=xavier
+        # def get_actor(input_shape):  # policy network
+        #     with tf.name_scope(self.scope):
+        #         ni = tl.layers.Input(input_shape, name='in')
+        #         nn = tl.layers.Dense(n_units=500, act=tf.nn.relu6, W_init=w_init, name='la')(ni)
+        #         nn = tl.layers.Dense(n_units=300, act=tf.nn.relu6, W_init=w_init, name='la2')(nn)
+        #         mu = tl.layers.Dense(n_units=self.N_A, act=tf.nn.tanh, W_init=w_init, name='mu')(nn)
+        #         sigma = tl.layers.Dense(n_units=self.N_A, act=tf.nn.softplus, W_init=w_init, name='sigma')(nn)
+        #     return tl.models.Model(inputs=ni, outputs=[mu, sigma], name=scope + '/Actor')
+
+        # self.actor = get_actor([None, self.N_S])
+        self.actor = StochasticPolicyNetwork((self.N_S,), (self.N_A,), actor_hidden_layer*[actor_hidden_dim], name=self.scope) # call the network model in common functions
         # self.actor.train()  # train mode for Dropout, BatchNorm
 
-        # self.critic = ValueNetwork(self.N_S, critic_hidden_dim, critic_hidden_layer, scope=self.scope).model() # call the network model in common functions
-        # self.critic.train()  # train mode for Dropout, BatchNorm
+        # def get_critic(input_shape):  # we use Value-function here, but not Q-function.
+        #     with tf.name_scope(self.scope):
+        #         ni = tl.layers.Input(input_shape, name='in')
+        #         nn = tl.layers.Dense(n_units=500, act=tf.nn.relu6, W_init=w_init, name='lc')(ni)
+        #         nn = tl.layers.Dense(n_units=300, act=tf.nn.relu6, W_init=w_init, name='lc2')(nn)
+        #         v = tl.layers.Dense(n_units=1, W_init=w_init, name='v')(nn)
+        #     return tl.models.Model(inputs=ni, outputs=v, name=scope + '/Critic')
 
-        [self.actor, self.critic] =  net_list
+        # self.critic = get_critic([None, self.N_S])
+        self.critic = MlpValueNetwork((self.N_S,), critic_hidden_layer*[critic_hidden_dim], name=self.scope) # call the network model in common functions
+        # self.critic.train()  # train mode for Dropout, BatchNorm
 
     @tf.function  # convert numpy functions to tf.Operations in the TFgraph, return tensor
     def update_global(
@@ -131,16 +147,21 @@ class ACNet(object):
         load_model(self.actor, 'model_actor', 'A3C')
         load_model(self.critic, 'model_critic', 'A3C')
 
+
 class Worker(object):
-    def __init__(self, env, net_list, name, globalAC, train_episodes, gamma, update_itr, entropy_beta, action_bound ):
+
+    def __init__(self, env_id, name, globalAC, train_episodes, gamma, update_itr, entropy_beta, action_dim, state_dim,
+        actor_hidden_dim, actor_hidden_layer, critic_hidden_dim, critic_hidden_layer, action_bound ):
+        self.env = make_env(env_id)
         self.name = name
-        self.AC = ACNet(net_list, name, entropy_beta, action_bound, globalAC )
+        self.AC = ACNet(name, entropy_beta, action_dim, state_dim, actor_hidden_dim, actor_hidden_layer, 
+        critic_hidden_dim, critic_hidden_layer, action_bound, globalAC )
         self.MAX_GLOBAL_EP = train_episodes
         self.UPDATE_GLOBAL_ITER = update_itr
         self.GAMMA = gamma
-        self.env = env
 
 
+    # def work(self):
     def work(self, globalAC):
         global COORD, GLOBAL_RUNNING_R, GLOBAL_EP, OPT_A, OPT_C, t0
         total_step = 1
@@ -157,6 +178,8 @@ class Worker(object):
                 s_, r, done, _info = self.env.step(a)
 
                 s_ = s_.astype('float32')  # double to float
+                # set robot falls reward to -2 instead of -100
+                if r == -100: r = -2
 
                 ep_r += r
                 buffer_s.append(s)
@@ -201,97 +224,97 @@ class Worker(object):
                     GLOBAL_EP += 1
                     break
 
-class A3C():
-    def __init__(self, net_list, state_dim, action_dim):
-        self.action_dim = action_dim
-        self.net_list = net_list
 
-    def learn(self, env_list, train_episodes, test_episodes=1000, max_steps=150, number_workers=1, update_itr=10,
-        gamma=0.99, entropy_beta=0.005 , actor_lr=5e-5, critic_lr=1e-4, seed=2, save_interval=500, mode='train'):
 
-        '''
-        parameters
-        -----------
-        env_list: a list of same learning environments
-        train_episodes:  total number of episodes for training
-        test_episodes:  total number of episodes for testing
-        max_steps:  maximum number of steps for one episode
-        number_workers: manually set number of workers
-        update_itr: update global policy after several episodes
-        gamma: reward discount factor
-        entropy_beta: factor for entropy boosted exploration
-        actor_lr: learning rate for actor
-        critic_lr: learning rate for critic
-        seed: random seed
-        save_interval: timesteps for saving the weights and plotting the results
-        mode: train or test
+def learn(env_id, train_episodes, test_episodes=1000, max_steps=150, number_workers=0, update_itr=10,
+    gamma=0.99, entropy_beta=0.005 , actor_lr=5e-5, critic_lr=1e-4, actor_hidden_dim=300, actor_hidden_layer=2, 
+    critic_hidden_dim=300, critic_hidden_layer=2,seed=2, save_interval=500, mode='train'):
 
-        '''
-        global COORD, GLOBAL_RUNNING_R, GLOBAL_EP, OPT_A, OPT_C, t0
-        COORD = tf.train.Coordinator()
-        GLOBAL_NET_SCOPE = 'Global_Net'
-        GLOBAL_RUNNING_R = []
-        GLOBAL_EP = 0  # will increase during training, stop training when it >= MAX_GLOBAL_EP
-        N_WORKERS = number_workers if number_workers>0 else multiprocessing.cpu_count()
+    '''
+    parameters
+    -----------
+    env: learning environment
+    train_episodes:  total number of episodes for training
+    test_episodes:  total number of episodes for testing
+    max_steps:  maximum number of steps for one episode
+    number_workers: manually set number of workers
+    update_itr: update global policy after several episodes
+    gamma: reward discount factor
+    entropy_beta: factor for entropy boosted exploration
+    actor_lr: learning rate for actor
+    critic_lr: learning rate for critic
+    mode: train or test
+    '''
+    global COORD, GLOBAL_RUNNING_R, GLOBAL_EP, OPT_A, OPT_C, t0
+    COORD = tf.train.Coordinator()
+    GLOBAL_NET_SCOPE = 'Global_Net'
+    GLOBAL_RUNNING_R = []
+    GLOBAL_EP = 0  # will increase during training, stop training when it >= MAX_GLOBAL_EP
+    N_WORKERS = number_workers if number_workers>0 else multiprocessing.cpu_count()
 
-        np.random.seed(seed)
-        tf.random.set_seed(seed)  # reproducible
+    env = make_env(env_id)
+    N_S = env.observation_space.shape[0]
+    N_A = env.action_space.shape[0]
 
-        A_BOUND = [env_list[0].action_space.low, env_list[0].action_space.high]
-        A_BOUND[0] = A_BOUND[0].reshape(1, self.action_dim)
-        A_BOUND[1] = A_BOUND[1].reshape(1, self.action_dim)
-        # print(A_BOUND)
-        if mode=='train':
-            # ============================= TRAINING ===============================
-            t0 = time.time()
-            with tf.device("/cpu:0"):
+    np.random.seed(seed)
+    tf.random.set_seed(seed)  # reproducible
 
-                OPT_A = tf.optimizers.RMSprop(actor_lr, name='RMSPropA')
-                OPT_C = tf.optimizers.RMSprop(critic_lr, name='RMSPropC')
 
-                GLOBAL_AC = ACNet(self.net_list[0], GLOBAL_NET_SCOPE, entropy_beta, A_BOUND)  # we only need its params
-                workers = []
-                # Create worker
-                for i in range(N_WORKERS):
-                    i_name = 'Worker_%i' % i  # worker name
-                    # workers.append(Worker(env_list[i], copy.deepcopy(self.net_list[i]), i_name, GLOBAL_AC, train_episodes, gamma, update_itr, entropy_beta, A_BOUND))
-                    workers.append(Worker(env_list[i], self.net_list[i+1], i_name, GLOBAL_AC, train_episodes, gamma, update_itr, entropy_beta, A_BOUND))
+    A_BOUND = [env.action_space.low, env.action_space.high]
+    A_BOUND[0] = A_BOUND[0].reshape(1, N_A)
+    A_BOUND[1] = A_BOUND[1].reshape(1, N_A)
+    # print(A_BOUND)
+    if mode=='train':
+        # ============================= TRAINING ===============================
+        t0 = time.time()
+        with tf.device("/cpu:0"):
 
-            # start TF threading
-            worker_threads = []
-            for worker in workers:
-                # t = threading.Thread(target=worker.work)
-                job = lambda: worker.work(GLOBAL_AC)
-                t = threading.Thread(target=job)
-                t.start()
-                worker_threads.append(t)
-            COORD.join(worker_threads)
-            # import matplotlib.pyplot as plt
-            # plt.plot(GLOBAL_RUNNING_R)
-            # plt.xlabel('episode')
-            # plt.ylabel('global running reward')
-            # plt.savefig('a3c.png')
-            # plt.show()
+            OPT_A = tf.optimizers.RMSprop(actor_lr, name='RMSPropA')
+            OPT_C = tf.optimizers.RMSprop(critic_lr, name='RMSPropC')
 
-            GLOBAL_AC.save_ckpt()
+            GLOBAL_AC = ACNet(GLOBAL_NET_SCOPE, entropy_beta, N_A, N_S, actor_hidden_dim, 
+            actor_hidden_layer, critic_hidden_dim, critic_hidden_layer, A_BOUND)  # we only need its params
+            workers = []
+            # Create worker
+            for i in range(N_WORKERS):
+                i_name = 'Worker_%i' % i  # worker name
+                workers.append(Worker(env_id, i_name, GLOBAL_AC, train_episodes, gamma, update_itr, entropy_beta, N_A, N_S, 
+                actor_hidden_dim, actor_hidden_layer, critic_hidden_dim, critic_hidden_layer, A_BOUND))
 
-        elif mode=='test':
-            # ============================= EVALUATION =============================
-            GLOBAL_AC.load_ckpt()
-            frame_idx=0
-            for eps in range(test_episodes):
-                s = env.reset()
-                rall = 0
-                for step in range (max_steps):
-                    env.render()
-                    frame_idx+=1
-                    s = s.astype('float32')  # double to float
-                    a = GLOBAL_AC.choose_action(s)
-                    s, r, d, _ = env.step(a)
-                    rall += r
-                    if d:
-                        print("reward", rall)
-                        break
-                        
-        elif mode is not 'test':
-            print('unknow mode type, activate test mode as default')
+        
+
+        # start TF threading
+        worker_threads = []
+        for worker in workers:
+            # t = threading.Thread(target=worker.work)
+            job = lambda: worker.work(GLOBAL_AC)
+            t = threading.Thread(target=job)
+            t.start()
+            worker_threads.append(t)
+        COORD.join(worker_threads)
+        import matplotlib.pyplot as plt
+        plt.plot(GLOBAL_RUNNING_R)
+        plt.xlabel('episode')
+        plt.ylabel('global running reward')
+        plt.savefig('a3c.png')
+        plt.show()
+
+        GLOBAL_AC.save_ckpt()
+
+    if mode=='test':
+        # ============================= EVALUATION =============================
+        GLOBAL_AC.load_ckpt()
+        frame_idx=0
+        for eps in range(test_episodes):
+            s = env.reset()
+            rall = 0
+            for step in range (max_steps):
+                env.render()
+                frame_idx+=1
+                s = s.astype('float32')  # double to float
+                a = GLOBAL_AC.choose_action(s)
+                s, r, d, _ = env.step(a)
+                rall += r
+                if d:
+                    print("reward", rall)
+                    break

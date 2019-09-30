@@ -154,6 +154,7 @@ class Worker(object):
                     self.env.render()
                 s = s.astype('float32')  # double to float
                 a = self.AC.choose_action(s)
+                print(a)
                 s_, r, done, _info = self.env.step(a)
 
                 s_ = s_.astype('float32')  # double to float
@@ -275,7 +276,7 @@ class A3C():
 
             GLOBAL_AC.save_ckpt()
 
-        elif mode=='test':
+        if mode=='test':
             # ============================= EVALUATION =============================
             GLOBAL_AC.load_ckpt()
             frame_idx=0
@@ -292,6 +293,3 @@ class A3C():
                     if d:
                         print("reward", rall)
                         break
-                        
-        elif mode is not 'test':
-            print('unknow mode type, activate test mode as default')
