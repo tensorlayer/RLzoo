@@ -1,196 +1,192 @@
 """
-Deep Q-Network Q(a, s)
------------------------
-TD Learning, Off-Policy, e-Greedy Exploration (GLIE).
-
-Q(S, A) <- Q(S, A) + alpha * (R + gammaa * Q(newS, newA) - Q(S, A))
-delta_w = R + gammaa * Q(newS, newA)
-
-See David Silver RL Tutorial Lecture 5 - Q-Learning for more details.
-
-Reference
-----------
-original paper: https://storage.googleapis.com/deepmind-media/dqn/DQNNaturePaper.pdf
-EN: https://medium.com/emergent-future/simple-reinforcement-learning-with-tensorflow-part-0-q-learning-with-tables-and-neural-networks-d195264329d0#.5m3361vlw
-CN: https://zhuanlan.zhihu.com/p/25710327
-
-Note: Policy Network has been proved to be better than Q-Learning, see tutorial_atari_pong.py
-
-Environment
------------
-# The FrozenLake v0 environment
-https://gym.openai.com/envs/FrozenLake-v0
-The agent controls the movement of a character in a grid world. Some tiles of
-the grid are walkable, and others lead to the agent falling into the water.
-Additionally, the movement direction of the agent is uncertain and only partially
-depends on the chosen direction. The agent is rewarded for finding a walkable
-path to a goal tile.
-SFFF       (S: starting point, safe)
-FHFH       (F: frozen surface, safe)
-FFFH       (H: hole, fall to your doom)
-HFFG       (G: goal, where the frisbee is located)
-The episode ends when you reach the goal or fall in a hole. You receive a reward
-of 1 if you reach the goal, and zero otherwise.
-
-Prerequisites
---------------
-tensorflow>=2.0.0a0
-tensorlayer>=2.0.0
-
+Deep Q Network
 """
-import argparse
-import time
+import random
+from copy import deepcopy
 
 import numpy as np
-
-import gym
 import tensorflow as tf
-import tensorlayer as tl
-from tensorlayer.models import Model
-from common.utils import *
-from common.buffer import *
-from common.networks import *
+
+from baselines.common.buffer import ReplayBuffer, PrioritizedReplayBuffer
 
 
-tl.logging.set_verbosity(tl.logging.DEBUG)
+class DQN(object):
+    """
+    Papers:
+    Mnih V, Kavukcuoglu K, Silver D, et al. Human-level control through deep
+    reinforcement learning[J]. Nature, 2015, 518(7540): 529.
+    Hessel M, Modayil J, Van Hasselt H, et al. Rainbow: Combining Improvements
+    in Deep Reinforcement Learning[J]. 2017.
+    """
+    def __init__(self, mode):
+        self.mode = mode
 
-##################### DQN ##########################
+    def get_action(self, obv, out_dim, eps, qnet):
+        if self.mode == 'train' and random.random() < eps:
+            return int(random.random() * out_dim)
+        else:
+            obv = np.expand_dims(obv, 0).astype('float32')
+            return qnet(obv).numpy().argmax(1)[0]
 
+    @staticmethod
+    def sync(net, net_tar):
+        """Copy q network to target q network"""
+        for var, var_tar in zip(net.trainable_weights,
+                                net_tar.trainable_weights):
+            var_tar.assign(var)
 
-def to_one_hot(i, n_classes=None):
-    a = np.zeros(n_classes, 'uint8')
-    a[i] = 1
-    return a
+    @tf.function
+    def _td_error(self, transitions,
+                  qnet, targetqnet, double, out_dim, reward_gamma):
+        b_o, b_a, b_r, b_o_, b_d = transitions
+        b_d = tf.cast(b_d, tf.float32)
+        b_a = tf.cast(b_a, tf.int64)
+        b_r = tf.cast(b_a, tf.float32)
+        if double:
+            b_a_ = tf.one_hot(tf.argmax(qnet(b_o_), 1), out_dim)
+            b_q_ = (1 - b_d) * tf.reduce_sum(targetqnet(b_o_) * b_a_, 1)
+        else:
+            b_q_ = (1 - b_d) * tf.reduce_max(targetqnet(b_o_), 1)
 
+        b_q = tf.reduce_sum(qnet(b_o) * tf.one_hot(b_a, out_dim), 1)
+        return b_q - (b_r + reward_gamma * b_q_)
 
-## Define Q-network q(a,s) that ouput the rewards of 4 actions by given state, i.e. Action-Value Function.
-# encoding for state: 4x4 grid can be represented by one-hot vector with 16 integers.
-def get_model(inputs_shape):
-    ni = tl.layers.Input(inputs_shape, name='observation')
-    nn = tl.layers.Dense(4, act=None, W_init=tf.random_uniform_initializer(0, 0.01), b_init=None, name='q_a_s')(ni)
-    return tl.models.Model(inputs=ni, outputs=nn, name="Q-Network")
+    def learn(
+            self, env,
+            number_timesteps,
+            network, optimizer,
+            save_path, save_interval,
+            gamma, exploration_rate, exploration_final_eps,
+            double_q, target_network_update_freq, buffer_size,
+            batch_size, train_freq, learning_starts,
+            prioritized_replay, prioritized_alpha, prioritized_beta0):
+        """
+        Parameters:
+        ----------
+        double_q (bool): if True double DQN will be used
+        dueling (bool): if True dueling value estimation will be used
+        exploration_rate (float): fraction of entire training period over
+            which the exploration rate is annealed
+        exploration_final_eps (float): final value of random action probability
+        batch_size (int): size of a batched sampled from replay buffer for training
+        train_freq (int): update the model every `train_freq` steps
+        learning_starts (int): how many steps of the model to collect transitions
+                               for before learning starts
+        target_network_update_freq (int): update the target network every
+                                          `target_network_update_freq` steps
+        buffer_size (int): size of the replay buffer
+        prioritized_replay (bool): if True prioritized replay buffer will be used.
+        prioritized_alpha (float): alpha parameter for prioritized replay
+        prioritized_beta0 (float): beta parameter for prioritized replay
+        """
+        assert self.mode == 'train'
+        out_dim = env.action_space.n
+        if prioritized_replay:
+            buffer = PrioritizedReplayBuffer(
+                buffer_size,  prioritized_alpha, prioritized_beta0)
+        else:
+            buffer = ReplayBuffer(buffer_size)
+        target_network = deepcopy(network)
+        network.train()
+        target_network.infer()
+        parameters = network.trainable_weights
 
+        o = env.reset()
+        nepisode = 0
+        for i in range(1, number_timesteps + 1):
+            eps = 1 - (1 - exploration_final_eps) * \
+                  min(1, i / exploration_rate * number_timesteps)
+            a = self.get_action(o, out_dim, eps, network)
 
-def save_ckpt(model):  # save trained weights
-    save_model(model, 'model_dqn', 'DQN')
+            # execute action and feed to replay buffer
+            # note that `_` tail in var name means next
+            o_, r, done, info = env.step(a)
+            buffer.push(o, a, r, o_, done)
 
+            # update networks
+            if i >= learning_starts and i % train_freq == 0:
+                if prioritized_replay:
+                    # sample from prioritized replay buffer
+                    *transitions, b_w, idxs = buffer.sample(batch_size)
+                    # calculate weighted huber loss
+                    with tf.GradientTape() as tape:
+                        priorities = self._td_error(
+                            transitions, network, target_network,
+                            double_q, out_dim, gamma)
+                        huber_loss = tf.where(tf.abs(priorities) < 1,
+                                              tf.square(priorities) * 0.5,
+                                              tf.abs(priorities) - 0.5)
+                        loss = tf.reduce_mean(huber_loss * b_w)
+                    # backpropagate
+                    grad = tape.gradient(loss, parameters)
+                    optimizer.apply_gradients(zip(grad, parameters))
+                    # update priorities
+                    priorities = np.clip(np.abs(priorities), 1e-6, None)
+                    buffer.update_priorities(idxs, priorities)
+                else:
+                    # sample from prioritized replay buffer
+                    transitions = buffer.sample(batch_size)
+                    # calculate huber loss
+                    with tf.GradientTape() as tape:
+                        td_errors = self._td_error(
+                            transitions, network, target_network,
+                            double_q, out_dim, gamma)
+                        huber_loss = tf.where(tf.abs(td_errors) < 1,
+                                              tf.square(td_errors) * 0.5,
+                                              tf.abs(td_errors) - 0.5)
+                        loss = tf.reduce_mean(huber_loss)
+                    # backpropagate
+                    grad = tape.gradient(loss, parameters)
+                    optimizer.apply_gradients(zip(grad, parameters))
+            if i % target_network_update_freq == 0:
+                self.sync(network, target_network)
 
-def load_ckpt(model):  # load trained weights
-    load_model(model, 'model_dqn', 'DQN')
+            # reset current observation
+            if done:
+                o = env.reset()
+            else:
+                o = o_
 
-def learn(env_id, train_episodes, test_episodes=100, max_steps=100, gamma=.99, epsilon=0.1,
-render = False , lr=0.1, seed=2, save_interval=10, mode='train'):
-    '''
-    parameters
-    --------------
-        env: learning environment
-        train_episodes:  total number of episodes for training
-        test_episodes:  total number of episodes for testing
-        max_steps:  maximum number of steps for one episode
-        gamma: decay factor
-        epsilon: e-Greedy Exploration, the larger the more random
-        render: display the game environment
-        lr: learning rate
-        save_interval: timesteps for saving the weights and plotting the results
-        mode: train or test
+            # episode in info is real (unwrapped) message
+            if info.get('episode'):
+                nepisode += 1
+                reward, length = info['episode']['r'], info['episode']['l']
+                print(
+                    'Time steps so far: {}, episode so far: {}, '
+                    'episode reward: {:.4f}, episode length: {}'
+                    .format(i, nepisode, reward, length)
+                )
 
-    '''
+            # saving model
+            if save_path is not None and i % save_interval == 0:
+                network.save_weights(save_path)
 
-    qnetwork = get_model([None, 16])
-    qnetwork.train()
-    train_weights = qnetwork.trainable_weights
+    def valid(self, env, number_episodes, network, checkpoint_path):
+        assert self.mode == 'valid'
+        out_dim = env.action_space.n
+        network.load_weights(checkpoint_path)
+        network.infer()
 
-    optimizer = tf.optimizers.SGD(learning_rate=lr)
-    env = make_env(env_id)
-    running_reward = None
-    np.random.seed(seed)
-    tf.random.set_seed(seed)  # reproducible
+        nepisode = 0
+        o = env.reset()
+        while nepisode < number_episodes:
+            a = self.get_action(o, out_dim, 0, network)
 
-    if mode=='train':
-        t0 = time.time()
-        rewards=[]
-        for i in range(train_episodes):
-            ## Reset environment and get first new observation
-            # episode_time = time.time()
-            s = env.reset()  # observation is state, integer 0 ~ 15
-            rAll = 0
-            for j in range(max_steps):  # step index, maximum step is 99
-                if render: env.render()
-                ## Choose an action by greedily (with e chance of random action) from the Q-network
-                allQ = qnetwork(np.asarray([to_one_hot(s, 16)], dtype=np.float32)).numpy()
-                a = np.argmax(allQ, 1)
+            # execute action
+            # note that `_` tail in var name means next
+            o_, r, done, info = env.step(a)
 
-                ## e-Greedy Exploration !!! sample random action
-                if np.random.rand(1) < epsilon:
-                    a[0] = env.action_space.sample()
-                ## Get new state and reward from environment
-                s1, r, d, _ = env.step(a[0])
-                ## Obtain the Q' values by feeding the new state through our network
-                Q1 = qnetwork(np.asarray([to_one_hot(s1, 16)], dtype=np.float32)).numpy()
+            if done:
+                o = env.reset()
+            else:
+                o = o_
 
-                ## Obtain maxQ' and set our target value for chosen action.
-                maxQ1 = np.max(Q1)  # in Q-Learning, policy is greedy, so we use "max" to select the next action.
-                targetQ = allQ
-                targetQ[0, a[0]] = r + gamma * maxQ1
-                ## Train network using target and predicted Q values
-                # it is not real target Q value, it is just an estimation,
-                # but check the Q-Learning update formula:
-                #    Q'(s,a) <- Q(s,a) + alpha(r + gamma * maxQ(s',a') - Q(s, a))
-                # minimizing |r + gamma * maxQ(s',a') - Q(s, a)|^2 equals to force Q'(s,a) ≈ Q(s,a)
-                with tf.GradientTape() as tape:
-                    _qvalues = qnetwork(np.asarray([to_one_hot(s, 16)], dtype=np.float32))
-                    _loss = tl.cost.mean_squared_error(targetQ, _qvalues, is_mean=False)
-                grad = tape.gradient(_loss, train_weights)
-                optimizer.apply_gradients(zip(grad, train_weights))
-
-                rAll += r
-                s = s1
-                ## Reduce chance of random action if an episode is done.
-                if d ==True:
-                    e = 1. / ((i / 50) + 10)  # reduce e, GLIE: Greey in the limit with infinite Exploration
-                    break
-
-
-            ## Note that, the rewards here with random action
-            running_reward = rAll if running_reward is None else running_reward * 0.99 + rAll * 0.01
-            # print("Episode [%d/%d] sum reward: %f running reward: %f took: %.5fs " % \
-            #     (i, num_episodes, rAll, running_reward, time.time() - episode_time))
-            rewards.append(running_reward)
-            if i % save_interval==0:
-                save_ckpt(qnetwork)  # save model
-                plot(rewards, Algorithm_name='DQN', Env_name=env_id )
-
-            
-            print('Episode: {}/{}  | Episode Reward: {:.4f} | Running Average Reward: {:.4f}  | Running Time: {:.4f}'\
-            .format(i, train_episodes, rAll, running_reward,  time.time()-t0 ))
-        save_ckpt(qnetwork)  # save model
-
-    if mode=='test':
-        t0 = time.time()
-        load_ckpt(qnetwork)  # load model
-        for i in range(test_episodes):
-            ## Reset environment and get first new observation
-            episode_time = time.time()
-            s = env.reset()  # observation is state, integer 0 ~ 15
-            rAll = 0
-            for j in range(max_steps):  # step index, maximum step is 99
-                if render: env.render()
-                ## Choose an action by greedily (with e chance of random action) from the Q-network
-                allQ = qnetwork(np.asarray([to_one_hot(s, 16)], dtype=np.float32)).numpy()
-                a = np.argmax(allQ, 1)  # no epsilon, only greedy for testing
-
-                ## Get new state and reward from environment
-                s1, r, d, _ = env.step(a[0])
-                rAll += r
-                s = s1
-                ## Reduce chance of random action if an episode is done.
-                if d ==True:
-                    e = 1. / ((i / 50) + 10)  # reduce e, GLIE: Greey in the limit with infinite Exploration
-                    break
-
-            ## Note that, the rewards here with random action
-            running_reward = rAll if running_reward is None else running_reward * 0.99 + rAll * 0.01
-            # print("Episode [%d/%d] sum reward: %f running reward: %f took: %.5fs " % \
-            #     (i, num_episodes, rAll, running_reward, time.time() - episode_time))
-            print('Episode: {}/{}  | Episode Reward: {:.4f} | Running Average Reward: {:.4f}  | Running Time: {:.4f}'\
-            .format(i, test_episodes, rAll, running_reward,  time.time()-t0 ))
+            # episode in info is real (unwrapped) message
+            if info.get('episode'):
+                nepisode += 1
+                reward, length = info['episode']['r'], info['episode']['l']
+                print(
+                    'episode so far: {}, '
+                    'episode reward: {:.4f}, episode length: {}'
+                    .format(nepisode, reward, length)
+                )

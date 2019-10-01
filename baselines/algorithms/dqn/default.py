@@ -8,31 +8,28 @@ def atari(env, **kwargs):
     in_dim = env.observation_space.shape
     act_dim = env.action_space.n
     params = dict(
-        grad_norm=10,
         batch_size=32,
         double_q=True,
         buffer_size=10000,
-        exploration_fraction=0.1,
+        exploration_rate=0.1,
         exploration_final_eps=0.01,
         train_freq=4,
         learning_starts=10000,
         target_network_update_freq=1000,
         gamma=0.99,
         prioritized_replay=True,
-        prioritized_replay_alpha=0.6,
-        prioritized_replay_beta0=0.4,
-        dueling=True,
-        atom_num=1,
-        min_value=-10,
-        max_value=10,
-        ob_scale=1 / 255.0
+        prioritized_alpha=0.6,
+        prioritized_beta0=0.4,
+        dueling=True
     )
     params.update(kwargs)
 
-    network = CNNQNet(in_dim, act_dim,
-                      params['atom_num'], params.pop('dueling'))
-    optimizer = tf.optimizers.Adam(1e-4, epsilon=1e-5)
-    params.update(network=network, optimizer=optimizer)
+    if params.get('network') is None:
+        params['network'] = CNNQNet(in_dim, act_dim, params.pop('dueling'))
+    if params.get('optimizer') is None:
+        params['optimizer'] = tf.optimizers.Adam(1e-4,
+                                                 epsilon=1e-5, clipnorm=10)
+
     return params
 
 
@@ -40,102 +37,75 @@ def classic_control(env, **kwargs):
     in_dim = env.observation_space.shape[0]
     act_dim = env.action_space.n
     params = dict(
-        grad_norm=10,
-        batch_size=100,
+        batch_size=32,
         double_q=True,
-        buffer_size=10000,
-        exploration_fraction=0.1,
+        buffer_size=1000,
+        exploration_rate=0.2,
         exploration_final_eps=0.01,
         train_freq=4,
-        learning_starts=1000,
-        target_network_update_freq=200,
+        learning_starts=200,
+        target_network_update_freq=50,
         gamma=0.99,
         prioritized_replay=False,
-        prioritized_replay_alpha=0.6,
-        prioritized_replay_beta0=0.4,
-        dueling=True,
-        atom_num=1,
-        min_value=-10,
-        max_value=10,
-        ob_scale=1
+        prioritized_alpha=0.6,
+        prioritized_beta0=0.4,
+        dueling=True
     )
     params.update(kwargs)
-    network = MLPQNet(in_dim, act_dim,
-                      params['atom_num'], params.pop('dueling'))
-    optimizer = tf.optimizers.Adam(1e-3, epsilon=1e-5)
-    params.update(network=network, optimizer=optimizer)
+    if params.get('network') is None:
+        params['network'] = MLPQNet(in_dim, act_dim, params.pop('dueling'))
+    if params.get('optimizer') is None:
+        params['optimizer'] = tf.optimizers.Adam(5e-3, epsilon=1e-5)
     return params
 
 
 class CNNQNet(tl.models.Model):
-    def __init__(self, in_dim, act_dim, atom_num, dueling):
+    def __init__(self, in_dim, act_dim, dueling):
         super().__init__()
-        self.atom_num = atom_num
         self.dueling = dueling
         with tf.name_scope('DQN'):
             with tf.name_scope('CNN'):
                 self.cnn = CNN(in_dim)
             latent_shape = self.cnn.outputs[0].shape
             mlp_in_shape = math_utils.flatten_dims(latent_shape)
-            q_out_shape = act_dim * atom_num
             with tf.name_scope('QValue'):
-                self.qmlp = MLP(mlp_in_shape, q_out_shape, 1, 256, scale=1)
+                self.qmlp = MLP(mlp_in_shape, act_dim, 1, 256, scale=1)
             if dueling:
                 with tf.name_scope('Value'):
-                    self.vmlp = MLP(mlp_in_shape, atom_num, 1, 256, scale=1)
+                    self.vmlp = MLP(mlp_in_shape, 1, 1, 256, scale=1)
 
     def forward(self, obv):
-        batch_size = obv.shape[0]
+        obv = tf.cast(obv, tf.float32) / 255.0
         mlp_in = tl.layers.flatten_reshape(self.cnn(obv))
         q_out = self.qmlp(mlp_in)
-        if self.atom_num == 1:
-            if self.dueling:
-                v_out = self.vmlp(mlp_in)
-                q_out = v_out + q_out - tf.reduce_mean(q_out, 1, True)
-            return q_out
-        else:
-            q_shape = (batch_size, -1, self.atom_num)
-            q_out = tf.reshape(q_out, q_shape)
-            if self.dueling:
-                v_out = tf.reshape(self.vmlp(mlp_in), q_shape)
-                q_out = v_out + q_out - tf.reduce_mean(q_out, 1, True)
-            logprobs = tf.nn.log_softmax(q_out, -1)
-            return logprobs
+        if self.dueling:
+            v_out = self.vmlp(mlp_in)
+            q_out = v_out + q_out - tf.reduce_mean(q_out, 1, True)
+        return q_out
 
 
 class MLPQNet(tl.models.Model):
-    def __init__(self, in_dim, act_dim, atom_num, dueling):
+    def __init__(self, in_dim, act_dim, dueling):
         super().__init__()
-        self.atom_num = atom_num
         self.dueling = dueling
         with tf.name_scope('DQN'):
             with tf.name_scope('MLP'):
                 self.mlp = MLP(in_dim, 64, 1, 64, tf.nn.tanh, tf.nn.tanh, 1)
-            latent_shape = self.mlp.outputs[0].shape
-            q_out_shape = act_dim * atom_num
+            latent_shape = math_utils.flatten_dims(self.mlp.outputs[0].shape)
             with tf.name_scope('QValue'):
-                self.qmlp = MLP(latent_shape, q_out_shape, 0, scale=1)
+                self.qmlp = MLP(latent_shape, act_dim, 0, scale=1)
             if dueling:
                 with tf.name_scope('Value'):
-                    self.vmlp = MLP(latent_shape, atom_num, 0, scale=1)
+                    self.vmlp = MLP(latent_shape, 1, 0, scale=1)
 
     def forward(self, obv):
-        batch_size = obv.shape[0]
+        obv = tf.cast(obv, tf.float32)
         latent = self.mlp(obv)
         q_out = self.qmlp(latent)
-        if self.atom_num == 1:
-            if self.dueling:
-                v_out = self.vmlp(latent)
-                q_out = v_out + q_out - tf.reduce_mean(q_out, 1, True)
-            return q_out
-        else:
-            q_shape = (batch_size, -1, self.atom_num)
-            q_out = tf.reshape(q_out, q_shape)
-            if self.dueling:
-                v_out = tf.reshape(self.vmlp(latent), q_shape)
-                q_out = v_out + q_out - tf.reduce_mean(q_out, 1, True)
-            logprobs = tf.nn.log_softmax(q_out, -1)
-            return logprobs
+        if self.dueling:
+            v_out = self.vmlp(latent)
+            q_out = v_out + q_out - tf.reduce_mean(q_out, 1, True)
+        return q_out
 
 
 # ========= put here temporally =========
