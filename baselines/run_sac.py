@@ -5,6 +5,7 @@ from common.utils import make_env
 from algorithms.sac.sac import SAC
 from common.value_networks import *
 from common.policy_networks import *
+import tensorflow as tf
 
 
 ''' load environment '''
@@ -14,28 +15,39 @@ action_shape = env.action_space.shape
 state_shape = env.observation_space.shape
 
 ''' build networks for the algorithm '''
-name='sac'
 num_hidden_layer = 4 #number of hidden layers for the networks
-hidden_dim=64 # dimension of hidden layers for the networks
-soft_q_net1 = MlpQNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim], name=name+'_q1')
-soft_q_net2 = MlpQNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim], name=name+'_q2')
-target_soft_q_net1 = MlpQNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim], name=name+'_target_q1')
-target_soft_q_net2 = MlpQNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim], name=name+'_target_q2')
-policy_net = StochasticPolicyNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim], name=name+'_policy')
+hidden_dim=64 # dimension of hidden layers for the networks, default as the same for each layer here
+with tf.name_scope('SAC'):
+    with tf.name_scope('Q_Net1'):
+        soft_q_net1 = MlpQNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
+    with tf.name_scope('Q_Net2'):
+        soft_q_net2 = MlpQNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
+    with tf.name_scope('Target_Q_Net1'):
+        target_soft_q_net1 = MlpQNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
+    with tf.name_scope('Target_Q_Net2'):
+        target_soft_q_net2 = MlpQNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
+    with tf.name_scope('Policy'):
+        policy_net = StochasticPolicyNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
 net_list = [soft_q_net1, soft_q_net2, target_soft_q_net1, target_soft_q_net2, policy_net]
 
-model=SAC(net_list, state_dim=state_shape[0], action_dim=action_shape[0])
+''' choose optimizers '''
+soft_q_lr, policy_lr, alpha_lr = 3e-4, 3e-4, 3e-4  # soft_q_lr: learning rate of the Q network; policy_lr: learning rate of the policy network; alpha_lr: learning rate of the variable alpha
+soft_q_optimizer1 = tf.optimizers.Adam(soft_q_lr)
+soft_q_optimizer2 = tf.optimizers.Adam(soft_q_lr)
+policy_optimizer = tf.optimizers.Adam(policy_lr)
+alpha_optimizer = tf.optimizers.Adam(alpha_lr)
+optimizers_list = [soft_q_optimizer1, soft_q_optimizer2, policy_optimizer, alpha_optimizer]
+
+model=SAC(net_list, optimizers_list, state_dim=state_shape[0], action_dim=action_shape[0])
 ''' 
 full list of arguments for the algorithm
 ----------------------------------------
 net_list: a list of networks (value and policy) used in the algorithm, from common functions or customization
+optimizers_list: a list of optimizers for all networks and differentiable variables
 state_dim: dimension of state for the environment
 action_dim: dimension of action for the environment
 replay_buffer_capacity: the size of buffer for storing explored samples
 action_range: value of each action in [-action_range, action_range]
-soft_q_lr: learning rate of the Q network
-policy_lr: learning rate of the policy network
-alpha_lr: learning rate of the variable alpha
 '''
 
 model.learn(env, train_episodes=100, max_steps=150, batch_size=64, explore_steps=500, \

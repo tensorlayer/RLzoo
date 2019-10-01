@@ -44,7 +44,7 @@ tl.logging.set_verbosity(tl.logging.DEBUG)
 
 class SAC():
     ''' Soft Actor-Critic '''
-    def __init__(self, net_list, state_dim, action_dim, replay_buffer_capacity=5e5, action_range=1., hidden_dim=32, num_hidden_layer=3, soft_q_lr=3e-4, policy_lr=3e-4, alpha_lr=3e-4):
+    def __init__(self, net_list, optimizers_list, state_dim, action_dim, replay_buffer_capacity=5e5, action_range=1.):
         self.replay_buffer = ReplayBuffer(replay_buffer_capacity)
         self.action_dim = action_dim
         self.action_range = action_range
@@ -61,10 +61,7 @@ class SAC():
         self.target_soft_q_net1 = self.target_ini(self.soft_q_net1, self.target_soft_q_net1)
         self.target_soft_q_net2 = self.target_ini(self.soft_q_net2, self.target_soft_q_net2)
 
-        self.soft_q_optimizer1 = tf.optimizers.Adam(soft_q_lr)
-        self.soft_q_optimizer2 = tf.optimizers.Adam(soft_q_lr)
-        self.policy_optimizer = tf.optimizers.Adam(policy_lr)
-        self.alpha_optimizer = tf.optimizers.Adam(alpha_lr)
+        [self.soft_q_optimizer1,  self.soft_q_optimizer2, self.policy_optimizer, self.alpha_optimizer] = optimizers_list
     
     def evaluate(self, state, epsilon=1e-6):
         ''' generate action with state for calculating gradients '''

@@ -60,10 +60,9 @@ tl.logging.set_verbosity(tl.logging.DEBUG)
 
 ###############################  Actor-Critic  ####################################
 class AC():
-    def __init__(self, net_list, state_dim, action_dim, a_lr=1e-3, c_lr=1e-3, gamma=0.9):
+    def __init__(self, net_list, optimizers_list, state_dim, action_dim, gamma=0.9):
         [self.actor, self.critic] = net_list
-        self.a_optimizer = tf.optimizers.Adam(a_lr)
-        self.c_optimizer = tf.optimizers.Adam(c_lr)
+        [self.a_optimizer, self.c_optimizer] = optimizers_list
         self.GAMMA = gamma
         self.state_dim = state_dim
 
@@ -326,6 +325,6 @@ class AC():
                                     s = env.reset().astype(np.float32)
                                     rall = 0
                         break
-                        
+
         elif mode is not 'test':
             print('unknow mode type, activate test mode as default')

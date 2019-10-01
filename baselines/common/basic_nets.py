@@ -7,22 +7,21 @@ from tensorlayer.layers import Dense, Input
 
 
 def MLP(input_dim, hidden_dim_list=[], w_init=tf.initializers.Orthogonal(0.2),
-        activation=tf.nn.relu, name='', *args, **kwargs):
+        activation=tf.nn.relu, *args, **kwargs):
     """Multiple fully-connected layers for approximation
 
     Args:
         input_dim (int): size of input tensor
         hidden_dim_list (list[int]): a list of dimensions of hidden layers
+        w_init (callable): initialization method for weights
         activation (callable): activation function of hidden layers
-        name (float): scale for orthogonal initialization
     Return:
         input tensor, output tensor
     """
 
-    l = inputs = Input([None, input_dim], name=name+'_input_layer')
+    l = inputs = Input([None, input_dim], name='input_layer')
     for i in range(len(hidden_dim_list)):
-        suffix = '_hidden_layer%d' % (i+1)
-        l = Dense(n_units=hidden_dim_list[i], act=activation, W_init=w_init, name=name+suffix)(l)
+        l = Dense(n_units=hidden_dim_list[i], act=activation, W_init=w_init, name='hidden_layer%d' % (i+1))(l)
     outputs = l
 
     return inputs, outputs
@@ -58,10 +57,10 @@ def CNN(input_shape, conv_kwargs=None):
             }
         ]
 
-    l=inputs = tl.layers.Input((1, ) + input_shape, name='CNN_Input')
+    l=inputs = tl.layers.Input((1, ) + input_shape, name='input_layer')
 
     for i, kwargs in enumerate(conv_kwargs):
-        kwargs['name'] = kwargs.get('name', 'CNN_Layer{}'.format(i + 1))
+        kwargs['name'] = kwargs.get('name', 'hidden_layer{}'.format(i + 1))
         l = tl.layers.Conv2d(**kwargs)(l)
     outputs = l
 

@@ -63,7 +63,7 @@ tfd = tfp.distributions
 ###################  Asynchronous Advantage Actor Critic (A3C)  ####################################
 class ACNet(object):
 
-    def __init__(self, net_list, scope, entropy_beta, action_bound, globalAC=None):
+    def __init__(self, net_list, optimizers_list, scope, entropy_beta, action_bound, globalAC=None):
         self.scope = scope  # the scope is for naming networks for each worker differently
         self.save_path = './model'
         self.ENTROPY_BETA=entropy_beta
@@ -75,6 +75,7 @@ class ACNet(object):
         # self.critic.train()  # train mode for Dropout, BatchNorm
 
         [self.actor, self.critic] =  net_list
+
 
     @tf.function  # convert numpy functions to tf.Operations in the TFgraph, return tensor
     def update_global(
@@ -202,9 +203,10 @@ class Worker(object):
                     break
 
 class A3C():
-    def __init__(self, net_list, state_dim, action_dim):
+    def __init__(self, net_list, optimizers_list, state_dim, action_dim):
         self.action_dim = action_dim
         self.net_list = net_list
+        self.optimizers_list = optimizers_list
 
     def learn(self, env_list, train_episodes, test_episodes=1000, max_steps=150, number_workers=1, update_itr=10,
         gamma=0.99, entropy_beta=0.005 , actor_lr=5e-5, critic_lr=1e-4, seed=2, save_interval=500, mode='train'):
@@ -292,6 +294,6 @@ class A3C():
                     if d:
                         print("reward", rall)
                         break
-                        
+
         elif mode is not 'test':
             print('unknow mode type, activate test mode as default')

@@ -1,5 +1,5 @@
 import gym
-
+import tensorflow as tf
 # from common.env_wrappers import DummyVecEnv
 from common.utils import make_env
 from algorithms.ac.ac import AC
@@ -14,22 +14,29 @@ state_shape = env.observation_space.shape
 action_shape = (env.action_space.n,)
 
 ''' build networks for the algorithm '''
-name='ac'
 num_hidden_layer = 4 #number of hidden layers for the networks
-hidden_dim=64 # dimension of hidden layers for the networks
-critic = MlpValueNetwork(state_shape, hidden_dim_list=num_hidden_layer*[hidden_dim], name=name+'_critic')
-actor = DeterministicPolicyNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim], name=name+'_actor')
+hidden_dim = 64 # dimension of hidden layers for the networks
+with tf.name_scope('AC'):
+        with tf.name_scope('Critic'):
+                critic = MlpValueNetwork(state_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
+        with tf.name_scope('Actor'):
+                actor = DeterministicPolicyNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
 net_list = [actor, critic]
 
-model=AC(net_list, state_dim=state_shape[0], action_dim=action_shape[0])
+''' choose optimizers '''
+a_lr, c_lr = 1e-3, 1e-3  # a_lr: learning rate of the actor; c_lr: learning rate of the critic
+a_optimizer = tf.optimizers.Adam(a_lr)
+c_optimizer = tf.optimizers.Adam(c_lr)
+optimizers_list=[a_optimizer, c_optimizer]
+
+model=AC(net_list, optimizers_list, state_dim=state_shape[0], action_dim=action_shape[0])
 ''' 
 full list of arguments for the algorithm
 ----------------------------------------
 net_list: a list of networks (value and policy) used in the algorithm, from common functions or customization
+optimizers_list: a list of optimizers for all networks and differentiable variables
 state_dim: dimension of state for the environment
 action_dim: dimension of action for the environment
-a_lr: learning rate of the actor
-c_lr: learning rate of the critic
 gamma: discounted factor of reward
 '''
 

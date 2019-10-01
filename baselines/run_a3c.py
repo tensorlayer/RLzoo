@@ -15,22 +15,31 @@ action_shape = env.action_space.shape
 state_shape = env.observation_space.shape
 
 ''' build networks for the algorithm '''
-name='a3c'
 num_hidden_layer = 4 #number of hidden layers for the networks
 hidden_dim=64 # dimension of hidden layers for the networks
 num_workers = 2
 net_list2 = []
 for i in range(num_workers+1):
-    actor = StochasticPolicyNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim], name=name+'_actor')
-    critic = MlpValueNetwork(state_shape, hidden_dim_list=num_hidden_layer*[hidden_dim], name=name+'_critic')
+    with tf.name_scope('A3C'):
+        with tf.name_scope('Actor'):
+            actor = StochasticPolicyNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
+        with tf.name_scope('Critic'):
+            critic = MlpValueNetwork(state_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
     net_list = [actor, critic]
     net_list2.append(net_list)
 
-model=A3C(net_list2, state_dim=state_shape[0], action_dim=action_shape[0])
+''' choose optimizers '''
+actor_lr, critic_lr = 5e-5, 1e-4 # learning rate
+a_optimizer = tf.optimizers.RMSprop(actor_lr)
+c_optimizer = tf.optimizers.RMSprop(critic_lr)
+optimizers_list= [a_optimizer, c_optimizer]
+
+model=A3C(net_list2, optimizers_list, state_dim=state_shape[0], action_dim=action_shape[0])
 ''' 
 full list of arguments for the algorithm
 ----------------------------------------
 net_list: a list of networks (value and policy) used in the algorithm, from common functions or customization
+optimizers_list: a list of optimizers for all networks and differentiable variables
 state_dim: dimension of state for the environment
 action_dim: dimension of action for the environment
 replay_buffer_capacity: the size of buffer for storing explored samples

@@ -36,12 +36,12 @@ class PolicyGradient:
     """
     PG class
     """
-    def __init__(self, net_list, state_dim, action_dim, learning_rate=0.01, reward_decay=0.95):
+    def __init__(self, net_list, optimizers_list, state_dim, action_dim, reward_decay=0.95):
         self.gamma = reward_decay
 
         self.ep_obs, self.ep_as, self.ep_rs = [], [], []
         [self.policy] = net_list 
-        self.optimizer = tf.optimizers.Adam(learning_rate)
+        [self.optimizer] = optimizers_list
 
     def choose_action(self, s):
         """
@@ -133,7 +133,7 @@ class PolicyGradient:
         load_model(self.policy, name, 'pg')
 
 
-    def learn(self, env, train_episodes=3000, test_episodes=1000, max_steps=1000, lr=0.02, gamma=0.99,
+    def learn(self, env, train_episodes=3000, test_episodes=1000, max_steps=1000, gamma=0.99,
             seed=2, save_interval=100, mode='train', render=False):
         """
         learning parameters
@@ -142,7 +142,6 @@ class PolicyGradient:
         train_episodes: total number of episodes for training
         test_episodes: total number of episodes for testing
         max_steps: maximum number of steps for one episode
-        lr: learning rate
         gamma: reward discount factor
         seed: random seed
         save_interval: timesteps for saving
