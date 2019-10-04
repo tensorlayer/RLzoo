@@ -31,15 +31,11 @@ __all__ = (
     'NormalizedActions',  # normalized action to actual space
 )
 cv2.ocl.setUseOpenCL(False)
-# env_id -> env_type
-id2type = dict()
-for _env in gym.envs.registry.all():
-    id2type[_env.id] = _env._entry_point.split(':')[0].rsplit('.', 1)[1]
 
 
-def build_env(env_id, vectorized=False, seed=0, reward_scale=1.0, nenv=0):
+def build_env(env_id, env_type,
+              vectorized=False, seed=0, reward_scale=1.0, nenv=0):
     """Build env based on options"""
-    env_type = id2type[env_id]
     nenv = nenv or cpu_count() // (1 + (platform == 'darwin'))
     stack = env_type == 'atari'
     if not vectorized:
@@ -539,7 +535,7 @@ class NormalizedActions(gym.ActionWrapper):
 def unit_test():
     env_id = 'CartPole-v0'
     unwrapped_env = gym.make(env_id)
-    wrapped_env = build_env(env_id, False)
+    wrapped_env = build_env(env_id, 'classic_control', False)
     o = wrapped_env.reset()
     print('Reset {} observation shape {}'.format(env_id, o.shape))
     done = False
@@ -551,7 +547,7 @@ def unit_test():
     env_id = 'PongNoFrameskip-v4'
     nenv = 2
     unwrapped_env = gym.make(env_id)
-    wrapped_env = build_env(env_id, True, nenv=nenv)
+    wrapped_env = build_env(env_id, 'atari', True, nenv=nenv)
     o = wrapped_env.reset()
     print('Reset {} observation shape {}'.format(env_id, o.shape))
     for _ in range(1000):

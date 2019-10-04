@@ -1,7 +1,7 @@
 import tensorflow as tf
 import tensorlayer as tl
 
-from baselines.common import math_utils
+from common import math_utils
 
 
 def atari(env, **kwargs):

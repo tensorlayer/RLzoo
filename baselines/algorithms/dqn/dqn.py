@@ -7,7 +7,7 @@ from copy import deepcopy
 import numpy as np
 import tensorflow as tf
 
-from baselines.common.buffer import ReplayBuffer, PrioritizedReplayBuffer
+from common.buffer import ReplayBuffer, PrioritizedReplayBuffer
 
 
 class DQN(object):

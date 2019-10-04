@@ -263,7 +263,7 @@ class PrioritizedReplayBuffer(ReplayBuffer):  # is it succeed from the ReplayBuf
         self._max_priority = 1.0
         self.beta = beta
 
-    def add(self, *args):
+    def push(self, *args):
         """See ReplayBuffer.store_effect"""
         idx = self.position
         super().push(*args)
