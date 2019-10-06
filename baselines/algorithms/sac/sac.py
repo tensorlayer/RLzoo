@@ -23,7 +23,6 @@ import time
 
 import matplotlib.pyplot as plt
 import numpy as np
-from IPython.display import clear_output
 
 import gym
 import tensorflow as tf
@@ -196,7 +195,7 @@ class SAC():
 
     def learn(self, env, train_episodes, test_episodes=1000, max_steps=150, batch_size=64, explore_steps=500, \
         update_itr=3, policy_target_update_interval = 3,  reward_scale = 1. , seed=2, save_interval=20, \
-        mode='train', AUTO_ENTROPY = True, DETERMINISTIC = False):
+        mode='train', AUTO_ENTROPY = True, DETERMINISTIC = False, render=False):
         '''
         parameters
         ----------
@@ -212,8 +211,9 @@ class SAC():
         seed: random seed
         save_interval: timesteps for saving the weights and plotting the results
         mode: 'train' or 'test'
-        AUTO_ENTROPY: automatically udpating variable alpha for entropy
-        DETERMINISTIC: stochastic action policy if False, otherwise deterministic
+        AUTO_ENTROPY: automatically updating variable alpha for entropy
+        DETERMINISTIC: stochastic action policy if False, otherwise deterministi
+        render: if true, visualize the environment
 
         '''
         np.random.seed(seed)
@@ -237,7 +237,7 @@ class SAC():
 
                     next_state, reward, done, _ = env.step(action)
                     next_state = next_state.astype(np.float32)
-                    env.render()
+                    if render: env.render()
                     done = 1 if done ==True else 0
 
                     self.replay_buffer.push(state, action, reward, next_state, done)
@@ -284,7 +284,7 @@ class SAC():
                     action = self.get_action(state, deterministic=DETERMINISTIC)
                     next_state, reward, done, _ = env.step(action)
                     next_state = next_state.astype(np.float32)
-                    env.render()
+                    if render: env.render()
                     done = 1 if done ==True else 0
 
                     state = next_state

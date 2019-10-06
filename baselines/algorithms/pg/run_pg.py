@@ -2,7 +2,7 @@ import gym
 
 # from common.env_wrappers import DummyVecEnv
 from common.utils import make_env
-from algorithms.pg.pg import PolicyGradient
+from algorithms.pg.pg import PG
 from common.policy_networks import *
 
 
@@ -24,7 +24,7 @@ lr = 0.01  # lr: learning rate of the policy
 optimizer = tf.optimizers.Adam(lr)
 optimizers_list = [optimizer]
 
-model=PolicyGradient(net_list, optimizers_list, state_dim=state_shape[0], action_dim=action_shape[0])
+model=PG(net_list, optimizers_list, state_dim=state_shape[0], action_dim=action_shape[0])
 ''' 
 full list of arguments for the algorithm
 ----------------------------------------

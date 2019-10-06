@@ -40,7 +40,7 @@ action_dim: dimension of action for the environment
 gamma: discounted factor of reward
 '''
 
-model.learn(env, train_episodes=100, test_episodes=1000, max_steps=1000,
+model.learn(env, train_episodes=1000, test_episodes=1000, max_steps=1000,
         seed=2, save_interval=100, mode='train', render=False)
 ''' 
 full list of parameters for training

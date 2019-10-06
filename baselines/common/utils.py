@@ -131,8 +131,10 @@ def get_algorithm_module(algorithm, submodule):
     return import_module('.'.join(['algorithms', algorithm, submodule]))
 
 
-def flatten_dims(shapes):  # will be moved to common
-    dim = 1
-    for s in shapes:
-        dim *= s
-    return dim
+def call_default_params(env, envtype, alg):
+    """ Get the default parameters for training from the default script """
+    alg = alg.lower()
+    default = import_module('.'.join(['algorithms', alg, 'default']))
+    params = getattr(default, envtype)(env)
+    
+    return params

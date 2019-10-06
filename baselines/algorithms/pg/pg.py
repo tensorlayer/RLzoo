@@ -32,9 +32,9 @@ from common.buffer import *
 
 ###############################  PG  ####################################
 
-class PolicyGradient:
+class PG:
     """
-    PG class
+    Policy Gradient class
     """
     def __init__(self, net_list, optimizers_list, state_dim, action_dim, reward_decay=0.95):
         self.gamma = reward_decay

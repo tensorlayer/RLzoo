@@ -30,7 +30,7 @@ def atari(env, **kwargs):
         params['optimizer'] = tf.optimizers.Adam(1e-4,
                                                  epsilon=1e-5, clipnorm=10)
 
-    return params
+    return {}, params
 
 
 def classic_control(env, **kwargs):
@@ -56,7 +56,7 @@ def classic_control(env, **kwargs):
         params['network'] = MLPQNet(in_dim, act_dim, params.pop('dueling'))
     if params.get('optimizer') is None:
         params['optimizer'] = tf.optimizers.Adam(5e-3, epsilon=1e-5)
-    return params
+    return {}, params
 
 
 class CNNQNet(tl.models.Model):

@@ -20,6 +20,7 @@ class DQN(object):
     """
     def __init__(self, mode):
         self.mode = mode
+        self.name='DQN'
 
     def get_action(self, obv, out_dim, eps, qnet):
         if self.mode == 'train' and random.random() < eps:

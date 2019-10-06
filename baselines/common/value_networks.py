@@ -24,7 +24,7 @@ Normal = tfd.Normal
 
 class MlpValueNetwork(Model):
     def __init__(self, state_shape, hidden_dim_list, w_init=tf.keras.initializers.glorot_normal(), \
-        activation = tf.nn.relu, trainable = True):
+        activation = tf.nn.relu, output_activation = None, trainable = True):
         """ Value network with multiple fully-connected layers 
         
         Args:
@@ -32,6 +32,7 @@ class MlpValueNetwork(Model):
             hidden_dim_list (list[int]): a list of dimensions of hidden layers
             w_init (callable): weights initialization
             activation (callable): activation function
+            output_activation (callable or None): output activation function
             trainable (bool): set training and evaluation mode
         """
 
@@ -39,7 +40,7 @@ class MlpValueNetwork(Model):
         with tf.name_scope('MLP'):
             inputs, l = MLP(state_dim, hidden_dim_list, w_init, activation)
         with tf.name_scope('Output'):
-            outputs = Dense(n_units=1, act=activation, W_init=w_init)(l)
+            outputs = Dense(n_units=1, act=output_activation, W_init=w_init)(l)
 
         super().__init__(inputs=inputs, outputs=outputs)
         if trainable:
@@ -49,7 +50,7 @@ class MlpValueNetwork(Model):
 
 class MlpQNetwork(Model):
     def __init__(self, state_shape, action_shape, hidden_dim_list, \
-        w_init=tf.keras.initializers.glorot_normal(), activation = tf.nn.relu, trainable = True):
+        w_init=tf.keras.initializers.glorot_normal(), activation = tf.nn.relu, output_activation = None, trainable = True):
         """ Q-value network with multiple fully-connected layers 
         
         Args:
@@ -58,6 +59,7 @@ class MlpQNetwork(Model):
             hidden_dim_list (list[int]): a list of dimensions of hidden layers
             w_init (callable): weights initialization
             activation (callable): activation function
+            output_activation (callable or None): output activation function
             trainable (bool): set training and evaluation mode
         """
 
@@ -66,7 +68,7 @@ class MlpQNetwork(Model):
         with tf.name_scope('MLP'):
             inputs, l = MLP(input_dim, hidden_dim_list, w_init, activation)
         with tf.name_scope('Output'):
-            outputs = Dense(n_units=1, act=activation, W_init=w_init)(l)
+            outputs = Dense(n_units=1, act=output_activation, W_init=w_init)(l)
 
         super().__init__(inputs=inputs, outputs=outputs)
         if trainable:

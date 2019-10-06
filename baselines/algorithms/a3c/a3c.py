@@ -247,7 +247,7 @@ class A3C():
             # ============================= TRAINING ===============================
             t0 = time.time()
             with tf.device("/cpu:0"):
-
+                [OPT_A, OPT_C] = self.optimizers_list
                 OPT_A = tf.optimizers.RMSprop(actor_lr, name='RMSPropA')
                 OPT_C = tf.optimizers.RMSprop(critic_lr, name='RMSPropC')
 

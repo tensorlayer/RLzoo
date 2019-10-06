@@ -69,7 +69,7 @@ tl.logging.set_verbosity(tl.logging.DEBUG)
 class TD3():
     ''' twin-delayed ddpg '''
     def __init__(self, net_list, optimizers_list, state_dim, action_dim, replay_buffer_capacity=5e5, \
-        action_range=1., policy_target_update_interval=5, q_lr=3e-4, policy_lr=3e-4 ):
+        action_range=1., policy_target_update_interval=5):
         self.replay_buffer = ReplayBuffer(replay_buffer_capacity)
         self.action_dim = action_dim
         self.action_range = action_range

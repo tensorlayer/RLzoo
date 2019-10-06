@@ -52,7 +52,7 @@ action_range: value of each action in [-action_range, action_range]
 
 model.learn(env, train_episodes=100, max_steps=150, batch_size=64, explore_steps=500, \
 update_itr=3, policy_target_update_interval = 3,  reward_scale = 1. , seed=2, save_interval=20, \
-mode='train', AUTO_ENTROPY = True, DETERMINISTIC = False)
+mode='train', AUTO_ENTROPY = True, DETERMINISTIC = False, render=False)
 ''' 
 full list of parameters for training
 ---------------------------------------
@@ -70,6 +70,7 @@ save_interval: timesteps for saving the weights and plotting the results
 mode: 'train'  or 'test'
 AUTO_ENTROPY: automatically udpating variable alpha for entropy
 DETERMINISTIC: stochastic action policy if False, otherwise deterministic
+render: if true, visualize the environment
 '''
 
 

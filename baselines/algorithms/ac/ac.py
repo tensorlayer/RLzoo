@@ -111,74 +111,8 @@ class AC():
         load_model(self.critic, 'model_critic', 'AC')
 
 
-# class Actor(object):
-
-#     def __init__(self, n_features, n_actions, lr, hidden_dim, hidden_layer):
-
-#         self.model = DeterministicPolicyNetwork(n_features, n_actions, hidden_dim, hidden_layer).model()
-#         self.model.train()
-#         self.optimizer = tf.optimizers.Adam(lr)
-
-#     def learn(self, s, a, td):
-#         with tf.GradientTape() as tape:
-#             _logits = self.model(np.array([s]))
-#             ## cross-entropy loss weighted by td-error (advantage),
-#             # the cross-entropy mearsures the difference of two probability distributions: the predicted logits and sampled action distribution,
-#             # then weighted by the td-error: small difference of real and predict actions for large td-error (advantage); and vice versa.
-#             _exp_v = tl.rein.cross_entropy_reward_loss(logits=_logits, actions=[a], rewards=td[0])
-#         grad = tape.gradient(_exp_v, self.model.trainable_weights)
-#         self.optimizer.apply_gradients(zip(grad, self.model.trainable_weights))
-#         return _exp_v
-
-#     def choose_action(self, s):
-#         _logits = self.model(np.array([s]))
-#         _probs = tf.nn.softmax(_logits).numpy()
-#         return tl.rein.choice_action_by_probs(_probs.ravel())  # sample according to probability distribution
-
-#     def choose_action_greedy(self, s):
-#         _logits = self.model(np.array([s]))  # logits: probability distribution of actions
-#         _probs = tf.nn.softmax(_logits).numpy()
-#         return np.argmax(_probs.ravel())
-
-#     def save_ckpt(self):  # save trained weights
-#         save_model(self.model, 'model_actor', 'AC')
-
-#     def load_ckpt(self):  # load trained weights
-#         load_model(self.model, 'model_actor', 'AC')
-
-
-# class Critic(object):
-
-#     def __init__(self, n_features, gamma, lr, hidden_dim, hidden_layer):
-#         self.GAMMA = gamma
-
-#         self.model = ValueNetwork(n_features, hidden_dim, hidden_layer).model()  # from common.networks
-#         self.model.train()
-
-#         self.optimizer = tf.optimizers.Adam(lr)
-
-#     def learn(self, s, r, s_):
-#         v_ = self.model(np.array([s_]))
-#         with tf.GradientTape() as tape:
-#             v = self.model(np.array([s]))
-#             ## TD_error = r + lambd * V(newS) - V(S)
-#             td_error = r + self.GAMMA * v_ - v
-#             loss = tf.square(td_error)
-#         grad = tape.gradient(loss, self.model.trainable_weights)
-#         self.optimizer.apply_gradients(zip(grad, self.model.trainable_weights))
-
-#         return td_error
-
-#     def save_ckpt(self):  # save trained weights
-#         save_model(self.model, 'model_critic', 'AC')
-
-#     def load_ckpt(self):  # load trained weights
-#         load_model(self.model, 'model_critic', 'AC')
-
-
     def learn(self, env, train_episodes, test_episodes=1000, max_steps=1000,
         seed=2, save_interval=100, mode='train', render=False):
-
         '''
         parameters
         -----------
@@ -196,16 +130,10 @@ class AC():
         np.random.seed(seed)
         tf.random.set_seed(seed)  # reproducible
 
-        # print("observation dimension: %d" % N_F)  # 4
-        # print("observation high: %s" % env.observation_space.high)  # [ 2.4 , inf , 0.41887902 , inf]
-        # print("observation low : %s" % env.observation_space.low)  # [-2.4 , -inf , -0.41887902 , -inf]
-        # print("num of actions: %d" % N_A)  # 2 : left or right
-
         if mode=='train':
             t0 = time.time()
             rewards = []
             for i_episode in range(train_episodes):
-                # episode_time = time.time()
                 s = env.reset().astype(np.float32)
                 t = 0  # number of step in this episode
                 all_r = []  # rewards of all steps
@@ -240,10 +168,7 @@ class AC():
                             running_reward = running_reward * 0.95 + ep_rs_sum * 0.05
 
                         rewards.append(running_reward)
-                        # start rending if running_reward greater than a threshold
-                        # if running_reward > DISPLAY_REWARD_THRESHOLD: RENDER = True
-                        # print("Episode: %d reward: %f running_reward %f took: %.5f" % \
-                        #     (i_episode, ep_rs_sum, running_reward, time.time() - episode_time))
+
                         print('Episode: {}/{}  | Episode Reward: {:.4f}  | Running Time: {:.4f}'\
                         .format(i_episode, train_episodes, ep_rs_sum, time.time()-t0 ))
 
@@ -261,7 +186,6 @@ class AC():
                                 rall += r
                                 s = s_new
                                 if done:
-                                    # print("reward", rall)
                                     s = env.reset().astype(np.float32)
                                     rall = 0
                         break
@@ -301,10 +225,6 @@ class AC():
                             running_reward = ep_rs_sum
                         else:
                             running_reward = running_reward * 0.95 + ep_rs_sum * 0.05
-                        # start rending if running_reward greater than a threshold
-                        # if running_reward > DISPLAY_REWARD_THRESHOLD: RENDER = True
-                        # print("Episode: %d reward: %f running_reward %f took: %.5f" % \
-                        #     (i_episode, ep_rs_sum, running_reward, time.time() - episode_time))
                         print('Episode: {}/{}  | Episode Reward: {:.4f}  | Running Time: {:.4f}'\
                         .format(i_episode, test_episodes, ep_rs_sum, time.time()-t0 ))
 

@@ -24,7 +24,7 @@ Normal = tfd.Normal
 
 class StochasticPolicyNetwork(Model):
     def __init__(self, state_shape, action_shape, hidden_dim_list, w_init=tf.keras.initializers.glorot_normal(), \
-        activation = tf.nn.relu, log_std_min=-20, log_std_max=2, trainable=True):
+        activation = tf.nn.relu, output_activation = None, log_std_min=-20, log_std_max=2, trainable=True):
         """ Stochastic continuous policy network with multiple fully-connected layers 
         
         Args:
@@ -33,6 +33,7 @@ class StochasticPolicyNetwork(Model):
             hidden_dim_list (list[int]): a list of dimensions of hidden layers
             w_init (callable): weights initialization
             activation (callable): activation function
+            output_activation (callable or None): output activation function
             log_std_min (float): lower bound of standard deviation of action
             log_std_max (float): upper bound of standard deviation of action
             trainable (bool): set training and evaluation mode
@@ -43,9 +44,9 @@ class StochasticPolicyNetwork(Model):
         with tf.name_scope('MLP'):
             inputs, l = MLP(state_dim, hidden_dim_list, w_init, activation)
         with tf.name_scope('Output_Mean'):
-            mean_linear = Dense(n_units=action_dim, W_init=w_init)(l)
+            mean_linear = Dense(n_units=action_dim, act=output_activation, W_init=w_init)(l)
         with tf.name_scope('Output_Std'):
-            log_std_linear = Dense(n_units=action_dim, W_init=w_init)(l)  
+            log_std_linear = Dense(n_units=action_dim, act=output_activation, W_init=w_init)(l)  
             log_std_linear = tl.layers.Lambda(lambda x: tf.clip_by_value(x, log_std_min, log_std_max), name='Lambda')(log_std_linear)
 
         super().__init__(inputs=inputs, outputs=[mean_linear, log_std_linear])
@@ -56,7 +57,7 @@ class StochasticPolicyNetwork(Model):
 
 class DeterministicPolicyNetwork(Model):
     def __init__(self, state_shape, action_shape, hidden_dim_list, w_init=tf.keras.initializers.glorot_normal(), \
-        activation = tf.nn.relu, trainable = True):
+        activation = tf.nn.relu, output_activation = tf.nn.tanh, trainable = True):
         """ Deterministic continuous policy network with multiple fully-connected layers 
         
         Args:
@@ -65,6 +66,7 @@ class DeterministicPolicyNetwork(Model):
             hidden_dim_list (list[int]): a list of dimensions of hidden layers
             w_init (callable): weights initialization
             activation (callable): activation function
+            output_activation (callable or None): output activation function
             trainable (bool): set training and evaluation mode
         """
 
@@ -73,7 +75,7 @@ class DeterministicPolicyNetwork(Model):
         with tf.name_scope('MLP'):
             inputs, l = MLP(state_dim, hidden_dim_list, w_init, activation)
         with tf.name_scope('Output'):
-            outputs = Dense(n_units=action_dim, act=tf.nn.tanh, W_init=w_init)(l)
+            outputs = Dense(n_units=action_dim, act=output_activation, W_init=w_init)(l)
 
         super().__init__(inputs=inputs, outputs=outputs)
         if trainable:
