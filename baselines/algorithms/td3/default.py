@@ -13,7 +13,6 @@ def atari(env):
     alg_params = dict(
         state_dim = state_shape[0],
         action_dim = action_shape[0],
-        gamma = 0.9,
         replay_buffer_capacity = 5e5,
         policy_target_update_interval = 5,
         action_range = 1.
@@ -65,7 +64,6 @@ def classic_control(env):
     alg_params = dict(
         state_dim = state_shape[0],
         action_dim = action_shape[0],
-        gamma = 0.9,
         replay_buffer_capacity = 5e5,
         policy_target_update_interval = 5,
         action_range = 1.

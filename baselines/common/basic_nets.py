@@ -6,7 +6,7 @@ import tensorlayer as tl
 from tensorlayer.layers import Dense, Input
 
 
-def MLP(input_dim, hidden_dim_list=[], w_init=tf.initializers.Orthogonal(0.2),
+def MLP(input_dim, hidden_dim_list:list, w_init=tf.initializers.Orthogonal(0.2),
         activation=tf.nn.relu, *args, **kwargs):
     """Multiple fully-connected layers for approximation
 

@@ -213,7 +213,7 @@ class TD3():
 
 
     def learn(self, env, train_episodes, test_episodes=1000, max_steps=150, batch_size=64, explore_steps=500, update_itr=3, 
-        reward_scale = 1. , seed=2, save_interval=10, explore_noise_scale = 1.0, eval_noise_scale = 0.5, mode='train'):
+        reward_scale = 1. , seed=2, save_interval=10, explore_noise_scale = 1.0, eval_noise_scale = 0.5, mode='train', render=False):
         '''
         parameters
         ----------
@@ -230,6 +230,7 @@ class TD3():
         explore_noise_scale: range of action noise for exploration
         eval_noise_scale: range of action noise for evaluation of action value
         mode: 'train' or 'test'
+        render: if true, visualize the environment
 
         '''
         random.seed(seed)
@@ -254,7 +255,7 @@ class TD3():
 
                     next_state, reward, done, _ = env.step(action)
                     next_state = next_state.astype(np.float32)
-                    env.render()
+                    if render: env.render()
                     done = 1 if done ==True else 0
 
                     self.replay_buffer.push(state, action, reward, next_state, done)
@@ -302,7 +303,7 @@ class TD3():
                     action = self.get_action(state, explore_noise_scale=1.0)
                     next_state, reward, done, _ = env.step(action)
                     next_state = next_state.astype(np.float32)
-                    env.render()
+                    if render: env.render()
                     done = 1 if done ==True else 0
 
                     state = next_state

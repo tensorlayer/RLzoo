@@ -51,7 +51,7 @@ action_range: value of each action in [-action_range, action_range]
 '''
 
 model.learn(env, train_episodes=100, max_steps=150, batch_size=64, explore_steps=500, update_itr=3, 
-reward_scale = 1. , seed=2, save_interval=10, explore_noise_scale = 1.0, eval_noise_scale = 0.5, mode='train')
+reward_scale = 1. , seed=2, save_interval=10, explore_noise_scale = 1.0, eval_noise_scale = 0.5, mode='train', render=False)
 ''' 
 full list of parameters for training
 ---------------------------------------
@@ -68,6 +68,8 @@ save_interval: timesteps for saving the weights and plotting the results
 explore_noise_scale: range of action noise for exploration
 eval_noise_scale: range of action noise for evaluation of action value
 mode: 'train' or 'test'
+render: if true, visualize the environment
+
 '''
 
 
