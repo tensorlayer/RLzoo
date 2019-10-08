@@ -20,7 +20,6 @@ tensorlayer >=2.0.0
 """
 import time
 
-import matplotlib.pyplot as plt
 import numpy as np
 
 import gym
@@ -28,20 +27,30 @@ import tensorflow as tf
 import tensorlayer as tl
 
 from common.utils import *
-from common.buffer import *
+
 
 ###############################  PG  ####################################
 
+
 class PG:
     """
-    Policy Gradient class
+    PG class
     """
-    def __init__(self, net_list, optimizers_list, state_dim, action_dim, reward_decay=0.95):
-        self.gamma = reward_decay
 
-        self.ep_obs, self.ep_as, self.ep_rs = [], [], []
-        [self.policy] = net_list 
-        [self.optimizer] = optimizers_list
+    def __init__(self, net_list, optimizers_list, state_dim, action_dim):
+        """
+        :param net_list: a list of networks (value and policy) used in the algorithm, from common functions or customization
+        :param optimizers_list: a list of optimizers for all networks and differentiable variables
+        :param state_dim: dimension of state for the environment
+        :param action_dim: dimension of action for the environment
+        """
+        assert len(net_list) == 1
+        assert len(optimizers_list) == 1
+        self.name = 'pg'
+        self.model = net_list[0]
+        self.buffer = []
+        print('Policy Network', self.model)
+        self.optimizer = optimizers_list[0]
 
     def choose_action(self, s):
         """
@@ -49,7 +58,7 @@ class PG:
         :param s: state
         :return: act
         """
-        _logits = self.policy(np.array([s], np.float32))
+        _logits = self.model(np.array([s], np.float32))
         _probs = tf.nn.softmax(_logits).numpy()
         return tl.rein.choice_action_by_probs(_probs.ravel())
 
@@ -59,7 +68,7 @@ class PG:
         :param s: state
         :return: act
         """
-        _probs = tf.nn.softmax(self.policy(np.array([s], np.float32))).numpy()
+        _probs = tf.nn.softmax(self.model(np.array([s], np.float32))).numpy()
         return np.argmax(_probs.ravel())
 
     def store_transition(self, s, a, r):
@@ -70,38 +79,33 @@ class PG:
         :param r: reward
         :return:
         """
-        self.ep_obs.append(np.array([s], np.float32))
-        self.ep_as.append(a)
-        self.ep_rs.append(r)
+        self.buffer.append([np.array(s, np.float32), np.array(a, np.float32), np.array(r, np.float32)])
 
-    def update(self):
+    def update(self, gamma):
         """
         update policy parameters via stochastic gradient ascent
         :return: None
         """
         # discount and normalize episode reward
-        s, a, r = self.ep_obs, self.ep_as, self.ep_rs
-        discounted_ep_rs_norm = self._discount_and_norm_rewards(r)
+        s, a, r = zip(*self.buffer)
+        s, a, r = np.array(s), np.array(a, np.int).flatten(), np.array(r).flatten()
+        discounted_ep_rs_norm = self._discount_and_norm_rewards(r, gamma)
 
         with tf.GradientTape() as tape:
-            # print(s)
-            _logits = self.policy(np.vstack(s))
-            # to maximize total reward (log_p * R) is to minimize -(log_p * R), and the tf only have minimize(loss)
-            neg_log_prob = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=_logits, labels=np.array(a))
-            # this is negative log of chosen action
-
-            # or in this way:
-            # neg_log_prob = tf.reduce_sum(-tf.log(self.all_act_prob)*tf.one_hot(self.tf_acts, self.n_actions), axis=1)
-
+            _logits = self.model(np.vstack(s))
+            # to maximize total reward (log_p * R) is to minimize -(log_p * R), and the tf only have minimize(loss)\
+            aa = np.array(a, np.int).flatten()
+            neg_log_prob = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=_logits,
+                                                                          labels=aa)
             loss = tf.reduce_mean(neg_log_prob * discounted_ep_rs_norm)  # reward guided loss
 
-        grad = tape.gradient(loss, self.policy.trainable_weights)
-        self.optimizer.apply_gradients(zip(grad, self.policy.trainable_weights))
+        grad = tape.gradient(loss, self.model.trainable_weights)
+        self.optimizer.apply_gradients(zip(grad, self.model.trainable_weights))
 
-        self.ep_obs, self.ep_as, self.ep_rs = [], [], []  # empty episode data
+        self.buffer = []
         return discounted_ep_rs_norm
 
-    def _discount_and_norm_rewards(self, reward_list):
+    def _discount_and_norm_rewards(self, reward_list, gamma):
         """
         compute discount_and_norm_rewards
         :return: discount_and_norm_rewards
@@ -110,7 +114,7 @@ class PG:
         discounted_ep_rs = np.zeros_like(reward_list)
         running_add = 0
         for t in reversed(range(0, len(reward_list))):
-            running_add = running_add * self.gamma + reward_list[t]
+            running_add = running_add * gamma + reward_list[t]
             discounted_ep_rs[t] = running_add
 
         # normalize episode rewards
@@ -118,45 +122,47 @@ class PG:
         discounted_ep_rs /= np.std(discounted_ep_rs)
         return discounted_ep_rs
 
-    def save(self, name='model'):
+    def save(self, name='policy'):
         """
         save trained weights
         :return: None
         """
-        save_model(self.policy, name, 'pg')
+        save_model(self.model, name, self.name)
 
-    def load(self, name='model'):
+    def load(self, name='policy'):
         """
         load trained weights
         :return: None
         """
-        load_model(self.policy, name, 'pg')
+        load_model(self.model, name, self.name)
 
-
-    def learn(self, env, train_episodes=3000, test_episodes=1000, max_steps=1000, gamma=0.99,
-            seed=2, save_interval=100, mode='train', render=False):
+    def learn(self, env, train_episodes=300, test_episodes=200, max_steps=3000, save_interval=100,
+              mode='train', render=False, gamma=0.95, seed=2, reward_shaping=None):
         """
-        learning parameters
-        --------------------
-        env: learning environment
-        train_episodes: total number of episodes for training
-        test_episodes: total number of episodes for testing
-        max_steps: maximum number of steps for one episode
-        gamma: reward discount factor
-        seed: random seed
-        save_interval: timesteps for saving
-        mode: train or test
-        render: render each step for visualization
+        parameters
+        ----------
+        :param env: learning environment
+        :param train_episodes: total number of episodes for training
+        :param test_episodes: total number of episodes for testing
+        :param max_steps: maximum number of steps for one episode
+        :param save_interval: timesteps for saving
+        :param mode: train or test
+        :param render: render each step
+        :param gamma: reward decay
+        :param seed: random seed
+        :param reward_shaping: reward shaping function
+        :return: None
         """
+        if seed:
+            # reproducible
+            np.random.seed(seed)
+            tf.random.set_seed(seed)
+            env.seed(seed)
 
-        # reproducible
-        np.random.seed(seed)
-        tf.random.set_seed(seed)
-
-        tl.logging.set_verbosity(tl.logging.DEBUG)
         if mode == 'train':
             reward_buffer = []
-            for i_episode in range(train_episodes):
+
+            for i_episode in range(1, train_episodes + 1):
 
                 episode_time = time.time()
                 observation = env.reset()
@@ -170,13 +176,16 @@ class PG:
 
                     observation_, reward, done, info = env.step(action)
 
-                    self.store_transition(observation, action, reward)
+                    shaped_reward = reward_shaping(reward) if reward_shaping else reward
+
+                    self.store_transition(observation, action, shaped_reward)
 
                     ep_rs_sum += reward
                     observation = observation_
 
                     if done:
                         break
+
                 try:
                     running_reward = running_reward * 0.99 + ep_rs_sum * 0.01
                 except:
@@ -188,13 +197,14 @@ class PG:
                 )
                 reward_buffer.append(running_reward)
 
-                self.update()
+                self.update(gamma)
 
                 if i_episode and i_episode % save_interval == 0:
                     self.save()
-            plot(reward_buffer, 'pg', env.spec.id)
-        
+            plot_save_log(reward_buffer, Algorithm_name='PG', Env_name=env.spec.id)
+
         elif mode == 'test':
+            # test
             self.load()
             observation = env.reset()
             for eps in range(test_episodes):
@@ -205,5 +215,5 @@ class PG:
                     if done:
                         observation = env.reset()
 
-        elif mode is not 'test':
-            print('unknow mode type, activate test mode as default')
+        else:
+            print('unknown mode type')

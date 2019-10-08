@@ -6,61 +6,31 @@ from common.value_networks import *
 from common.policy_networks import *
 
 
-def atari(env):
-    state_shape = env.observation_space.shape
-    action_shape = (env.action_space.n,)
-
-    alg_params = dict(
-        state_dim = state_shape[0],
-        action_dim = action_shape[0],
-        reward_decay = 0.95,
-    )
-    if alg_params.get('net_list') is None:
-        num_hidden_layer = 2 #number of hidden layers for the networks
-        hidden_dim=32 # dimension of hidden layers for the networks
-        with tf.name_scope('PG'):
-            policy = DeterministicPolicyNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
-        net_list = [policy]
-        alg_params['net_list'] = net_list
-    if alg_params.get('optimizers_list') is None:
-        lr = 0.01  # lr: learning rate of the policy
-        optimizer = tf.optimizers.Adam(lr)
-        optimizers_list = [optimizer]
-
-    learn_params = dict(
-        gamma=0.99,
-        seed=2, 
-        max_steps=1000
-    )
-
-    return alg_params, learn_params
-
-
 def classic_control(env):
     state_shape = env.observation_space.shape
-    action_shape = (env.action_space.n,)
+    action_shape = env.action_space.n,
 
     alg_params = dict(
         state_dim = state_shape[0],
         action_dim = action_shape[0],
-        reward_decay = 0.95,
     )
+
     if alg_params.get('net_list') is None:
-        num_hidden_layer = 2 #number of hidden layers for the networks
-        hidden_dim=32 # dimension of hidden layers for the networks
+        num_hidden_layer = 1  # number of hidden layers for the networks
+        hidden_dim = 64  # dimension of hidden layers for the networks
         with tf.name_scope('PG'):
-            policy = DeterministicPolicyNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
-        net_list = [policy]
+            with tf.name_scope('Policy'):
+                policy_net = DeterministicPolicyNetwork(state_shape, action_shape, num_hidden_layer * [hidden_dim])
+        net_list = [policy_net]
         alg_params['net_list'] = net_list
+
     if alg_params.get('optimizers_list') is None:
-        lr = 0.01  # lr: learning rate of the policy
-        optimizer = tf.optimizers.Adam(lr)
-        optimizers_list = [optimizer]
+        learning_rate = 0.02
+        policy_optimizer = tf.optimizers.Adam(learning_rate)
+        optimizers_list = [policy_optimizer]
         alg_params['optimizers_list'] = optimizers_list
 
-    learn_params = dict(
-        gamma=0.99,
-        seed=2, 
-        max_steps=1000
-    )
+    learn_params = dict(env=env, train_episodes=300, test_episodes=200, max_steps=3000, save_interval=100,
+            mode='train', render=False, gamma=0.95, seed=2)
+
     return alg_params, learn_params
