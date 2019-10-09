@@ -58,11 +58,32 @@ Currently the repository is still in development, and there may be some envrionm
 
 ## Usage:
 
+### 1. Implicit Configurations
+
+RL zoo with **implicit configurations** means the configurations for learning are not contained in the main script for running (i.e. `run_rlzoo.py`), but in the `default.py` file in each algorithm folder (for example, `baselines/algorithms/sac/default.py` is the default parameters configuration for SAC algorithm). Whenever you want to change the configurations for learning, including (1) parameter values for the algorithm and learning process, (2) the network structures, (3) the optimizers, etc, you need to go to the `default.py` file under the folder of each algorithm for achieving that. 
+
+#### Common Interface:
+
+```python
+EnvName = 'Pendulum-v0'  # chose environment
+EnvType = ['classic_control', 'atari', 'box2d', 'mujoco', 'dm_control'][0]  # select environment type
+
+env = build_env(EnvName, EnvType)  # build environment with wrappers
+alg_params, learn_params = call_default_params(env, EnvType, 'TD3')  # call default parameters for the algorithm and learning process
+alg = TD3(**alg_params) # instantiate the algorithm
+alg.learn(env=env, train_episodes=1000, test_episodes=1000, 
+        save_interval=100, mode='train', render=False, **learn_params)  # start the learning process
+```
+
 #### To Run:
 
-```bash
-python run_sac.py 
 ```
+python run_rlzoo.py
+```
+
+### 2. Explicit Configurations
+
+RL zoo with **explicit configurations** means the configurations for learning, including parameter values for the algorithm and the learning process, the network structures used in the algorithms and the optimizers etc, are explicitly displayed in the main script for running. And the main scripts are under the folder of each algorithm, for example, `baselines/algorithms/sac/run_sac.py` can be called with `python algorithms/sac/run_sac.py` from the root file `./baselines/` to run the learning process same as in above implicit configurations.
 
 #### A Quick Example:
 
@@ -125,7 +146,11 @@ for i in range(100):
 env.close()
 ```
 
+#### To Run:
 
+```python
+python algorithms/*ALGORITHM_NAME*/run_*ALGORITHM_NAME*.py 
+```
 
 ## Troubleshooting:
 
