@@ -83,7 +83,7 @@ python run_rlzoo.py
 
 ### 2. Explicit Configurations
 
-RL zoo with **explicit configurations** means the configurations for learning, including parameter values for the algorithm and the learning process, the network structures used in the algorithms and the optimizers etc, are explicitly displayed in the main script for running. And the main scripts are under the folder of each algorithm, for example, `baselines/algorithms/sac/run_sac.py` can be called with `python algorithms/sac/run_sac.py` from the root file `./baselines/` to run the learning process same as in above implicit configurations.
+RL zoo with **explicit configurations** means the configurations for learning, including parameter values for the algorithm and the learning process, the network structures used in the algorithms and the optimizers etc, are explicitly displayed in the main script for running. And the main scripts are under the folder of each algorithm, for example, `./baselines/algorithms/sac/run_sac.py` can be called with `python algorithms/sac/run_sac.py` from the root file `./baselines/` to run the learning process same as in above implicit configurations.
 
 #### A Quick Example:
 
@@ -150,6 +150,8 @@ env.close()
 
 ```python
 python algorithms/*ALGORITHM_NAME*/run_*ALGORITHM_NAME*.py 
+# for example
+python algorithms/ac/run_ac.py
 ```
 
 ## Troubleshooting:
