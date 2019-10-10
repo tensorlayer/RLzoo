@@ -69,7 +69,7 @@ Currently the repository is still in development, and there may be some envrionm
 
 ### 1. Implicit Configurations
 
-RL zoo with **implicit configurations** means the configurations for learning are not contained in the main script for running (i.e. `run_rlzoo.py`), but in the `default.py` file in each algorithm folder (for example, `baselines/algorithms/sac/default.py` is the default parameters configuration for SAC algorithm). Whenever you want to change the configurations for learning, including (1) parameter values for the algorithm and learning process, (2) the network structures, (3) the optimizers, etc, you need to go to the `default.py` file under the folder of each algorithm for achieving that. 
+RL zoo with **implicit configurations** means the configurations for learning are not explicitly contained in the main script for running (i.e. `run_rlzoo.py`), but in the `default.py` file in each algorithm folder (for example, `baselines/algorithms/sac/default.py` is the default parameters configuration for SAC algorithm). Whenever you want to change the configurations for learning, including (1) parameter values for the algorithm and learning process, (2) the network structures, (3) the optimizers, etc, you can go to the folder of each algorithm and modify parameters in `default.py` or change the values of `alg_params` (a dictionary of configurations for the algorithm) and `learn_params` (a dictionary of configurations for the learning process) in `run_rlzoo.py` according to the keys. 
 
 #### Common Interface:
 
