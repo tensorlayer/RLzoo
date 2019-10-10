@@ -59,7 +59,7 @@ class PG:
         :return: act
         """
         _logits = self.model(np.array([s], np.float32))
-        # _probs = tf.nn.softmax(_logits).numpy()
+        # _probs = tf.nn.softmax(_logits).numpy() # deprecated!
         # return tl.rein.choice_action_by_probs(_probs.ravel())
         self.model.policy_dist.set_param(_logits)
         return self.model.policy_dist.sample().numpy()[0]
@@ -70,11 +70,11 @@ class PG:
         :param s: state
         :return: act
         """
-        # _probs = tf.nn.softmax(self.model(np.array([s], np.float32))).numpy()
+        # _probs = tf.nn.softmax(self.model(np.array([s], np.float32))).numpy()  # deprecated!
         # return np.argmax(_probs.ravel())
         _logits = self.model(np.array([s], np.float32))
         self.model.policy_dist.set_param(_logits)
-        return self.model.policy_dist.greedy_sample()[0]
+        return self.model.policy_dist.greedy_sample().numpy()[0]
 
     def store_transition(self, s, a, r):
         """
@@ -177,7 +177,6 @@ class PG:
                         env.render()
 
                     action = self.choose_action(observation)
-                    print(action)
 
                     observation_, reward, done, info = env.step(action)
 

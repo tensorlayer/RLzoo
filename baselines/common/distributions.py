@@ -51,12 +51,14 @@ class Categorical(Distribution):
         return self
 
     def sample(self):
+        """ Sample actions from distribution, using the Gumbel-Softmax trick """
         u = tf.random.uniform(tf.shape(self._logits), dtype=self._logits.dtype)
         return tf.argmax(self._logits - tf.math.log(-tf.math.log(u)), axis=-1)
 
     def greedy_sample(self):
-        _probs = tf.nn.softmax(self._logits).numpy()
-        return np.argmax(_probs.ravel())
+        """ Get actions greedily """
+        _probs = tf.nn.softmax(self._logits)
+        return tf.argmax(_probs.ravel())
 
     def logp(self, x):
         return -self.neglogp(x)
@@ -116,12 +118,14 @@ class DiagGaussian(Distribution):
         return self
 
     def sample(self, deterministic=False):
+        """ Get actions in deterministic or stochastic manner """
         if deterministic:
             return self.mean
         else:
             return self.mean + self.std * tf.random.normal(tf.shape(self.mean))
 
     def greedy_sample(self):
+        """ Get actions greedily/deterministically """
         return self.sample(deterministic=True)
 
     def logp(self, x):

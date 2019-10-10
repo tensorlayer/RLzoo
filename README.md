@@ -52,8 +52,10 @@ Currently the repository is still in development, and there may be some envrionm
     * Classic control
     * MuJoCo
     * Robotics
-* [**DeepMind Control Suite**](https://github.com/deepmind/dm_control) 
-* [**RLBench**](https://github.com/stepjam/RLBench)
+*  [**DeepMind Control Suite**](https://github.com/deepmind/dm_control) 
+*  [**RLBench**](https://github.com/stepjam/RLBench)
+
+** Make sure the name of environment matches the type of environment. The types of environments include: 'atari', 'box2d', 'classic_control', 'mujoco', 'robotics', 'dm_control', 'rlbench'.
 
 ## Prerequisites:
 
