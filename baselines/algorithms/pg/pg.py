@@ -59,8 +59,10 @@ class PG:
         :return: act
         """
         _logits = self.model(np.array([s], np.float32))
-        _probs = tf.nn.softmax(_logits).numpy()
-        return tl.rein.choice_action_by_probs(_probs.ravel())
+        # _probs = tf.nn.softmax(_logits).numpy()
+        # return tl.rein.choice_action_by_probs(_probs.ravel())
+        self.model.policy_dist.set_param(_logits)
+        return self.model.policy_dist.sample().numpy()[0]
 
     def choose_action_greedy(self, s):
         """
@@ -68,8 +70,11 @@ class PG:
         :param s: state
         :return: act
         """
-        _probs = tf.nn.softmax(self.model(np.array([s], np.float32))).numpy()
-        return np.argmax(_probs.ravel())
+        # _probs = tf.nn.softmax(self.model(np.array([s], np.float32))).numpy()
+        # return np.argmax(_probs.ravel())
+        _logits = self.model(np.array([s], np.float32))
+        self.model.policy_dist.set_param(_logits)
+        return self.model.policy_dist.greedy_sample()[0]
 
     def store_transition(self, s, a, r):
         """
@@ -95,8 +100,10 @@ class PG:
             _logits = self.model(np.vstack(s))
             # to maximize total reward (log_p * R) is to minimize -(log_p * R), and the tf only have minimize(loss)\
             aa = np.array(a, np.int).flatten()
-            neg_log_prob = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=_logits,
-                                                                          labels=aa)
+            # neg_log_prob = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=_logits,
+            #                                                               labels=aa)
+            self.model.policy_dist.set_param(_logits)
+            neg_log_prob = self.model.policy_dist.neglogp(aa)
             loss = tf.reduce_mean(neg_log_prob * discounted_ep_rs_norm)  # reward guided loss
 
         grad = tape.gradient(loss, self.model.trainable_weights)

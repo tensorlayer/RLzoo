@@ -85,7 +85,10 @@ class AC():
             ## cross-entropy loss weighted by td-error (advantage),
             # the cross-entropy mearsures the difference of two probability distributions: the predicted logits and sampled action distribution,
             # then weighted by the td-error: small difference of real and predict actions for large td-error (advantage); and vice versa.
-            _exp_v = tl.rein.cross_entropy_reward_loss(logits=_logits, actions=[a], rewards=td_error[0])
+            # _exp_v = tl.rein.cross_entropy_reward_loss(logits=_logits, actions=[a], rewards=td_error[0])
+            self.actor.policy_dist.set_param(_logits)
+            neg_log_prob = self.actor.policy_dist.neglogp([a])
+            _exp_v = tf.reduce_mean(neg_log_prob * td_error[0])
         grad = tape.gradient(_exp_v, self.actor.trainable_weights)
         self.a_optimizer.apply_gradients(zip(grad, self.actor.trainable_weights))
         return _exp_v
@@ -93,14 +96,18 @@ class AC():
     def get_action(self, s):
         s=s.astype(np.float32)
         _logits = self.actor(np.array([s]))
-        _probs = tf.nn.softmax(_logits).numpy()
-        return tl.rein.choice_action_by_probs(_probs.ravel())  # sample according to probability distribution
+        # _probs = tf.nn.softmax(_logits).numpy()
+        # return tl.rein.choice_action_by_probs(_probs.ravel())  # sample according to probability distribution
+        self.actor.policy_dist.set_param(_logits)
+        return self.actor.policy_dist.sample().numpy()[0]
 
     def choose_action_greedy(self, s):
         s=s.astype(np.float32)
         _logits = self.actor(np.array([s]))  # logits: probability distribution of actions
-        _probs = tf.nn.softmax(_logits).numpy()
-        return np.argmax(_probs.ravel())
+        # _probs = tf.nn.softmax(_logits).numpy()
+        # return np.argmax(_probs.ravel())
+        self.actor.policy_dist.set_param(_logits)
+        return self.actor.policy_dist.greedy_sample()[0]
 
     def save_ckpt(self):  # save trained weights
         save_model(self.actor, 'model_actor', 'AC')

@@ -4,6 +4,9 @@ import tensorlayer as tl
 from common import math_utils
 from common.value_networks import *
 from common.policy_networks import *
+from common.distributions import make_dist
+from gym import spaces
+
 
 
 def atari(env):
@@ -45,7 +48,7 @@ def atari(env):
     learn_params = dict(
         max_steps=150, 
         batch_size=64, 
-        explore_steps=500,
+        explore_steps=0,
         update_itr=3, 
         policy_target_update_interval = 3,  
         reward_scale = 1. , 
@@ -58,8 +61,9 @@ def atari(env):
 
 
 def classic_control(env):
+    action_shape = env.action_space.shape  # only continuous
     state_shape = env.observation_space.shape
-    action_shape = env.action_space.shape
+
 
     alg_params = dict(
         state_dim = state_shape[0],
@@ -80,7 +84,7 @@ def classic_control(env):
             with tf.name_scope('Target_Q_Net2'):
                 target_soft_q_net2 = MlpQNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
             with tf.name_scope('Policy'):
-                policy_net = StochasticPolicyNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
+                policy_net = StochasticPolicyNetwork(env.observation_space, env.action_space, hidden_dim_list=num_hidden_layer*[hidden_dim])
         net_list = [soft_q_net1, soft_q_net2, target_soft_q_net1, target_soft_q_net2, policy_net]
         alg_params['net_list'] = net_list
     if alg_params.get('optimizers_list') is None:
@@ -95,7 +99,7 @@ def classic_control(env):
     learn_params = dict(
         max_steps=150, 
         batch_size=64, 
-        explore_steps=500,
+        explore_steps=0,
         update_itr=3, 
         policy_target_update_interval = 3,  
         reward_scale = 1. , 

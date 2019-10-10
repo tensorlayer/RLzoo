@@ -2,16 +2,12 @@
 Soft Actor-Critic
 using target Q instead of V net: 2 Q net, 2 target Q net, 1 policy net
 adding alpha loss
-
 paper: https://arxiv.org/pdf/1812.05905.pdf
 Actor policy is stochastic.
-
 Env: Openai Gym Pendulum-v0, continuous action space
-
 tensorflow 2.0.0a0
 tensorflow-probability 0.6.0
 tensorlayer 2.0.0
-
 &&
 pip install box2d box2d-kengz --user
 '''
@@ -65,7 +61,8 @@ class SAC():
     def evaluate(self, state, epsilon=1e-6):
         ''' generate action with state for calculating gradients '''
         state = state.astype(np.float32)
-        mean, log_std = self.policy_net(state)
+        mean_log_std = self.policy_net(state)
+        mean, log_std = tf.split(mean_log_std, 2, -1)
         std = tf.math.exp(log_std)  # no clip in evaluation, clip affects gradients flow
 
         normal = Normal(0, 1)
@@ -84,7 +81,8 @@ class SAC():
 
     def get_action(self, state, deterministic=False):
         ''' generate action with state for interaction with envronment '''
-        mean, log_std = self.policy_net(np.array([state.astype(np.float32)]))
+        mean_log_std = self.policy_net(np.array([state.astype(np.float32)]))
+        mean, log_std = tf.split(mean_log_std, 2, -1)
         std = tf.math.exp(log_std)
 
         normal = Normal(0, 1)
@@ -214,7 +212,6 @@ class SAC():
         AUTO_ENTROPY: automatically updating variable alpha for entropy
         DETERMINISTIC: stochastic action policy if False, otherwise deterministi
         render: if true, visualize the environment
-
         '''
         np.random.seed(seed)
         tf.random.set_seed(seed)  # reproducible

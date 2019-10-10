@@ -4,7 +4,7 @@ import tensorlayer as tl
 from common import math_utils
 from common.value_networks import *
 from common.policy_networks import *
-
+from gym import spaces
 
 def atari(env):
     state_shape = env.observation_space.shape
@@ -42,7 +42,14 @@ def atari(env):
 
 def classic_control(env):
     state_shape = env.observation_space.shape
-    action_shape = (env.action_space.n,)
+    if isinstance(env.action_space, spaces.Discrete):
+        action_shape = (env.action_space.n,)
+    elif isinstance(env.action_space, spaces.Box):
+        assert len(env.action_space.shape) == 1
+        action_shape = env.action_space.shape
+    else:
+        raise NotImplementedError
+
     alg_params = dict(
         state_dim = state_shape[0],
         action_dim = action_shape[0],
@@ -55,7 +62,7 @@ def classic_control(env):
             with tf.name_scope('Critic'):
                     critic = MlpValueNetwork(state_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
             with tf.name_scope('Actor'):
-                    actor = DeterministicPolicyNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
+                    actor = DeterministicPolicyNetwork(env.observation_space, env.action_space, hidden_dim_list=num_hidden_layer*[hidden_dim])
         net_list = [actor, critic]
         alg_params['net_list'] = net_list
     if alg_params.get('optimizers_list') is None:

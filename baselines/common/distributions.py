@@ -40,6 +40,7 @@ class Categorical(Distribution):
         """
         self._ndim = ndim
         self._logits = logits
+        self.output_dim = ndim
 
     def set_param(self, logits):
         """
@@ -47,10 +48,15 @@ class Categorical(Distribution):
             logits (tensor): logits variables to set
         """
         self._logits = logits
+        return self
 
     def sample(self):
         u = tf.random.uniform(tf.shape(self._logits), dtype=self._logits.dtype)
         return tf.argmax(self._logits - tf.math.log(-tf.math.log(u)), axis=-1)
+
+    def greedy_sample(self):
+        _probs = tf.nn.softmax(self._logits).numpy()
+        return np.argmax(_probs.ravel())
 
     def logp(self, x):
         return -self.neglogp(x)
@@ -94,6 +100,7 @@ class DiagGaussian(Distribution):
         self.mean = None
         self.logstd = None
         self.std = None
+        self.output_dim = 2*ndim
         if mean_logstd is not None:
             self.set_param(mean_logstd)
 
@@ -106,9 +113,13 @@ class DiagGaussian(Distribution):
         self.mean = mean
         self.logstd = logstd
         self.std = tf.math.exp(logstd)
+        return self
 
-    def sample(self):
-        return self.mean + self.std * tf.random.normal(tf.shape(self.mean))
+    def sample(self, deterministic=False):
+        if deterministic:
+            return self.mean
+        else:
+            return self.mean + self.std * tf.random.normal(tf.shape(self.mean))
 
     def logp(self, x):
         return -self.neglogp(x)

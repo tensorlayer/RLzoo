@@ -27,6 +27,9 @@ def MLP(input_dim, hidden_dim_list:list, w_init=tf.initializers.Orthogonal(0.2),
     return inputs, outputs
 
 
+
+
+
 def CNN(input_shape, conv_kwargs=None):
     """Multiple convolutional layers for approximation
     Default setting is equal to architecture used in DQN

@@ -4,11 +4,17 @@ import tensorlayer as tl
 from common import math_utils
 from common.value_networks import *
 from common.policy_networks import *
-
+from gym import spaces
 
 def classic_control(env):
     state_shape = env.observation_space.shape
-    action_shape = env.action_space.n,
+    if isinstance(env.action_space, spaces.Discrete):
+        action_shape = (env.action_space.n,)
+    elif isinstance(env.action_space, spaces.Box):
+        assert len(env.action_space.shape) == 1
+        action_shape = env.action_space.shape
+    else:
+        raise NotImplementedError
 
     alg_params = dict(
         state_dim = state_shape[0],
@@ -20,7 +26,7 @@ def classic_control(env):
         hidden_dim = 64  # dimension of hidden layers for the networks
         with tf.name_scope('PG'):
             with tf.name_scope('Policy'):
-                policy_net = DeterministicPolicyNetwork(state_shape, action_shape, num_hidden_layer * [hidden_dim])
+                policy_net = DeterministicPolicyNetwork(env.observation_space, env.action_space, num_hidden_layer * [hidden_dim])
         net_list = [policy_net]
         alg_params['net_list'] = net_list
 
@@ -30,7 +36,9 @@ def classic_control(env):
         optimizers_list = [policy_optimizer]
         alg_params['optimizers_list'] = optimizers_list
 
-    learn_params = dict(env=env, train_episodes=300, test_episodes=200, max_steps=3000, save_interval=100,
-            mode='train', render=False, gamma=0.95, seed=2)
+    learn_params = dict(
+        max_steps=3000, 
+        gamma=0.95, 
+        seed=2)
 
     return alg_params, learn_params
