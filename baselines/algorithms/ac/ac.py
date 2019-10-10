@@ -73,8 +73,7 @@ class AC():
         v_ = self.critic(np.array([s_]))
         with tf.GradientTape() as tape:
             v = self.critic(np.array([s]))
-            ## TD_error = r + lambd * V(newS) - V(S)
-            td_error = r + self.GAMMA * v_ - v
+            td_error = r + self.GAMMA * v_ - v  # TD_error = r + lambd * V(newS) - V(S)
             loss = tf.square(td_error)
         grad = tape.gradient(loss, self.critic.trainable_weights)
         self.c_optimizer.apply_gradients(zip(grad, self.critic.trainable_weights))

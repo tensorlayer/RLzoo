@@ -93,17 +93,14 @@ class PG:
         """
         # discount and normalize episode reward
         s, a, r = zip(*self.buffer)
-        s, a, r = np.array(s), np.array(a, np.int).flatten(), np.array(r).flatten()
+        s, a, r = np.array(s), np.array(a, np.int), np.array(r).flatten()
         discounted_ep_rs_norm = self._discount_and_norm_rewards(r, gamma)
 
         with tf.GradientTape() as tape:
             _logits = self.model(np.vstack(s))
             # to maximize total reward (log_p * R) is to minimize -(log_p * R), and the tf only have minimize(loss)\
-            aa = np.array(a, np.int).flatten()
-            # neg_log_prob = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=_logits,
-            #                                                               labels=aa)
             self.model.policy_dist.set_param(_logits)
-            neg_log_prob = self.model.policy_dist.neglogp(aa)
+            neg_log_prob = self.model.policy_dist.neglogp(a)
             loss = tf.reduce_mean(neg_log_prob * discounted_ep_rs_norm)  # reward guided loss
 
         grad = tape.gradient(loss, self.model.trainable_weights)
@@ -180,6 +177,7 @@ class PG:
                         env.render()
 
                     action = self.choose_action(observation)
+                    print(action)
 
                     observation_, reward, done, info = env.step(action)
 

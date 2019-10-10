@@ -75,7 +75,7 @@ def _make_env(env_id, env_type, seed, reward_shaping, frame_stack, **kwargs):
         env = ClipRewardEnv(env)
         if frame_stack:
             env = FrameStack(env, 4)
-    elif env_type in ['classic_control', 'box2d', 'mujuco']:
+    elif env_type in ['classic_control', 'box2d', 'mujoco']:
         env = gym.make(env_id)
         max_episode_steps = kwargs.get('max_episode_steps')
         if max_episode_steps is not None:

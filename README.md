@@ -44,7 +44,16 @@ Currently the repository is still in development, and there may be some envrionm
 |TD3|Discrete/Continuous |Pendulum|[Addressing function approximation error in actor-critic methods. Fujimoto et al. 2018.](https://arxiv.org/pdf/1802.09477.pdf)|
 |Soft Actor-Critic (SAC)|Discrete/Continuous |Pendulum|[Soft actor-critic algorithms and applications. Haarnoja et al. 2018.](https://arxiv.org/abs/1812.05905)|
 
-### Applications:
+### List of Supported Environments:
+
+*  [**OpenAI Gym**](https://gym.openai.com/): full list of environments is [here](https://gym.openai.com/envs/#classic_control); list of Atari, Box2D and Classic control with types of spaces is [here](https://github.com/openai/gym/wiki/Table-of-environments).
+  * Atari
+  * Box2D
+  * Classic control
+  * MuJoCo
+  * Robotics
+* [**DeepMind Control Suite**](https://github.com/deepmind/dm_control) 
+* [**RLBench**](https://github.com/stepjam/RLBench)
 
 ## Prerequisites:
 
