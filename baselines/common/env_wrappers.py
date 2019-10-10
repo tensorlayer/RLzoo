@@ -12,6 +12,7 @@ import numpy as np
 import cv2
 import gym
 from gym import spaces
+from gym.wrappers import FlattenDictWrapper
 
 __all__ = (
     'build_env',  # build env
@@ -24,7 +25,7 @@ __all__ = (
     'WarpFrame',  # warp observation wrapper
     'FrameStack',  # stack frame wrapper
     'LazyFrames',  # lazy store wrapper
-    'RewardScaler',  # reward scale
+    'RewardShaping',  # reward shaping
     'SubprocVecEnv',  # vectorized env wrapper
     'VecFrameStack',  # stack frames in vectorized env
     'Monitor',  # Episode reward and length monitor
@@ -33,20 +34,32 @@ __all__ = (
 cv2.ocl.setUseOpenCL(False)
 
 
-def build_env(env_id, env_type,
-              vectorized=False, seed=0, reward_scale=1.0, nenv=0):
-    """Build env based on options"""
+def build_env(env_id, env_type, vectorized=False,
+              seed=0, reward_shaping=None, nenv=0, **kwargs):
+    """Build env based on options
+    Args:
+        env_id (str): environment id
+        env_type (str): atari, classic_control, box2d
+        vectorized (bool): whether sampling parrallel
+        seed (int): random seed for env
+        reward_shaping (callable): callable function for reward shaping
+        nenv (int): how many processes will be used in sampling
+        kwargs (dict):
+            max_episode_steps (int): the maximum episode steps
+    """
     nenv = nenv or cpu_count() // (1 + (platform == 'darwin'))
     stack = env_type == 'atari'
     if not vectorized:
-        env = _make_env(env_id, env_type, seed, reward_scale, stack)
+        env = _make_env(env_id, env_type, seed,
+                        reward_shaping, stack, **kwargs)
     else:
-        env = _make_vec_env(env_id, env_type, nenv, seed, reward_scale, stack)
+        env = _make_vec_env(env_id, env_type, nenv, seed,
+                            reward_shaping, stack, **kwargs)
 
     return env
 
 
-def _make_env(env_id, env_type, seed, reward_scale, frame_stack=True):
+def _make_env(env_id, env_type, seed, reward_shaping, frame_stack, **kwargs):
     """Make single env"""
     if env_type == 'atari':
         env = gym.make(env_id)
@@ -62,19 +75,34 @@ def _make_env(env_id, env_type, seed, reward_scale, frame_stack=True):
         env = ClipRewardEnv(env)
         if frame_stack:
             env = FrameStack(env, 4)
-    elif env_type == 'classic_control':
-        env = Monitor(gym.make(env_id))
+    elif env_type in ['classic_control', 'box2d', 'mujuco']:
+        env = gym.make(env_id)
+        max_episode_steps = kwargs.get('max_episode_steps')
+        if max_episode_steps is not None:
+            env = TimeLimit(env.unwrapped, max_episode_steps)
+        env = Monitor(env)
+    elif env_type == 'robotics':
+        env = gym.make(env_id)
+        env = FlattenDictWrapper(env, ['observation', 'desired_goal'])
+        env = Monitor(env, info_keywords=('is_success',))
     else:
         raise NotImplementedError
-    if reward_scale != 1:
-        env = RewardScaler(env, reward_scale)
+
+    if reward_shaping is not None:
+        if callable(reward_shaping):
+            env = RewardShaping(env, reward_shaping)
+        else:
+            raise ValueError('reward_shaping parameter must be callable')
     env.seed(seed)
     return env
 
 
-def _make_vec_env(env_id, env_type, nenv, seed, reward_scale, frame_stack=True):
+def _make_vec_env(env_id, env_type, nenv, seed,
+                  reward_shaping, frame_stack, **kwargs):
     """Make vectorized env"""
-    env = SubprocVecEnv([partial(_make_env, env_id, env_type, seed + i, reward_scale, False) for i in range(nenv)])
+    env = SubprocVecEnv([partial(
+        _make_env, env_id, env_type, seed + i, reward_shaping, False, **kwargs
+    ) for i in range(nenv)])
     if frame_stack:
         env = VecFrameStack(env, 4)
     return env
@@ -316,17 +344,17 @@ class LazyFrames(object):
         return self._force()[i]
 
 
-class RewardScaler(gym.RewardWrapper):
-    """Bring rewards to a reasonable scale for PPO.
-    This is incredibly important and effects performance drastically.
+class RewardShaping(gym.RewardWrapper):
+    """Shaping the reward
+    For reward scale, func can be `lambda r: r * scale`
     """
 
-    def __init__(self, env, scale=0.01):
-        super(RewardScaler, self).__init__(env)
-        self.scale = scale
+    def __init__(self, env, func):
+        super(RewardShaping, self).__init__(env)
+        self.func = func
 
     def reward(self, reward):
-        return reward * self.scale
+        return self.func(reward)
 
 
 class VecFrameStack(object):
@@ -495,9 +523,10 @@ class SubprocVecEnv(object):
 
 class Monitor(gym.Wrapper):
 
-    def __init__(self, env):
+    def __init__(self, env, info_keywords=None):
         super(Monitor, self).__init__(env)
         self._monitor_rewards = None
+        self._info_keywords = info_keywords or []
 
     def reset(self, **kwargs):
         self._monitor_rewards = []
@@ -507,7 +536,12 @@ class Monitor(gym.Wrapper):
         o_, r, done, info = self.env.step(action)
         self._monitor_rewards.append(r)
         if done:
-            info['episode'] = {'r': sum(self._monitor_rewards), 'l': len(self._monitor_rewards)}
+            info['episode'] = {
+                'r': sum(self._monitor_rewards),
+                'l': len(self._monitor_rewards)
+            }
+            for keyword in self._info_keywords:
+                info['episode'][keyword] = info[keyword]
         return o_, r, done, info
 
 
@@ -530,32 +564,3 @@ class NormalizedActions(gym.ActionWrapper):
         action = np.clip(action, low, high)
 
         return action
-
-
-def unit_test():
-    env_id = 'CartPole-v0'
-    unwrapped_env = gym.make(env_id)
-    wrapped_env = build_env(env_id, 'classic_control', False)
-    o = wrapped_env.reset()
-    print('Reset {} observation shape {}'.format(env_id, o.shape))
-    done = False
-    while not done:
-        a = unwrapped_env.action_space.sample()
-        o_, r, done, info = wrapped_env.step(a)
-        print('Take action {} get reward {} info {}'.format(a, r, info))
-
-    env_id = 'PongNoFrameskip-v4'
-    nenv = 2
-    unwrapped_env = gym.make(env_id)
-    wrapped_env = build_env(env_id, 'atari', True, nenv=nenv)
-    o = wrapped_env.reset()
-    print('Reset {} observation shape {}'.format(env_id, o.shape))
-    for _ in range(1000):
-        a = [unwrapped_env.action_space.sample() for _ in range(nenv)]
-        a = np.asarray(a, 'int64')
-        o_, r, done, info = wrapped_env.step(a)
-        print('Take action {} get reward {} info {}'.format(a, r, info))
-
-
-if __name__ == '__main__':
-    unit_test()
