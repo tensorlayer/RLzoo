@@ -132,7 +132,6 @@ class DiagGaussian(Distribution):
         return -self.neglogp(x)
 
     def neglogp(self, x):
-        print(x.shape, self.logstd.shape)
         return 0.5 * tf.reduce_sum(
             tf.square((x - self.mean) / self.std), axis=-1) \
             + 0.5 * np.log(2.0 * np.pi) * float(self._ndim) \

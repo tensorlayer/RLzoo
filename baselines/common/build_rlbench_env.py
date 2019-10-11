@@ -55,6 +55,10 @@ class RLBenchEnv():
         # set seed as in openai.gym env
         pass 
 
+    def render(self):
+        # render the scene
+        pass
+
     def reset(self):
         descriptions, obs = self.task.reset()
         return getattr(obs, self.state_type)

@@ -60,11 +60,12 @@ tl.logging.set_verbosity(tl.logging.DEBUG)
 
 ###############################  Actor-Critic  ####################################
 class AC():
-    def __init__(self, net_list, optimizers_list, state_dim, action_dim, gamma=0.9):
+    def __init__(self, net_list, optimizers_list, state_dim, action_dim, action_range, gamma=0.9):
         [self.actor, self.critic] = net_list
         [self.a_optimizer, self.c_optimizer] = optimizers_list
         self.GAMMA = gamma
         self.state_dim = state_dim
+        self.action_range = action_range
 
     def update(self, s, a, r, s_):
         s=s.astype(np.float32)
@@ -98,7 +99,7 @@ class AC():
         # _probs = tf.nn.softmax(_logits).numpy() # deprecated!
         # return tl.rein.choice_action_by_probs(_probs.ravel())  # sample according to probability distribution
         policy_dist=self.actor.policy_dist.set_param(_logits)
-        return policy_dist.sample().numpy()[0]
+        return self.action_range*policy_dist.sample().numpy()[0]
 
     def choose_action_greedy(self, s):
         s=s.astype(np.float32)
@@ -106,7 +107,7 @@ class AC():
         # _probs = tf.nn.softmax(_logits).numpy() # deprecated!
         # return np.argmax(_probs.ravel())
         policy_dist=self.actor.policy_dist.set_param(_logits)
-        return policy_dist.greedy_sample().numpy()[0]
+        return self.action_range*policy_dist.greedy_sample().numpy()[0]
 
     def save_ckpt(self):  # save trained weights
         save_model(self.actor, 'model_actor', 'AC')
@@ -153,7 +154,7 @@ class AC():
                     s_new, r, done, info = env.step(a)
                     s_new = s_new
 
-                    if done: r = -20
+                    # if done: r = -20  # for cartpole env
 
                     all_r.append(r)
 
@@ -179,21 +180,21 @@ class AC():
                         .format(i_episode, train_episodes, ep_rs_sum, time.time()-t0 ))
 
                         # Early Stopping for quick check
-                        if t >= max_steps:
-                            print("Early Stopping")
-                            s = env.reset().astype(np.float32)
-                            rall = 0
-                            while True:
-                                env.render()
-                                # a = actor.choose_action(s)
-                                a = self.choose_action_greedy(s)  # Hao Dong: it is important for this task
-                                s_new, r, done, info = env.step(a)
-                                s_new = np.concatenate((s_new[0:self.state_dim], s[self.state_dim:]), axis=0).astype(np.float32)
-                                rall += r
-                                s = s_new
-                                if done:
-                                    s = env.reset().astype(np.float32)
-                                    rall = 0
+                        # if t >= max_steps:
+                        #     print("Early Stopping")
+                        #     s = env.reset().astype(np.float32)
+                        #     rall = 0
+                        #     while True:
+                        #         env.render()
+                        #         # a = actor.choose_action(s)
+                        #         a = self.choose_action_greedy(s)  # Hao Dong: it is important for this task
+                        #         s_new, r, done, info = env.step(a)
+                        #         s_new = np.concatenate((s_new[0:self.state_dim], s[self.state_dim:]), axis=0).astype(np.float32)
+                        #         rall += r
+                        #         s = s_new
+                        #         if done:
+                        #             s = env.reset().astype(np.float32)
+                        #             rall = 0
                         break
 
                     

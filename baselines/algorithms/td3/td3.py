@@ -97,9 +97,13 @@ class TD3():
         '''
         state = state.astype(np.float32)
         if target:
-            action = self.target_policy_net(state)
+            outputs = self.target_policy_net(state)
+            policy_dist=self.target_policy_net.policy_dist.set_param(outputs)
+            action = policy_dist.sample(deterministic=True)
         else:
-            action = self.policy_net(state)
+            outputs = self.policy_net(state)
+            policy_dist=self.policy_net.policy_dist.set_param(outputs)
+            action = policy_dist.sample(deterministic=True)
         action = self.action_range * action
         # add noise
         normal = Normal(0, 1)
@@ -112,7 +116,9 @@ class TD3():
 
     def get_action(self, state, explore_noise_scale):
         ''' generate action with state for interaction with envronment '''
-        action = self.policy_net(np.array([state]))
+        outputs = self.policy_net(np.array([state]))
+        policy_dist=self.policy_net.policy_dist.set_param(outputs)
+        action = policy_dist.sample(deterministic=True)
         action = action.numpy()[0]
 
         # add noise
