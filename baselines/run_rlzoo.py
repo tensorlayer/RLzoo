@@ -28,24 +28,24 @@ from algorithms import *
 # EnvName = 'Ant-v2'  # mujoco
 # EnvName = 'FetchReach-v1'  # robotics
 # EnvName = 'BipedalWalker-v2'  # box2d
-EnvName = 'CartPole-v1'  # classic_control
-EnvType = ['classic_control', 'atari', 'box2d', 'mujoco', 'robotics', 'dm_control'][0]
-
-env = build_env(EnvName, EnvType)
-alg_params, learn_params = call_default_params(env, EnvType, 'PG')
-alg = PG(**alg_params)
-alg.learn(env=env, train_episodes=1000, test_episodes=1000, 
-        save_interval=100, mode='train', render=False, **learn_params)
-
-
-# EnvName = 'Pendulum-v0'
-# EnvType = ['classic_control', 'atari', 'box2d', 'mujoco', 'dm_control'][0]
+# EnvName = 'CartPole-v1'  # classic_control
+# EnvType = ['classic_control', 'atari', 'box2d', 'mujoco', 'robotics', 'dm_control'][0]
 
 # env = build_env(EnvName, EnvType)
-# alg_params, learn_params = call_default_params(env, EnvType, 'SAC')
-# alg = SAC(**alg_params)
+# alg_params, learn_params = call_default_params(env, EnvType, 'PG')
+# alg = PG(**alg_params)
 # alg.learn(env=env, train_episodes=1000, test_episodes=1000, 
 #         save_interval=100, mode='train', render=False, **learn_params)
+
+
+EnvName = 'ToiletSeatUp'
+EnvType = ['atari', 'box2d', 'classic_control', 'mujoco', 'robotics', 'dm_control', 'rlbench'][-1]
+
+env = build_env(EnvName, EnvType)
+alg_params, learn_params = call_default_params(env, EnvType, 'SAC')
+alg = SAC(**alg_params)
+alg.learn(env=env, train_episodes=1000, test_episodes=1000, 
+        save_interval=100, mode='train', render=False, **learn_params)
 
 
 # EnvName = 'Pendulum-v0'
