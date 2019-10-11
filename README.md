@@ -58,7 +58,6 @@ Currently the repository is still in development, and there may be some envrionm
 ** Make sure the name of environment matches the type of environment. The types of environments include: 'atari', 'box2d', 'classic_control', 'mujoco', 'robotics', 'dm_control', 'rlbench'.
 
 ** When using the RLBench environments, please add the path of your local rlbench repository to python: 
-
 ```export PYTHONPATH=PATH_TO_YOUR_LOCAL_RLBENCH_REPO```
 
 ## Prerequisites:
