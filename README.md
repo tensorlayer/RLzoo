@@ -53,9 +53,13 @@ Currently the repository is still in development, and there may be some envrionm
     * MuJoCo
     * Robotics
 *  [**DeepMind Control Suite**](https://github.com/deepmind/dm_control) 
-*  [**RLBench**](https://github.com/stepjam/RLBench): full list of environments is [here](https://github.com/stepjam/RLBench/blob/master/rlbench/tasks/__init__.py).
+*  [**RLBench**](https://github.com/stepjam/RLBench): full list of environments is [here](https://github.com/stepjam/RLBench/blob/master/rlbench/tasks/__init__.py). Installation of Vrep->PyRep->RLBench follows [here](http://www.coppeliarobotics.com/downloads.html)->[here](https://github.com/stepjam/PyRep)->[here](https://github.com/stepjam/RLBench).
 
 ** Make sure the name of environment matches the type of environment. The types of environments include: 'atari', 'box2d', 'classic_control', 'mujoco', 'robotics', 'dm_control', 'rlbench'.
+
+** When using the RLBench environments, please add the path of your local rlbench repository to python: 
+
+```export PYTHONPATH=PATH_TO_YOUR_LOCAL_RLBENCH_REPO```
 
 ## Prerequisites:
 
@@ -169,6 +173,8 @@ python algorithms/ac/run_ac.py
 
 * If you meet the error`AttributeError: module 'tensorflow' has no attribute 'contrib'` when running the code after installing tensorflow-probability, try:
 `pip install --upgrade tf-nightly-2.0-preview tfp-nightly`
+
+* When trying to use RLBench environments, `No module named rlbench` can be caused by no RLBench package installed at your local or a mistake of adding python path. You should add `export PYTHONPATH=/home/quantumiracle/research/vrep/PyRep/RLBench` every time you try to run the learning script with RLBench environment or add it to you `~/.bashrc` file once for all.
 
 ## Citing:
 
