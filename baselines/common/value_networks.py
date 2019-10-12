@@ -53,16 +53,6 @@ class ValueNetwork(Model):
         else:
             self.eval()    
 
-class CnnBackbone(Model):
-    def __init__(self, state_shape, conv_kwargs=None ):
-        """ CNN feature extractor for high-dimensional state """
-        inputs, outputs = CNN(state_shape, conv_kwargs)
-        super().__init__(inputs=inputs, outputs=outputs)
-        if trainable:
-            self.train()
-        else:
-            self.eval()
-
 class MlpQNetwork(Model):
     def __init__(self, state_shape, action_shape, hidden_dim_list, \
         w_init=tf.keras.initializers.glorot_normal(), activation = tf.nn.relu, output_activation = None, trainable = True):
@@ -86,7 +76,6 @@ class MlpQNetwork(Model):
         assert len(state_shape)==1
         with tf.name_scope('MLP'):
             inputs, l = MLP(input_dim, hidden_dim_list, w_init, activation)
-        # need to handle image state with action for q here, cnn for state first
 
         with tf.name_scope('Output'):
             outputs = Dense(n_units=1, act=output_activation, W_init=w_init)(l)
@@ -104,8 +93,6 @@ class QNetwork(Model):
         w_init=tf.keras.initializers.glorot_normal(), activation = tf.nn.relu, output_activation = None, trainable = True):
         """ Q-value network with multiple fully-connected layers or convolutional layers (according to state shape)
 
-        Inputs: (state tensor, action tensor)
-
         Args:
             state_shape (tuple[int]): shape of the state, for example, (state_dim, ) for single-dimensional state
             action_shape (tuple[int]): shape of the action, for example, (action_dim, ) for single-dimensional action
@@ -115,30 +102,42 @@ class QNetwork(Model):
             output_activation (callable or None): output activation function
             trainable (bool): set training and evaluation mode
         """
-        self.name = 'Q_Network'
+        super(QNetwork, self).__init__()
         if len(state_shape) == 1:
             input_shape = tuple(map(sum,zip(action_shape,state_shape)))
             input_dim = input_shape[0]
-            self.mlp = MLP(input_dim, hidden_dim_list, w_init, activation)
+            self.mlp = MLPModel(input_dim, hidden_dim_list, w_init, activation)
+            self.output = Dense(n_units=1, act=output_activation, W_init=w_init, in_channels=hidden_dim_list[-1])
         elif len(state_shape) >1:
-            self.cnn = CNN(state_shape, conv_kwargs=None)
+            self.cnn = CNNModel(state_shape, conv_kwargs=None)
+            self.output = Dense(n_units=1, act=output_activation, W_init=w_init, in_channels=9224)  # 9216+8
         else:
             raise ValueError("State Shape Not Accepted!")
-
+        
         assert len(action_shape) == 1
+        self.state_shape = state_shape
+        self.output_activation = output_activation
+        self.w_init = w_init
 
-    def forward(self, s, a):
-        if self.state_shape == 1:
+        if trainable:
+            self.train()
+        else:
+            self.eval()  
+  
+
+    def forward(self, inputs):
+        """ Inputs: (state tensor, action tensor) """
+        [s,a] = inputs
+        if len(self.state_shape) == 1:
             with tf.name_scope('MLP'):
                 sa=tf.concat([s,a],axis=-1)
-                _, l = self.mlp(sa)
+                l = self.mlp(sa)
 
         else:  # high-dimensional state
             with tf.name_scope('CNN'):
-                _, l = self.cnn(s)  # extracted state feature
-            l=tf.concat([l, a], axis=-1)
+                l = self.cnn(s)  # extracted state feature
+            l = tf.concat([l, a], axis=-1)
 
         with tf.name_scope('Output'):
-            outputs = Dense(n_units=1, act=output_activation, W_init=w_init)(l)
-
+            outputs = self.output(l)
         return outputs

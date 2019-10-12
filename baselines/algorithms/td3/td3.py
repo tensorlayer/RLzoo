@@ -163,20 +163,18 @@ class TD3():
                                  np.mean(reward, axis=0)) / (np.std(reward, axis=0)+1e-6)  # normalize with batch mean and std; plus a small number to prevent numerical problem
 
         # Training Q Function
-        target_q_input = tf.concat([next_state, new_next_action], 1)  # the dim 0 is number of samples
-        target_q_min = tf.minimum(self.target_q_net1(target_q_input), self.target_q_net2(target_q_input))
+        target_q_min = tf.minimum(self.target_q_net1([next_state, new_next_action]), self.target_q_net2([next_state, new_next_action]))
 
         target_q_value = reward + (1 - done) * gamma * target_q_min  # if done==1, only reward
-        q_input = tf.concat([state, action], 1)  # input of q_net
 
         with tf.GradientTape() as q1_tape:
-            predicted_q_value1 = self.q_net1(q_input)
+            predicted_q_value1 = self.q_net1([state, action])
             q_value_loss1 = tf.reduce_mean(tf.square(predicted_q_value1 - target_q_value))
         q1_grad = q1_tape.gradient(q_value_loss1, self.q_net1.trainable_weights)
         self.q_optimizer1.apply_gradients(zip(q1_grad, self.q_net1.trainable_weights))
 
         with tf.GradientTape() as q2_tape:
-            predicted_q_value2 = self.q_net2(q_input)
+            predicted_q_value2 = self.q_net2([state, action])
             q_value_loss2 = tf.reduce_mean(tf.square(predicted_q_value2 - target_q_value))
         q2_grad = q2_tape.gradient(q_value_loss2, self.q_net2.trainable_weights)
         self.q_optimizer2.apply_gradients(zip(q2_grad, self.q_net2.trainable_weights))
@@ -187,11 +185,10 @@ class TD3():
                 new_action = self.evaluate(
                     state, eval_noise_scale=0.0, target=False
                 )  # no noise, deterministic policy gradients
-                new_q_input = tf.concat([state, new_action], 1)
                 # ''' implementation 1 '''
-                # predicted_new_q_value = tf.minimum(self.q_net1(new_q_input),self.q_net2(new_q_input))
+                # predicted_new_q_value = tf.minimum(self.q_net1([state, new_action]),self.q_net2([state, new_action]))
                 ''' implementation 2 '''
-                predicted_new_q_value = self.q_net1(new_q_input)
+                predicted_new_q_value = self.q_net1([state, new_action])
                 policy_loss = -tf.reduce_mean(predicted_new_q_value)
             p_grad = p_tape.gradient(policy_loss, self.policy_net.trainable_weights)
             self.policy_optimizer.apply_gradients(zip(p_grad, self.policy_net.trainable_weights))

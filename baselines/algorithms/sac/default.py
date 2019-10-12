@@ -25,13 +25,13 @@ def atari(env):
         hidden_dim=64 # dimension of hidden layers for the networks, default as the same for each layer here
         with tf.name_scope('SAC'):
             with tf.name_scope('Q_Net1'):
-                soft_q_net1 = MlpQNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
+                soft_q_net1 = QNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
             with tf.name_scope('Q_Net2'):
-                soft_q_net2 = MlpQNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
+                soft_q_net2 = QNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
             with tf.name_scope('Target_Q_Net1'):
-                target_soft_q_net1 = MlpQNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
+                target_soft_q_net1 = QNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
             with tf.name_scope('Target_Q_Net2'):
-                target_soft_q_net2 = MlpQNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
+                target_soft_q_net2 = QNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
             with tf.name_scope('Policy'):
                 policy_net = StochasticPolicyNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
         net_list = [soft_q_net1, soft_q_net2, target_soft_q_net1, target_soft_q_net2, policy_net]
@@ -76,13 +76,13 @@ def classic_control(env):
         hidden_dim=64 # dimension of hidden layers for the networks, default as the same for each layer here
         with tf.name_scope('SAC'):
             with tf.name_scope('Q_Net1'):
-                soft_q_net1 = MlpQNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
+                soft_q_net1 = QNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
             with tf.name_scope('Q_Net2'):
-                soft_q_net2 = MlpQNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
+                soft_q_net2 = QNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
             with tf.name_scope('Target_Q_Net1'):
-                target_soft_q_net1 = MlpQNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
+                target_soft_q_net1 = QNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
             with tf.name_scope('Target_Q_Net2'):
-                target_soft_q_net2 = MlpQNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
+                target_soft_q_net2 = QNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
             with tf.name_scope('Policy'):
                 policy_net = StochasticPolicyNetwork(env.observation_space, env.action_space, hidden_dim_list=num_hidden_layer*[hidden_dim])
         net_list = [soft_q_net1, soft_q_net2, target_soft_q_net1, target_soft_q_net2, policy_net]
@@ -137,6 +137,10 @@ def rlbench(env):
             with tf.name_scope('Policy'):
                 policy_net = StochasticPolicyNetwork(env.observation_space, env.action_space, hidden_dim_list=num_hidden_layer*[hidden_dim])
         net_list = [soft_q_net1, soft_q_net2, target_soft_q_net1, target_soft_q_net2, policy_net]
+        # soft_q_net1.train()
+        # soft_q_net2.train()
+        # target_soft_q_net1.train()
+        # target_soft_q_net2.train()
         alg_params['net_list'] = net_list
     if alg_params.get('optimizers_list') is None:
         soft_q_lr, policy_lr, alpha_lr = 3e-4, 3e-4, 3e-4  # soft_q_lr: learning rate of the Q network; policy_lr: learning rate of the policy network; alpha_lr: learning rate of the variable alpha
