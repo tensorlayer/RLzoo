@@ -40,9 +40,9 @@ Currently the repository is still in development, and there may be some envrionm
 |**actor-critic**||||
 |Actor-Critic (AC)|Discrete/Continuous|CartPole| [Actor-critic algorithms. Konda er al. 2000.](https://papers.nips.cc/paper/1786-actor-critic-algorithms.pdf)|
 | Asynchronous Advantage Actor-Critic (A3C)| Discrete/Continuous | BipedalWalker| [Asynchronous methods for deep reinforcement learning. Mnih et al. 2016.](https://arxiv.org/pdf/1602.01783.pdf) |
-| DDPG|Discrete/Continuous |Pendulum| [Continuous Control With Deep Reinforcement Learning, Lillicrap et al. 2016](https://arxiv.org/pdf/1509.02971.pdf) |
-|TD3|Discrete/Continuous |Pendulum|[Addressing function approximation error in actor-critic methods. Fujimoto et al. 2018.](https://arxiv.org/pdf/1802.09477.pdf)|
-|Soft Actor-Critic (SAC)|Discrete/Continuous |Pendulum|[Soft actor-critic algorithms and applications. Haarnoja et al. 2018.](https://arxiv.org/abs/1812.05905)|
+| DDPG|Continuous |Pendulum| [Continuous Control With Deep Reinforcement Learning, Lillicrap et al. 2016](https://arxiv.org/pdf/1509.02971.pdf) |
+|TD3|Continuous |Pendulum|[Addressing function approximation error in actor-critic methods. Fujimoto et al. 2018.](https://arxiv.org/pdf/1802.09477.pdf)|
+|Soft Actor-Critic (SAC)|Continuous |Pendulum|[Soft actor-critic algorithms and applications. Haarnoja et al. 2018.](https://arxiv.org/abs/1812.05905)|
 
 ### Environments:
 
