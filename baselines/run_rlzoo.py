@@ -17,7 +17,7 @@ from algorithms import *
 # EnvName = 'Ant-v2' 
 # EnvName = 'CartPole-v0'  # classic_control, ac cannot learn cartpole-v1
 # EnvType = ['classic_control', 'atari', 'box2d', 'mujoco', 'robotics', 'dm_control'][0]
-EnvName = 'ToiletSeatUp'
+EnvName = 'ReachTarget'
 EnvType = ['atari', 'box2d', 'classic_control', 'mujoco', 'robotics', 'dm_control', 'rlbench'][-1]
 
 env = build_env(EnvName, EnvType)

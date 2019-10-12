@@ -6,7 +6,6 @@ from collections import deque
 from functools import partial
 from multiprocessing import Pipe, Process, cpu_count
 from sys import platform
-from common.build_rlbench_env import RLBenchEnv
 
 import numpy as np
 
@@ -87,6 +86,7 @@ def _make_env(env_id, env_type, seed, reward_shaping, frame_stack, **kwargs):
         env = FlattenDictWrapper(env, ['observation', 'desired_goal'])
         env = Monitor(env, info_keywords=('is_success',))
     elif env_type == 'rlbench':
+        from common.build_rlbench_env import RLBenchEnv
         env  = RLBenchEnv(env_id)
     else:
         raise NotImplementedError

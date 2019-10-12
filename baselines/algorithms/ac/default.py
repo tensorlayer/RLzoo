@@ -45,16 +45,18 @@ def classic_control(env):
     state_shape = env.observation_space.shape
     if isinstance(env.action_space, spaces.Discrete):
         action_shape = (env.action_space.n,)
+        action_range = 1  # int
     elif isinstance(env.action_space, spaces.Box):
         assert len(env.action_space.shape) == 1
         action_shape = env.action_space.shape
+        action_range = 1.  # float
     else:
         raise NotImplementedError
 
     alg_params = dict(
         state_dim = state_shape[0],
         action_dim = action_shape[0],
-        action_range = 1.,
+        action_range = action_range,
         gamma = 0.9,
     )
     if alg_params.get('net_list') is None:
@@ -86,16 +88,18 @@ def box2d(env):
     state_shape = env.observation_space.shape
     if isinstance(env.action_space, spaces.Discrete):
         action_shape = (env.action_space.n,)
+        action_range = 1  # int
     elif isinstance(env.action_space, spaces.Box):
         assert len(env.action_space.shape) == 1
         action_shape = env.action_space.shape
+        action_range = 1.  # float
     else:
         raise NotImplementedError
 
     alg_params = dict(
         state_dim = state_shape[0],
         action_dim = action_shape[0],
-        action_range = 1.,
+        action_range = action_range,
         gamma = 0.9,
     )
     if alg_params.get('net_list') is None:
@@ -127,16 +131,18 @@ def mujoco(env):
     state_shape = env.observation_space.shape
     if isinstance(env.action_space, spaces.Discrete):
         action_shape = (env.action_space.n,)
+        action_range = 1  # int
     elif isinstance(env.action_space, spaces.Box):
         assert len(env.action_space.shape) == 1
         action_shape = env.action_space.shape
+        action_range = 1.  # float
     else:
         raise NotImplementedError
 
     alg_params = dict(
         state_dim = state_shape[0],
         action_dim = action_shape[0],
-        action_range = 1.,
+        action_range = action_range,
         gamma = 0.9,
     )
     if alg_params.get('net_list') is None:
@@ -168,16 +174,18 @@ def robotics(env):
     state_shape = env.observation_space.shape
     if isinstance(env.action_space, spaces.Discrete):
         action_shape = (env.action_space.n,)
+        action_range = 1  # int
     elif isinstance(env.action_space, spaces.Box):
         assert len(env.action_space.shape) == 1
         action_shape = env.action_space.shape
+        action_range = 1.  # float
     else:
         raise NotImplementedError
 
     alg_params = dict(
         state_dim = state_shape[0],
         action_dim = action_shape[0],
-        action_range = 1.,
+        action_range = action_range,
         gamma = 0.9,
     )
     if alg_params.get('net_list') is None:

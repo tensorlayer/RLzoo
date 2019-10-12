@@ -62,8 +62,8 @@ class PG:
         _logits = self.model(np.array([s], np.float32))
         # _probs = tf.nn.softmax(_logits).numpy() # deprecated!
         # return tl.rein.choice_action_by_probs(_probs.ravel())
-        self.model.policy_dist.set_param(_logits)
-        return self.action_range * self.model.policy_dist.sample().numpy()[0]
+        policy_dist = self.model.policy_dist.set_param(_logits)
+        return self.action_range * policy_dist.sample().numpy()[0]
 
     def choose_action_greedy(self, s):
         """
@@ -74,8 +74,8 @@ class PG:
         # _probs = tf.nn.softmax(self.model(np.array([s], np.float32))).numpy()  # deprecated!
         # return np.argmax(_probs.ravel())
         _logits = self.model(np.array([s], np.float32))
-        self.model.policy_dist.set_param(_logits)
-        return self.action_range * self.model.policy_dist.greedy_sample().numpy()[0]
+        policy_dist = self.model.policy_dist.set_param(_logits)
+        return self.action_range * policy_dist.greedy_sample().numpy()[0]
 
     def store_transition(self, s, a, r):
         """
@@ -178,7 +178,6 @@ class PG:
                         env.render()
 
                     action = self.choose_action(observation)
-
                     observation_, reward, done, info = env.step(action)
 
                     shaped_reward = reward_shaping(reward) if reward_shaping else reward
