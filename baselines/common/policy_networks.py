@@ -42,8 +42,13 @@ class StochasticContinuousPolicyNetwork(Model):
 
         action_dim = action_shape[0]
         state_dim = state_shape[0]  # need modification for cnn
-        with tf.name_scope('MLP'):
-            inputs, l = MLP(state_dim, hidden_dim_list, w_init, activation)
+        if len(state_shape)==1:
+            with tf.name_scope('MLP'):
+                state_dim = state_shape[0]
+                inputs, l = MLP(state_dim, hidden_dim_list, w_init, activation)
+        else:
+            with tf.name_scope('CNN'):
+                inputs, l = CNN(state_shape, conv_kwargs=None)
         with tf.name_scope('Output_Mean'):
             mean_linear = Dense(n_units=action_dim, act=output_activation, W_init=w_init)(l)
         with tf.name_scope('Output_Std'):
@@ -72,9 +77,15 @@ class DeterministicContinuousPolicyNetwork(Model):
         """
 
         action_dim = action_shape[0]
-        state_dim = state_shape[0]
-        with tf.name_scope('MLP'):
-            inputs, l = MLP(state_dim, hidden_dim_list, w_init, activation)
+
+        if len(state_shape)==1:
+            with tf.name_scope('MLP'):
+                state_dim = state_shape[0]
+                inputs, l = MLP(state_dim, hidden_dim_list, w_init, activation)
+        else:
+            with tf.name_scope('CNN'):
+                inputs, l = CNN(state_shape, conv_kwargs=None)
+
         with tf.name_scope('Output'):
             outputs = Dense(n_units=action_dim, act=output_activation, W_init=w_init)(l)
 
@@ -101,9 +112,15 @@ class DeterministicPolicyNetwork(Model):
         self.policy_dist = make_dist(action_space)
 
         state_shape = state_space.shape
-        state_dim = state_shape[0]  # need modification for cnn
-        with tf.name_scope('MLP'):
-            inputs, l = MLP(state_dim, hidden_dim_list, w_init, activation)
+
+        if len(state_shape)==1:
+            with tf.name_scope('MLP'):
+                state_dim = state_shape[0]
+                inputs, l = MLP(state_dim, hidden_dim_list, w_init, activation)
+        else:
+            with tf.name_scope('CNN'):
+                inputs, l = CNN(state_shape, conv_kwargs=None)
+
         with tf.name_scope('Output'):
             outputs = Dense(n_units=self.policy_dist.output_dim, act=output_activation, W_init=w_init)(l)
 
@@ -132,9 +149,13 @@ class StochasticPolicyNetwork(Model):
         self.policy_dist = make_dist(action_space)
 
         state_shape = state_space.shape
-        state_dim = state_shape[0]  # need modification for cnn
-        with tf.name_scope('MLP'):
-            inputs, l = MLP(state_dim, hidden_dim_list, w_init, activation)
+        if len(state_shape)==1:
+            with tf.name_scope('MLP'):
+                state_dim = state_shape[0]
+                inputs, l = MLP(state_dim, hidden_dim_list, w_init, activation)
+        else:
+            with tf.name_scope('CNN'):
+                inputs, l = CNN(state_shape, conv_kwargs=None)
 
         with tf.name_scope('Output'):
             outputs = Dense(n_units=self.policy_dist.output_dim, act=output_activation, W_init=w_init)(l)

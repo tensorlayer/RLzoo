@@ -6,11 +6,10 @@ import numpy as np
 import gym
 from gym import spaces
 import sys
-# Don't forget to add: export PYTHONPATH=/home/quantumiracle/research/vrep/PyRep/RLBench
-
+# Don't forget to add: export PYTHONPATH=PATH_TO_YOUR_LOCAL_RLBENCH_REPO
 
 # list of state types
-state_types = [  'left_shoulder_rgb',
+state_types = [ 'left_shoulder_rgb',
                 'left_shoulder_depth',
                 'left_shoulder_mask',
                 'right_shoulder_rgb',
@@ -31,7 +30,7 @@ state_types = [  'left_shoulder_rgb',
 
 class RLBenchEnv():
     """ make RLBench env to have same interfaces as openai.gym """
-    def __init__(self, task_name, state_type='task_low_dim_state'):
+    def __init__(self, task_name, state_type='left_shoulder_rgb'):
         obs_config = ObservationConfig()
         obs_config.set_all(True)
         action_mode = ActionMode(ArmActionMode.ABS_JOINT_VELOCITY)

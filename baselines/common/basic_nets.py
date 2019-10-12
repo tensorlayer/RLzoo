@@ -28,8 +28,6 @@ def MLP(input_dim, hidden_dim_list:list, w_init=tf.initializers.Orthogonal(0.2),
 
 
 
-
-
 def CNN(input_shape, conv_kwargs=None):
     """Multiple convolutional layers for approximation
     Default setting is equal to architecture used in DQN
@@ -59,13 +57,12 @@ def CNN(input_shape, conv_kwargs=None):
                 'W_init': tf.initializers.GlorotUniform()
             }
         ]
-
     l=inputs = tl.layers.Input((1, ) + input_shape, name='input_layer')
 
     for i, kwargs in enumerate(conv_kwargs):
         kwargs['name'] = kwargs.get('name', 'hidden_layer{}'.format(i + 1))
         l = tl.layers.Conv2d(**kwargs)(l)
-    outputs = l
+    outputs = tl.layers.Flatten(name='flatten_layer')(l)
 
     return inputs, outputs
 

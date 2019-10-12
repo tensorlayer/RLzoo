@@ -36,9 +36,14 @@ class MlpValueNetwork(Model):
             trainable (bool): set training and evaluation mode
         """
 
-        state_dim = state_shape[0]
-        with tf.name_scope('MLP'):
-            inputs, l = MLP(state_dim, hidden_dim_list, w_init, activation)
+        if len(state_shape)==1:
+            with tf.name_scope('MLP'):
+                state_dim = state_shape[0]
+                inputs, l = MLP(state_dim, hidden_dim_list, w_init, activation)
+        else:
+            with tf.name_scope('CNN'):
+                inputs, l = CNN(state_shape, conv_kwargs=None)
+
         with tf.name_scope('Output'):
             outputs = Dense(n_units=1, act=output_activation, W_init=w_init)(l)
 
@@ -52,7 +57,9 @@ class MlpQNetwork(Model):
     def __init__(self, state_shape, action_shape, hidden_dim_list, \
         w_init=tf.keras.initializers.glorot_normal(), activation = tf.nn.relu, output_activation = None, trainable = True):
         """ Q-value network with multiple fully-connected layers 
-        
+
+        Inputs: (state tensor, action tensor)
+
         Args:
             state_shape (tuple[int]): shape of the state, for example, (state_dim, ) for single-dimensional state
             action_shape (tuple[int]): shape of the action, for example, (action_dim, ) for single-dimensional action
@@ -65,8 +72,12 @@ class MlpQNetwork(Model):
 
         input_shape = tuple(map(sum,zip(action_shape,state_shape)))
         input_dim = input_shape[0]
+
+        assert len(state_shape)==1
         with tf.name_scope('MLP'):
             inputs, l = MLP(input_dim, hidden_dim_list, w_init, activation)
+        # need to handle image state with action for q here, cnn for state first
+
         with tf.name_scope('Output'):
             outputs = Dense(n_units=1, act=output_activation, W_init=w_init)(l)
 
