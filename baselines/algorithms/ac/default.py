@@ -21,7 +21,7 @@ def atari(env):
         hidden_dim = 64 # dimension of hidden layers for the networks
         with tf.name_scope('AC'):
             with tf.name_scope('Critic'):
-                    critic = MlpValueNetwork(state_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
+                    critic = ValueNetwork(state_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
             with tf.name_scope('Actor'):
                     actor = DeterministicPolicyNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
         net_list = [actor, critic]
@@ -64,7 +64,7 @@ def classic_control(env):
         hidden_dim = 64 # dimension of hidden layers for the networks
         with tf.name_scope('AC'):
             with tf.name_scope('Critic'):
-                    critic = MlpValueNetwork(state_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
+                    critic = ValueNetwork(state_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
             with tf.name_scope('Actor'):
                     actor = DeterministicPolicyNetwork(env.observation_space, env.action_space, hidden_dim_list=num_hidden_layer*[hidden_dim])
         net_list = [actor, critic]
@@ -107,7 +107,7 @@ def box2d(env):
         hidden_dim = 64 # dimension of hidden layers for the networks
         with tf.name_scope('AC'):
             with tf.name_scope('Critic'):
-                    critic = MlpValueNetwork(state_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
+                    critic = ValueNetwork(state_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
             with tf.name_scope('Actor'):
                     actor = DeterministicPolicyNetwork(env.observation_space, env.action_space, hidden_dim_list=num_hidden_layer*[hidden_dim])
         net_list = [actor, critic]
@@ -150,7 +150,7 @@ def mujoco(env):
         hidden_dim = 64 # dimension of hidden layers for the networks
         with tf.name_scope('AC'):
             with tf.name_scope('Critic'):
-                    critic = MlpValueNetwork(state_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
+                    critic = ValueNetwork(state_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
             with tf.name_scope('Actor'):
                     actor = DeterministicPolicyNetwork(env.observation_space, env.action_space, hidden_dim_list=num_hidden_layer*[hidden_dim])
         net_list = [actor, critic]
@@ -193,7 +193,7 @@ def robotics(env):
         hidden_dim = 64 # dimension of hidden layers for the networks
         with tf.name_scope('AC'):
             with tf.name_scope('Critic'):
-                    critic = MlpValueNetwork(state_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
+                    critic = ValueNetwork(state_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
             with tf.name_scope('Actor'):
                     actor = DeterministicPolicyNetwork(env.observation_space, env.action_space, hidden_dim_list=num_hidden_layer*[hidden_dim])
         net_list = [actor, critic]
@@ -234,7 +234,7 @@ def rlbench(env):
         hidden_dim = 64 # dimension of hidden layers for the networks
         with tf.name_scope('AC'):
             with tf.name_scope('Critic'):
-                    critic = MlpValueNetwork(state_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
+                    critic = ValueNetwork(state_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
             with tf.name_scope('Actor'):
                     actor = DeterministicPolicyNetwork(env.observation_space, env.action_space, hidden_dim_list=num_hidden_layer*[hidden_dim])
         net_list = [actor, critic]

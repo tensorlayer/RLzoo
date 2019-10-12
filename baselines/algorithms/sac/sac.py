@@ -126,21 +126,21 @@ class SAC():
 
         # Training Q Function
         new_next_action, next_log_prob, _, _, _ = self.evaluate(next_state)
-        target_q_input = tf.concat([next_state, new_next_action], 1)  # the dim 0 is number of samples
+        # target_q_input = tf.concat([next_state, new_next_action], 1)  # the dim 0 is number of samples
         target_q_min = tf.minimum(
-            self.target_soft_q_net1(target_q_input), self.target_soft_q_net2(target_q_input)
+            self.target_soft_q_net1(next_state, new_next_action), self.target_soft_q_net2(next_state, new_next_action)
         ) - self.alpha * next_log_prob
         target_q_value = reward + (1 - done) * gamma * target_q_min  # if done==1, only reward
-        q_input = tf.concat([state, action], 1)  # the dim 0 is number of samples
+        # q_input = tf.concat([state, action], 1)  # the dim 0 is number of samples
 
         with tf.GradientTape() as q1_tape:
-            predicted_q_value1 = self.soft_q_net1(q_input)
+            predicted_q_value1 = self.soft_q_net1(state, action)
             q_value_loss1 = tf.reduce_mean(tf.losses.mean_squared_error(predicted_q_value1, target_q_value))
         q1_grad = q1_tape.gradient(q_value_loss1, self.soft_q_net1.trainable_weights)
         self.soft_q_optimizer1.apply_gradients(zip(q1_grad, self.soft_q_net1.trainable_weights))
 
         with tf.GradientTape() as q2_tape:
-            predicted_q_value2 = self.soft_q_net2(q_input)
+            predicted_q_value2 = self.soft_q_net2(state, action)
             q_value_loss2 = tf.reduce_mean(tf.losses.mean_squared_error(predicted_q_value2, target_q_value))
         q2_grad = q2_tape.gradient(q_value_loss2, self.soft_q_net2.trainable_weights)
         self.soft_q_optimizer2.apply_gradients(zip(q2_grad, self.soft_q_net2.trainable_weights))
@@ -148,11 +148,11 @@ class SAC():
         # Training Policy Function
         with tf.GradientTape() as p_tape:
             new_action, log_prob, z, mean, log_std = self.evaluate(state)
-            new_q_input = tf.concat([state, new_action], 1)  # the dim 0 is number of samples
+            # new_q_input = tf.concat([state, new_action], 1)  # the dim 0 is number of samples
             ''' implementation 1 '''
-            predicted_new_q_value = tf.minimum(self.soft_q_net1(new_q_input), self.soft_q_net2(new_q_input))
+            predicted_new_q_value = tf.minimum(self.soft_q_net1(state, new_action), self.soft_q_net2(state, new_action))
             ''' implementation 2 '''
-            # predicted_new_q_value = self.soft_q_net1(new_q_input)
+            # predicted_new_q_value = self.soft_q_net1(state, new_action)
             policy_loss = tf.reduce_mean(self.alpha * log_prob - predicted_new_q_value)
         p_grad = p_tape.gradient(policy_loss, self.policy_net.trainable_weights)
         self.policy_optimizer.apply_gradients(zip(p_grad, self.policy_net.trainable_weights))

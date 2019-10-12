@@ -26,8 +26,8 @@ Normal = tfd.Normal
 class StochasticContinuousPolicyNetwork(Model):
     def __init__(self, state_shape, action_shape, hidden_dim_list, w_init=tf.keras.initializers.glorot_normal(), \
         activation = tf.nn.relu, output_activation = None, log_std_min=-20, log_std_max=2, trainable=True):
-        """ Stochastic continuous policy network with multiple fully-connected layers 
-        
+        """ Stochastic continuous policy network with multiple fully-connected layers or convolutional layers (according to state shape)
+
         Args:
             state_shape (tuple[int]): shape of the state, for example, (state_dim, ) for single-dimensional state
             action_shape (tuple[int]): shape of the action, for example, (action_dim, ) for single-dimensional action
@@ -64,7 +64,7 @@ class StochasticContinuousPolicyNetwork(Model):
 class DeterministicContinuousPolicyNetwork(Model):
     def __init__(self, state_shape, action_shape, hidden_dim_list, w_init=tf.keras.initializers.glorot_normal(), \
         activation = tf.nn.relu, output_activation = tf.nn.tanh, trainable = True):
-        """ Deterministic continuous policy network with multiple fully-connected layers 
+        """ Deterministic continuous policy network with multiple fully-connected layers or convolutional layers (according to state shape)
         
         Args:
             state_shape (tuple[int]): shape of the state, for example, (state_dim, ) for single-dimensional state
