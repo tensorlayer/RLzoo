@@ -52,10 +52,10 @@ from algorithms import *
 #         save_interval=100, mode='train', render=False, **learn_params)
 
 
-EnvName = 'Pendulum-v0'
-EnvType = ['classic_control', 'atari', 'box2d', 'mujoco', 'dm_control'][0]
-# EnvName = 'ToiletSeatUp'
-# EnvType = ['atari', 'box2d', 'classic_control', 'mujoco', 'robotics', 'dm_control', 'rlbench'][-1]
+# EnvName = 'Pendulum-v0'
+# EnvType = ['classic_control', 'atari', 'box2d', 'mujoco', 'dm_control'][0]
+EnvName = 'ToiletSea2tUp'
+EnvType = ['atari', 'box2d', 'classic_control', 'mujoco', 'robotics', 'dm_control', 'rlbench'][-1]
 
 env = build_env(EnvName, EnvType)
 alg_params, learn_params = call_default_params(env, EnvType, 'TD3')

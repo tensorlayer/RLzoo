@@ -13,6 +13,7 @@ import cv2
 import gym
 from gym import spaces
 from gym.wrappers import FlattenDictWrapper
+from env_list import get_envlist
 
 __all__ = (
     'build_env',  # build env
@@ -58,6 +59,14 @@ def build_env(env_id, env_type, vectorized=False,
 
     return env
 
+def check_name_in_list(env_id, env_type):
+    """ Check if env_id exists in the env_type list """
+    env_list = get_envlist(env_type)
+    if env_id not in env_list:
+        print('Env ID {:s} Not Found In {:s}!'.format(env_id, env_type))
+    else:
+        print('Env ID {:s} Exists!'.format(env_id))
+
 
 def _make_env(env_id, env_type, seed, reward_shaping, frame_stack, **kwargs):
     """Make single env"""
@@ -87,6 +96,7 @@ def _make_env(env_id, env_type, seed, reward_shaping, frame_stack, **kwargs):
         env = Monitor(env, info_keywords=('is_success',))
     elif env_type == 'rlbench':
         from common.build_rlbench_env import RLBenchEnv
+        check_name_in_list(env_id, env_type)  # should put this in front of all env types if env list contains all
         env  = RLBenchEnv(env_id)
     else:
         raise NotImplementedError
