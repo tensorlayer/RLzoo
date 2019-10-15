@@ -171,10 +171,10 @@ python algorithms/ac/run_ac.py
 
 ## Troubleshooting:
 
-* If you meet the error`AttributeError: module 'tensorflow' has no attribute 'contrib'` when running the code after installing tensorflow-probability, try:
+* If you meet the error *'AttributeError: module 'tensorflow' has no attribute 'contrib''* when running the code after installing tensorflow-probability, try:
 `pip install --upgrade tf-nightly-2.0-preview tfp-nightly`
 
-* When trying to use RLBench environments, `No module named rlbench` can be caused by no RLBench package installed at your local or a mistake of adding python path. You should add `export PYTHONPATH=/home/quantumiracle/research/vrep/PyRep/RLBench` every time you try to run the learning script with RLBench environment or add it to you `~/.bashrc` file once for all.
+* When trying to use RLBench environments, *'No module named rlbench'* can be caused by no RLBench package installed at your local or a mistake in the python path. You should add `export PYTHONPATH=/home/quantumiracle/research/vrep/PyRep/RLBench` every time you try to run the learning script with RLBench environment or add it to you `~/.bashrc` file once for all.
 
 ## Citing:
 
