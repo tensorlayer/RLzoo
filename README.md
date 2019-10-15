@@ -46,7 +46,7 @@ Currently the repository is still in development, and there may be some envrionm
 
 ### Environments:
 
-*  [**OpenAI Gym**](https://gym.openai.com/): full list of environments is [here](https://gym.openai.com/envs/#classic_control); list of Atari, Box2D and Classic control with types of spaces is [here](https://github.com/openai/gym/wiki/Table-of-environments).
+*  [**OpenAI Gym**](https://gym.openai.com/): full list of environments is [here](https://gym.openai.com/envs/#classic_control); list of environments with types of spaces for Atari, Box2D and Classic Control is [here](https://github.com/openai/gym/wiki/Table-of-environments).
     * Atari
     * Box2D
     * Classic control
