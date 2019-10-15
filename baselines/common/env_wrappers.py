@@ -70,6 +70,7 @@ def check_name_in_list(env_id, env_type):
 
 def _make_env(env_id, env_type, seed, reward_shaping, frame_stack, **kwargs):
     """Make single env"""
+    check_name_in_list(env_id, env_type)  # check existence of env_id in env_type
     if env_type == 'atari':
         env = gym.make(env_id)
         assert 'NoFrameskip' in env.spec.id
@@ -96,7 +97,6 @@ def _make_env(env_id, env_type, seed, reward_shaping, frame_stack, **kwargs):
         env = Monitor(env, info_keywords=('is_success',))
     elif env_type == 'rlbench':
         from common.build_rlbench_env import RLBenchEnv
-        check_name_in_list(env_id, env_type)  # should put this in front of all env types if env list contains all
         env  = RLBenchEnv(env_id)
     else:
         raise NotImplementedError
