@@ -10,7 +10,8 @@ alg.learn(env=env, number_timesteps=int(1e4), save_path=None,
 
 
 env = build_env('PongNoFrameskip-v4', 'atari')
-alg = dqn.DQN('train')
+init_param, train_param = default.atari(env)
+alg = dqn.DQN(**init_param)
 params = default.atari(env)
 alg.learn(env=env, number_timesteps=int(5e4), save_path=None,
-          save_interval=0, **params)
+          save_interval=0, **train_param)

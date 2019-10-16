@@ -1,7 +1,7 @@
 import tensorflow as tf
 import tensorlayer as tl
 
-from common import math_utils
+from common import basic_nets
 
 
 def atari(env, **kwargs):
@@ -30,7 +30,7 @@ def atari(env, **kwargs):
         params['optimizer'] = tf.optimizers.Adam(1e-4,
                                                  epsilon=1e-5, clipnorm=10)
 
-    return {}, params
+    return {'mode': 'train'}, params
 
 
 def classic_control(env, **kwargs):
@@ -56,7 +56,7 @@ def classic_control(env, **kwargs):
         params['network'] = MLPQNet(in_dim, act_dim, params.pop('dueling'))
     if params.get('optimizer') is None:
         params['optimizer'] = tf.optimizers.Adam(5e-3, epsilon=1e-5)
-    return {}, params
+    return {'mode': 'train'}, params
 
 
 class CNNQNet(tl.models.Model):
@@ -65,21 +65,40 @@ class CNNQNet(tl.models.Model):
         self.dueling = dueling
         with tf.name_scope('DQN'):
             with tf.name_scope('CNN'):
-                self.cnn = CNN(in_dim)
-            latent_shape = self.cnn.outputs[0].shape
-            mlp_in_shape = math_utils.flatten_dims(latent_shape)
+                self.cnn = basic_nets.CNNModel(in_dim)
+            mlp_in_shape = self.cnn.outputs[0].shape[0]
             with tf.name_scope('QValue'):
-                self.qmlp = MLP(mlp_in_shape, act_dim, 1, 256, scale=1)
+                hidden_dim = 256
+                self.preq = tl.layers.Dense(
+                    hidden_dim, tf.nn.relu,
+                    tf.initializers.Orthogonal(1.0),
+                    in_channels=mlp_in_shape
+                )
+                self.qout = tl.layers.Dense(
+                    act_dim, None,
+                    tf.initializers.Orthogonal(1.0),
+                    in_channels=hidden_dim
+                )
             if dueling:
                 with tf.name_scope('Value'):
-                    self.vmlp = MLP(mlp_in_shape, 1, 1, 256, scale=1)
+                    hidden_dim = 256
+                    self.prev = tl.layers.Dense(
+                        hidden_dim, tf.nn.relu,
+                        tf.initializers.Orthogonal(1.0),
+                        in_channels=mlp_in_shape
+                    )
+                    self.vout = tl.layers.Dense(
+                        1, None,
+                        tf.initializers.Orthogonal(1.0),
+                        in_channels=hidden_dim
+                    )
 
     def forward(self, obv):
         obv = tf.cast(obv, tf.float32) / 255.0
         mlp_in = tl.layers.flatten_reshape(self.cnn(obv))
-        q_out = self.qmlp(mlp_in)
+        q_out = self.qout(self.preq(mlp_in))
         if self.dueling:
-            v_out = self.vmlp(mlp_in)
+            v_out = self.vout(self.prev(mlp_in))
             q_out = v_out + q_out - tf.reduce_mean(q_out, 1, True)
         return q_out
 
@@ -88,15 +107,27 @@ class MLPQNet(tl.models.Model):
     def __init__(self, in_dim, act_dim, dueling):
         super().__init__()
         self.dueling = dueling
+        hidden_dim = 64
         with tf.name_scope('DQN'):
             with tf.name_scope('MLP'):
-                self.mlp = MLP(in_dim, 64, 1, 64, tf.nn.tanh, tf.nn.tanh, 1)
-            latent_shape = math_utils.flatten_dims(self.mlp.outputs[0].shape)
+                self.mlp = tl.layers.Dense(
+                    hidden_dim, tf.nn.tanh,
+                    tf.initializers.Orthogonal(1.0),
+                    in_channels=in_dim
+                )
             with tf.name_scope('QValue'):
-                self.qmlp = MLP(latent_shape, act_dim, 0, scale=1)
+                self.qmlp = tl.layers.Dense(
+                    act_dim, None,
+                    tf.initializers.Orthogonal(1.0),
+                    in_channels=hidden_dim
+                )
             if dueling:
                 with tf.name_scope('Value'):
-                    self.vmlp = MLP(latent_shape, 1, 0, scale=1)
+                    self.vmlp = tl.layers.Dense(
+                        1, None,
+                        tf.initializers.Orthogonal(1.0),
+                        in_channels=hidden_dim
+                    )
 
     def forward(self, obv):
         obv = tf.cast(obv, tf.float32)
@@ -106,74 +137,3 @@ class MLPQNet(tl.models.Model):
             v_out = self.vmlp(latent)
             q_out = v_out + q_out - tf.reduce_mean(q_out, 1, True)
         return q_out
-
-
-# ========= put here temporally =========
-def CNN(input_shape, conv_kwargs=None):
-    """Multiple convolutional layers for approximation
-    Default setting is equal to architecture used in DQN
-
-    Args:
-        input_shape (tuple[int]): (H, W, C)
-        conv_kwargs (list[param]): list of conv parameters for tl.layers.Conv2d
-    Return:
-        tl.model.Model
-    """
-    if not conv_kwargs:
-        in_channels = input_shape[-1]
-        conv_kwargs = [
-            {
-                'in_channels': in_channels, 'n_filter': 32, 'act': tf.nn.relu,
-                'filter_size': (8, 8), 'strides': (4, 4), 'padding': 'VALID',
-                'W_init': tf.initializers.GlorotUniform()
-            },
-            {
-                'in_channels': 32, 'n_filter': 64, 'act': tf.nn.relu,
-                'filter_size': (4, 4), 'strides': (2, 2), 'padding': 'VALID',
-                'W_init': tf.initializers.GlorotUniform()
-            },
-            {
-                'in_channels': 64, 'n_filter': 64, 'act': tf.nn.relu,
-                'filter_size': (3, 3), 'strides': (1, 1), 'padding': 'VALID',
-                'W_init': tf.initializers.GlorotUniform()
-            }
-        ]
-
-    ni = tl.layers.Input((1, ) + input_shape, name='CNN_Input')
-    hi = ni
-
-    for i, kwargs in enumerate(conv_kwargs):
-        hi = tl.layers.Conv2d(**kwargs)(hi)
-
-    return tl.models.Model(inputs=ni, outputs=hi)
-
-
-def MLP(input_dim, output_dim, num_layers=1, num_hidden=64,
-        activation=tf.nn.relu, activation_output=None, scale=1e-2):
-    """Multiple fully-connected layers for approximation
-
-    Args:
-        input_dim (int): size of input tensor
-        output_dim (int): size of the last fully-connected layer
-        num_layers (int): number of fully-connected layers
-        num_hidden (int): size of fully-connected layers
-        activation (callable): activation function of hidden
-        activation_output (callable): activation function of output
-        scale (float): scale for orthogonal initialization
-    Return:
-        tl.model.Model
-    """
-    ni = tl.layers.Input((1, input_dim))
-    hi = ni
-
-    for i in range(num_layers):
-        hi = tl.layers.Dense(n_units=num_hidden, act=activation,
-                             W_init=tf.initializers.Orthogonal(scale),
-                             in_channels=input_dim)(hi)
-        input_dim = num_hidden
-
-    output = tl.layers.Dense(n_units=output_dim, act=activation_output,
-                             W_init=tf.initializers.Orthogonal(scale),
-                             in_channels=input_dim)(hi)
-    return tl.models.Model(inputs=ni, outputs=output)
-# ========= put here temporally =========

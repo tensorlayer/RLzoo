@@ -1,13 +1,11 @@
 """Basic neural networks"""
-import math
-
 import tensorflow as tf
 import tensorlayer as tl
 from tensorlayer.layers import Dense, Input
 
 
-def MLP(input_dim, hidden_dim_list:list, w_init=tf.initializers.Orthogonal(0.2),
-        activation=tf.nn.relu, *args, **kwargs):
+def MLP(input_dim, hidden_dim_list,
+        w_init=tf.initializers.Orthogonal(0.2), activation=tf.nn.relu):
     """Multiple fully-connected layers for approximation
 
     Args:
@@ -21,11 +19,11 @@ def MLP(input_dim, hidden_dim_list:list, w_init=tf.initializers.Orthogonal(0.2),
 
     l = inputs = Input([None, input_dim], name='input_layer')
     for i in range(len(hidden_dim_list)):
-        l = Dense(n_units=hidden_dim_list[i], act=activation, W_init=w_init, name='hidden_layer%d' % (i+1))(l)
+        l = Dense(n_units=hidden_dim_list[i], act=activation,
+                  W_init=w_init, name='hidden_layer%d' % (i+1))(l)
     outputs = l
 
     return inputs, outputs
-
 
 
 def CNN(input_shape, conv_kwargs=None):
@@ -67,10 +65,8 @@ def CNN(input_shape, conv_kwargs=None):
     return inputs, outputs
 
 
-
-
-def MLPModel(input_dim, hidden_dim_list:list, w_init=tf.initializers.Orthogonal(0.2),
-        activation=tf.nn.relu, *args, **kwargs):
+def MLPModel(input_dim, hidden_dim_list,
+             w_init=tf.initializers.Orthogonal(0.2), activation=tf.nn.relu):
     """Multiple fully-connected layers for approximation
 
     Args:
@@ -83,11 +79,11 @@ def MLPModel(input_dim, hidden_dim_list:list, w_init=tf.initializers.Orthogonal(
     """
     l = inputs = Input([None, input_dim], name='Input_Layer')
     for i in range(len(hidden_dim_list)):
-        l = Dense(n_units=hidden_dim_list[i], act=activation, W_init=w_init, name='Hidden_Layer%d' % (i+1))(l)
+        l = Dense(n_units=hidden_dim_list[i], act=activation,
+                  W_init=w_init, name='Hidden_Layer%d' % (i+1))(l)
     outputs = l
 
     return tl.models.Model(inputs=inputs, outputs=outputs)
-
 
 
 def CNNModel(input_shape, conv_kwargs=None):
@@ -129,5 +125,3 @@ def CNNModel(input_shape, conv_kwargs=None):
     no = tl.layers.Flatten(name='Flatten_Layer')(hi)
 
     return tl.models.Model(inputs=ni, outputs=no)
-
-
