@@ -161,7 +161,6 @@ class QNetwork(Model):
         assert len(action_shape) == 1
 
         if len(state_shape) == 1:
-            # obs_inputs, current_layer = MLP(state_shape[0], hidden_dim_list, w_init, activation)  # todo additional obs mlp can be added
             obs_inputs = current_layer = Input((None,) + state_shape, name='Obs_Input_Layer')
         elif len(state_shape) > 1:
             with tf.name_scope('QNet_CNN'):
