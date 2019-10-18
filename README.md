@@ -70,6 +70,7 @@ Currently the repository is still in development, and there may be some envrionm
 * Vrep, PyRep, RLBench (if using RLBench environments, follows [here](http://www.coppeliarobotics.com/downloads.html), [here](https://github.com/stepjam/PyRep) and [here](https://github.com/stepjam/RLBench))
 
 Run the following line in the root file to install all required packages:
+
 `pip install -r requirements.txt`
 
 ## Usage:
