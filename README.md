@@ -72,6 +72,7 @@ Currently the repository is still in development, and there may be some envrionm
 `pip install -r requirements.txt`
 
 ## Usage:
+We provide at least two types of interfaces for running the learning algorithms, with (1) implicit configurations or (2) explicit configurations. Both of them start learning program through running a python script, instead of running a long command line with all configurations shortened to be arguments of it (e.g. in Openai Baseline). Our approaches are found to be more interpretable, flexible and convenient to apply in practice. According to the level of explicitness of learning configurations, we provided two different ways of setting learning configurations in python scripts: the first one with implicit configurations uses a `default.py` script to record all configurations for each algorithm, while the second one with explicit configurations exposes all configurations to the running scripts. Both of them can run any RL algorithms on any environments supported in our repository with a simple command line.
 
 ### 1. Implicit Configurations
 
@@ -165,7 +166,7 @@ env.close()
 
 ```python
 python algorithms/*ALGORITHM_NAME*/run_*ALGORITHM_NAME*.py 
-# for example
+# for example: run actor-critic
 python algorithms/ac/run_ac.py
 ```
 
