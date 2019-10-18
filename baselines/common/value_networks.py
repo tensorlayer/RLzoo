@@ -144,39 +144,60 @@ class MlpQNetwork(Model):
 
 
 class QNetwork(Model):
-    def __init__(self, state_shape, action_shape, hidden_dim_list,
+    def __init__(self, state_space, action_space, hidden_dim_list,
                  w_init=tf.keras.initializers.glorot_normal(), activation=tf.nn.relu, output_activation=None,
                  trainable=True):
         """ Q-value network with multiple fully-connected layers or convolutional layers (according to state shape)
 
         Args:
-            state_shape (tuple[int]): shape of the state, for example, (state_dim, ) for single-dimensional state
-            action_shape (tuple[int]): shape of the action, for example, (action_dim, ) for single-dimensional action
+            state_space (gym.spaces): space of the state from gym environments
+            action_space (gym.spaces): space of the action from gym environments
             hidden_dim_list (list[int]): a list of dimensions of hidden layers
             w_init (callable): weights initialization
             activation (callable): activation function
             output_activation (callable or None): output activation function
             trainable (bool): set training and evaluation mode
         """
-        assert len(action_shape) == 1
+        state_shape = state_space.shape
+
+        self._state_space, self._action_space = state_space, action_space
+
+        if isinstance(action_space, spaces.Discrete):
+            action_shape = action_space.n,
+            act_inputs = Input((None,), name='Act_Input_Layer', dtype=tf.int32)
+        elif isinstance(action_space, spaces.Box):
+            action_shape = action_space.shape
+            assert len(action_shape) == 1
+            act_inputs = Input((None,) + action_shape, name='Act_Input_Layer')
+        else:
+            raise NotImplementedError
 
         if len(state_shape) == 1:
             obs_inputs = current_layer = Input((None,) + state_shape, name='Obs_Input_Layer')
         elif len(state_shape) > 1:
             with tf.name_scope('QNet_CNN'):
-                obs_inputs, current_layer = CNN(state_shape, conv_kwargs=None)
+                obs_inputs, current_layer = CNN(state_shape)
         else:
             raise ValueError("State Shape Not Accepted!")
 
-        act_inputs = Input((None,)+action_shape, name='Act_Input_Layer')
-
-        current_layer = tl.layers.Concat(-1)([current_layer, act_inputs])
+        if isinstance(action_space, spaces.Box):
+            current_layer = tl.layers.Concat(-1)([current_layer, act_inputs])
 
         with tf.name_scope('QNet_MLP'):
             for i, dim in enumerate(hidden_dim_list):
                 current_layer = Dense(n_units=dim, act=activation, W_init=w_init,
                                       name='mlp_hidden_layer%d' % (i + 1))(current_layer)
-            outputs = Dense(n_units=1, act=output_activation, W_init=w_init)(current_layer)
+
+            if isinstance(action_space, spaces.Discrete):
+                current_layer = Dense(n_units=action_shape[0], act=output_activation, W_init=w_init)(current_layer)
+
+                act_one_hot = tl.layers.OneHot(depth=action_shape[0], axis=1)(act_inputs)
+                outputs = tl.layers.Lambda(
+                    lambda x: tf.reduce_sum(tf.reduce_prod(x, axis=0), axis=1))((current_layer, act_one_hot))
+            elif isinstance(action_space, spaces.Box):
+                outputs = Dense(n_units=1, act=output_activation, W_init=w_init)(current_layer)
+            else:
+                raise ValueError("State Shape Not Accepted!")
 
         super().__init__(inputs=[obs_inputs, act_inputs], outputs=outputs)
 
@@ -184,3 +205,11 @@ class QNetwork(Model):
             self.train()
         else:
             self.eval()
+
+    @property
+    def state_space(self):
+        return copy.deepcopy(self._state_space)
+
+    @property
+    def action_space(self):
+        return copy.deepcopy(self._action_space)
