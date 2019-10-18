@@ -25,9 +25,9 @@ with tf.name_scope('TD3'):
     with tf.name_scope('Target_Q_Net2'):
         target_q_net2 = MlpQNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
     with tf.name_scope('Policy'):
-        policy_net = DeterministicPolicyNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
+        policy_net = DeterministicPolicyNetwork(env.observation_space, env.action_space, hidden_dim_list=num_hidden_layer*[hidden_dim])
     with tf.name_scope('Target_Policy'):
-        target_policy_net = DeterministicPolicyNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
+        target_policy_net = DeterministicPolicyNetwork(env.observation_space, env.action_space, hidden_dim_list=num_hidden_layer*[hidden_dim])
 net_list = [q_net1, q_net2, target_q_net1, target_q_net2, policy_net, target_policy_net]
 
 ''' choose optimizers '''

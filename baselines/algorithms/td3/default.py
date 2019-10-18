@@ -22,13 +22,13 @@ def atari(env):
         hidden_dim=64 # dimension of hidden layers for the networks
         with tf.name_scope('TD3'):
             with tf.name_scope('Q_Net1'):
-                q_net1 = QNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
+                q_net1 = QNetwork(env.observation_space, env.action_space, hidden_dim_list=num_hidden_layer*[hidden_dim])
             with tf.name_scope('Q_Net2'):
-                q_net2 = QNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
+                q_net2 = QNetwork(env.observation_space, env.action_space, hidden_dim_list=num_hidden_layer*[hidden_dim])
             with tf.name_scope('Target_Q_Net1'):
-                target_q_net1 = QNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
+                target_q_net1 = QNetwork(env.observation_space, env.action_space, hidden_dim_list=num_hidden_layer*[hidden_dim])
             with tf.name_scope('Target_Q_Net2'):
-                target_q_net2 = QNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
+                target_q_net2 = QNetwork(env.observation_space, env.action_space, hidden_dim_list=num_hidden_layer*[hidden_dim])
             with tf.name_scope('Policy'):
                 policy_net = DeterministicPolicyNetwork(env.observation_space, env.action_space, hidden_dim_list=num_hidden_layer*[hidden_dim])
             with tf.name_scope('Target_Policy'):
@@ -73,13 +73,13 @@ def classic_control(env):
         hidden_dim=64 # dimension of hidden layers for the networks
         with tf.name_scope('TD3'):
             with tf.name_scope('Q_Net1'):
-                q_net1 = QNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
+                q_net1 = QNetwork(env.observation_space, env.action_space, hidden_dim_list=num_hidden_layer*[hidden_dim])
             with tf.name_scope('Q_Net2'):
-                q_net2 = QNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
+                q_net2 = QNetwork(env.observation_space, env.action_space, hidden_dim_list=num_hidden_layer*[hidden_dim])
             with tf.name_scope('Target_Q_Net1'):
-                target_q_net1 = QNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
+                target_q_net1 = QNetwork(env.observation_space, env.action_space, hidden_dim_list=num_hidden_layer*[hidden_dim])
             with tf.name_scope('Target_Q_Net2'):
-                target_q_net2 = QNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
+                target_q_net2 = QNetwork(env.observation_space, env.action_space, hidden_dim_list=num_hidden_layer*[hidden_dim])
             with tf.name_scope('Policy'):
                 policy_net = DeterministicPolicyNetwork(env.observation_space, env.action_space, hidden_dim_list=num_hidden_layer*[hidden_dim])
             with tf.name_scope('Target_Policy'):
@@ -124,13 +124,13 @@ def rlbench(env):
         hidden_dim=64 # dimension of hidden layers for the networks
         with tf.name_scope('TD3'):
             with tf.name_scope('Q_Net1'):
-                q_net1 = QNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
+                q_net1 = QNetwork(env.observation_space, env.action_space, hidden_dim_list=num_hidden_layer*[hidden_dim])
             with tf.name_scope('Q_Net2'):
-                q_net2 = QNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
+                q_net2 = QNetwork(env.observation_space, env.action_space, hidden_dim_list=num_hidden_layer*[hidden_dim])
             with tf.name_scope('Target_Q_Net1'):
-                target_q_net1 = QNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
+                target_q_net1 = QNetwork(env.observation_space, env.action_space, hidden_dim_list=num_hidden_layer*[hidden_dim])
             with tf.name_scope('Target_Q_Net2'):
-                target_q_net2 = QNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
+                target_q_net2 = QNetwork(env.observation_space, env.action_space, hidden_dim_list=num_hidden_layer*[hidden_dim])
             with tf.name_scope('Policy'):
                 policy_net = DeterministicPolicyNetwork(env.observation_space, env.action_space, hidden_dim_list=num_hidden_layer*[hidden_dim])
             with tf.name_scope('Target_Policy'):

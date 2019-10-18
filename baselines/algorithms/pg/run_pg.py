@@ -18,7 +18,7 @@ name = 'pg'
 num_hidden_layer = 1  # number of hidden layers for the networks
 hidden_dim = 64  # dimension of hidden layers for the networks
 
-policy_net = DeterministicPolicyNetwork(state_shape, action_shape, num_hidden_layer * [hidden_dim],
+policy_net = DeterministicPolicyNetwork(env.observation_space, env.action_space, num_hidden_layer * [hidden_dim],
                                         name=name + '_policy')
 net_list = [policy_net]
 
