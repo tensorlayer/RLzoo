@@ -2,6 +2,7 @@
 import numpy as np
 import tensorflow as tf
 from gym import spaces
+import copy
 
 
 class Distribution(object):
@@ -48,7 +49,9 @@ class Categorical(Distribution):
             logits (tensor): logits variables to set
         """
         self._logits = logits
-        return self
+
+    def get_param(self):
+        return copy.deepcopy(self._logits)
 
     def sample(self):
         """ Sample actions from distribution, using the Gumbel-Softmax trick """
@@ -58,7 +61,7 @@ class Categorical(Distribution):
     def greedy_sample(self):
         """ Get actions greedily """
         _probs = tf.nn.softmax(self._logits)
-        return tf.argmax(_probs.ravel())
+        return tf.argmax(_probs, axis=-1)
 
     def logp(self, x):
         return -self.neglogp(x)
@@ -106,27 +109,27 @@ class DiagGaussian(Distribution):
         if mean_logstd is not None:
             self.set_param(mean_logstd)
 
-    def set_param(self, mean_logstd):
+    def set_param(self, param):
         """
         Args:
-            mean_logstd (tensor): mean and logstd, stacked on the last axis
+            param (tensor): mean or mean and logstd parameters, stacked on the last axis
         """
-        mean, logstd = tf.split(mean_logstd, 2, -1)
+        mean, logstd = tf.split(param, 2, -1)
         self.mean = mean
         self.logstd = logstd
         self.std = tf.math.exp(logstd)
-        return self
 
-    def sample(self, deterministic=False):
+    def get_param(self):
+        """ Get parameters """
+        return tf.concat([copy.deepcopy(self.mean), copy.deepcopy(self.logstd)], axis=-1)
+
+    def sample(self):
         """ Get actions in deterministic or stochastic manner """
-        if deterministic:
-            return self.mean
-        else:
-            return self.mean + self.std * tf.random.normal(tf.shape(self.mean))
+        return self.mean + self.std * tf.random.normal(tf.shape(self.mean))
 
     def greedy_sample(self):
         """ Get actions greedily/deterministically """
-        return self.sample(deterministic=True)
+        return self.mean
 
     def logp(self, x):
         return -self.neglogp(x)

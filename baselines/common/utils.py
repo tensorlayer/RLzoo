@@ -56,6 +56,7 @@ def plot_save_log(episode_rewards, Algorithm_name, Env_name):
     if not os.path.exists('log'):
         os.makedirs('log')
     np.save('./log/'+ Algorithm_name + '-' + Env_name, episode_rewards)
+    plt.close()
 
 
 def save_model(model, Model_name, Algorithm_name):
