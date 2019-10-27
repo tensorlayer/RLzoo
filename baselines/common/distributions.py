@@ -55,8 +55,9 @@ class Categorical(Distribution):
 
     def sample(self):
         """ Sample actions from distribution, using the Gumbel-Softmax trick """
-        u = tf.random.uniform(tf.shape(self._logits), dtype=self._logits.dtype)
-        return tf.argmax(self._logits - tf.math.log(-tf.math.log(u)), axis=-1)
+        u = np.array(np.random.uniform(0, 1, size=np.shape(self._logits)), dtype=np.float32)
+        res = tf.argmax(self._logits - tf.math.log(-tf.math.log(u)), axis=-1)
+        return res
 
     def greedy_sample(self):
         """ Get actions greedily """
@@ -67,7 +68,11 @@ class Categorical(Distribution):
         return -self.neglogp(x)
 
     def neglogp(self, x):
-        x = tf.one_hot(x, self._ndim)
+        x = np.array(x)
+        if np.any(x % 1):
+            raise ValueError('Input float actions in discrete action space')
+        x = tf.convert_to_tensor(x, tf.int32)
+        x = tf.one_hot(x, self._ndim, axis=-1)
         return tf.nn.softmax_cross_entropy_with_logits(x, self._logits)
 
     def kl(self, logits):
@@ -125,7 +130,7 @@ class DiagGaussian(Distribution):
 
     def sample(self):
         """ Get actions in deterministic or stochastic manner """
-        return self.mean + self.std * tf.random.normal(tf.shape(self.mean))
+        return self.mean + self.std * np.random.normal(0, 1, np.shape(self.mean))
 
     def greedy_sample(self):
         """ Get actions greedily/deterministically """
@@ -169,3 +174,4 @@ def make_dist(ac_space):
         return DiagGaussian(ac_space.shape[0])
     else:
         raise NotImplementedError
+
