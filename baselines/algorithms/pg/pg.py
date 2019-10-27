@@ -37,7 +37,7 @@ class PG:
     PG class
     """
 
-    def __init__(self, net_list, optimizers_list, state_dim, action_dim, action_range):
+    def __init__(self, net_list, optimizers_list):
         """
         :param net_list: a list of networks (value and policy) used in the algorithm, from common functions or customization
         :param optimizers_list: a list of optimizers for all networks and differentiable variables
@@ -51,7 +51,6 @@ class PG:
         self.buffer = []
         print('Policy Network', self.model)
         self.optimizer = optimizers_list[0]
-        self.action_range = action_range
 
     def choose_action(self, s):
         """
@@ -59,11 +58,7 @@ class PG:
         :param s: state
         :return: act
         """
-        _logits = self.model(np.array([s], np.float32))
-        # _probs = tf.nn.softmax(_logits).numpy() # deprecated!
-        # return tl.rein.choice_action_by_probs(_probs.ravel())
-        policy_dist = self.model.policy_dist.set_param(_logits)
-        return self.action_range * policy_dist.sample().numpy()[0]
+        return self.model(np.array([s], np.float32))[0].numpy()
 
     def choose_action_greedy(self, s):
         """
@@ -71,11 +66,7 @@ class PG:
         :param s: state
         :return: act
         """
-        # _probs = tf.nn.softmax(self.model(np.array([s], np.float32))).numpy()  # deprecated!
-        # return np.argmax(_probs.ravel())
-        _logits = self.model(np.array([s], np.float32))
-        policy_dist = self.model.policy_dist.set_param(_logits)
-        return self.action_range * policy_dist.greedy_sample().numpy()[0]
+        return self.model(np.array([s], np.float32), greedy=True).numpy()[0]
 
     def store_transition(self, s, a, r):
         """
@@ -94,13 +85,11 @@ class PG:
         """
         # discount and normalize episode reward
         s, a, r = zip(*self.buffer)
-        s, a, r = np.array(s), np.array(a, np.int), np.array(r).flatten()
+        s, a, r = np.array(s), np.array(a), np.array(r).flatten()
         discounted_ep_rs_norm = self._discount_and_norm_rewards(r, gamma)
 
         with tf.GradientTape() as tape:
-            _logits = self.model(np.vstack(s))
-            # to maximize total reward (log_p * R) is to minimize -(log_p * R), and the tf only have minimize(loss)\
-            self.model.policy_dist.set_param(_logits)
+            self.model(np.vstack(s))
             neg_log_prob = self.model.policy_dist.neglogp(a)
             loss = tf.reduce_mean(neg_log_prob * discounted_ep_rs_norm)  # reward guided loss
 
@@ -134,7 +123,7 @@ class PG:
         """
         save_model(self.model, name, self.name)
 
-    def load(self, name='policy'):
+    def load_ckpt(self, name='policy'):
         """
         load trained weights
         :return: None
@@ -142,7 +131,7 @@ class PG:
         load_model(self.model, name, self.name)
 
     def learn(self, env, train_episodes=300, test_episodes=200, max_steps=3000, save_interval=100,
-              mode='train', render=False, gamma=0.95, seed=2, reward_shaping=None):
+              mode='train', render=False, gamma=0.95, seed=None):
         """
         parameters
         ----------
@@ -155,7 +144,6 @@ class PG:
         :param render: render each step
         :param gamma: reward decay
         :param seed: random seed
-        :param reward_shaping: reward shaping function
         :return: None
         """
         if seed:
@@ -166,10 +154,10 @@ class PG:
 
         if mode == 'train':
             reward_buffer = []
+            t0 = time.time()
 
             for i_episode in range(1, train_episodes + 1):
 
-                episode_time = time.time()
                 observation = env.reset()
 
                 ep_rs_sum = 0
@@ -179,10 +167,7 @@ class PG:
 
                     action = self.choose_action(observation)
                     observation_, reward, done, info = env.step(action)
-
-                    shaped_reward = reward_shaping(reward) if reward_shaping else reward
-
-                    self.store_transition(observation, action, shaped_reward)
+                    self.store_transition(observation, action, reward)
 
                     ep_rs_sum += reward
                     observation = observation_
@@ -195,9 +180,8 @@ class PG:
                 except:
                     running_reward = ep_rs_sum
 
-                print(
-                    "Episode [%d/%d] \tsum reward: %d  \trunning reward: %f \ttook: %.5fs " %
-                    (i_episode, train_episodes, ep_rs_sum, running_reward, time.time() - episode_time)
+                print('Episode: {}/{}  | Episode Reward: {:.4f}  | Running Time: {:.4f}'.format(
+                    i_episode, train_episodes, ep_rs_sum, time.time() - t0)
                 )
                 reward_buffer.append(running_reward)
 
@@ -209,15 +193,26 @@ class PG:
 
         elif mode == 'test':
             # test
-            self.load()
-            observation = env.reset()
+            self.load_ckpt()
+            t0 = time.time()
             for eps in range(test_episodes):
+                observation = env.reset()
+                ep_rs_sum = 0
                 for step in range(max_steps):
-                    env.render()
+                    if render:
+                        env.render()
                     action = self.choose_action_greedy(observation)
                     observation, reward, done, info = env.step(action)
+                    ep_rs_sum += reward
                     if done:
-                        observation = env.reset()
+                        break
+                try:
+                    running_reward = running_reward * 0.99 + ep_rs_sum * 0.01
+                except:
+                    running_reward = ep_rs_sum
+                print('Episode: {}/{}  | Episode Reward: {:.4f}  | Running Time: {:.4f}'.format(
+                    eps, test_episodes, ep_rs_sum, time.time() - t0)
+                )
 
         else:
             print('unknown mode type')
