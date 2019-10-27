@@ -103,7 +103,7 @@ class DeterministicContinuousPolicyNetwork(Model):
 
 class DeterministicPolicyNetwork(Model):
     def __init__(self, state_space, action_space, hidden_dim_list, w_init=tf.keras.initializers.glorot_normal(), \
-                 activation=tf.nn.relu, output_activation=tf.nn.tanh, trainable=True, name='Policy_Net'):
+                 activation=tf.nn.relu, output_activation=tf.nn.tanh, trainable=True, name=None):
         """ Deterministic continuous/discrete policy network with multiple fully-connected layers
 
         Args:
@@ -151,6 +151,8 @@ class DeterministicPolicyNetwork(Model):
                 outputs = tl.layers.Lambda(lambda x: tf.argmax(tf.nn.softmax(x), axis=-1))(outputs)
             elif isinstance(self._action_space, spaces.Box):
                 outputs = tl.layers.Lambda(lambda x: x * self._action_scale + self._action_mean)(outputs)
+                outputs = tl.layers.Lambda(lambda x: tf.clip_by_value(x, self._action_space.low,
+                                                                      self._action_space.high))(outputs)
 
         # make model
         super().__init__(inputs=inputs, outputs=outputs, name=name)
@@ -187,7 +189,7 @@ class DeterministicPolicyNetwork(Model):
 class StochasticPolicyNetwork(Model):
     def __init__(self, state_space, action_space, hidden_dim_list, w_init=tf.keras.initializers.glorot_normal(),
                  activation=tf.nn.relu, output_activation=None, log_std_min=-20, log_std_max=2, trainable=True,
-                 name='Policy_Net'):
+                 name=None):
         """ Stochastic continuous/discrete policy network with multiple fully-connected layers 
         
         Args:
@@ -248,7 +250,7 @@ class StochasticPolicyNetwork(Model):
 
         if isinstance(self._action_space, spaces.Box):  # normalize action
             result = result * self._action_scale + self._action_mean
-
+            result = tf.clip_by_value(result, self._action_space.low, self._action_space.high)
         return result
 
     @property
