@@ -7,8 +7,8 @@ from algorithms.pg.pg import PG
 from common.policy_networks import *
 
 ''' load environment '''
-# env = gym.make('CartPole-v0').unwrapped
-env = gym.make('Pendulum-v0').unwrapped
+env = gym.make('CartPole-v0').unwrapped
+# env = gym.make('Pendulum-v0').unwrapped
 # env = DummyVecEnv([lambda: env])  # The algorithms require a vectorized/wrapped environment to run
 obs_space = env.observation_space
 act_space = env.action_space
