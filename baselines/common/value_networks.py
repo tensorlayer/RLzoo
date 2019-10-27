@@ -27,7 +27,7 @@ Normal = tfd.Normal
 
 class ValueNetwork(Model):
     def __init__(self, state_space, hidden_dim_list, w_init=tf.keras.initializers.glorot_normal(),
-                 activation=tf.nn.relu, output_activation=None, trainable=True, name='Value_Net'):
+                 activation=tf.nn.relu, output_activation=None, trainable=True, name=None):
         """ Value network with multiple fully-connected layers or convolutional layers (according to state shape)
         
         Args:
@@ -112,7 +112,7 @@ class MlpQNetwork(Model):
 class QNetwork(Model):
     def __init__(self, state_space, action_space, hidden_dim_list,
                  w_init=tf.keras.initializers.glorot_normal(), activation=tf.nn.relu, output_activation=None,
-                 trainable=True, name='Q_Net'):
+                 trainable=True, name=None):
         """ Q-value network with multiple fully-connected layers or convolutional layers (according to state shape)
 
         Args:
@@ -190,7 +190,12 @@ class QNetwork(Model):
             raise ValueError('Input float actions in discrete action space')
 
         states = np.array(states, dtype=np.float32)
-        actions = np.array(actions, dtype=np.int32)
+        # if isinstance(self._action_space, spaces.Discrete) and type(actions) == tf.int32:
+        if isinstance(self._action_space, spaces.Discrete):
+            actions = tf.convert_to_tensor(actions, dtype=tf.int32)
+        # elif isinstance(self._action_space, spaces.Box) and type(actions) == tf.float32:
+        elif isinstance(self._action_space, spaces.Box):
+            actions = tf.convert_to_tensor(actions, dtype=tf.float32)
         return super().__call__([states, actions], *args, **kwargs)
 
     @property
@@ -208,5 +213,4 @@ class QNetwork(Model):
     @property
     def action_shape(self):
         return copy.deepcopy(self._action_shape)
-
 
