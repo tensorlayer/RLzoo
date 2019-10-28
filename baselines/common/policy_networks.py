@@ -102,7 +102,7 @@ class DeterministicContinuousPolicyNetwork(Model):
 
 
 class DeterministicPolicyNetwork(Model):
-    def __init__(self, state_space, action_space, hidden_dim_list, w_init=tf.keras.initializers.glorot_normal(), \
+    def __init__(self, state_space, action_space, hidden_dim_list, w_init=tf.keras.initializers.glorot_normal(),
                  activation=tf.nn.relu, output_activation=tf.nn.tanh, trainable=True, name=None):
         """ Deterministic continuous/discrete policy network with multiple fully-connected layers
 
@@ -213,9 +213,9 @@ class StochasticPolicyNetwork(Model):
 
         self.policy_dist = make_dist(self._action_space)  # create action distribution
 
-        self._action_shape = self.policy_dist.output_dim,
         self._state_shape = state_space.shape
 
+        # build structure
         if len(self._state_shape) == 1:
             l = inputs = Input((None,) + self._state_shape, name='input_layer')
         else:
@@ -226,9 +226,18 @@ class StochasticPolicyNetwork(Model):
             for i, dim in enumerate(hidden_dim_list):
                 l = Dense(n_units=dim, act=activation, W_init=w_init, name='hidden_layer%d' % (i + 1))(l)
 
-        with tf.name_scope('Outputs'):
-            outputs = Dense(n_units=self._action_shape[0], act=output_activation, W_init=w_init, name='output')(l)
+        with tf.name_scope('Output'):
+            if isinstance(action_space, spaces.Discrete):
+                outputs = Dense(n_units=self.policy_dist.ndim, act=output_activation, W_init=w_init)(l)
+            elif isinstance(action_space, spaces.Box):
+                mu = Dense(n_units=self.policy_dist.ndim, act=output_activation, W_init=w_init)(l)
+                log_sigma = Dense(n_units=self.policy_dist.ndim, act=output_activation, W_init=w_init)(l)
+                log_sigma = tl.layers.Lambda(lambda x: tf.clip_by_value(x, log_std_min, log_std_max))(log_sigma)
+                outputs = [mu, log_sigma]
+            else:
+                raise NotImplementedError
 
+        # make model
         super().__init__(inputs=inputs, outputs=outputs, name=name)
         if trainable:
             self.train()
