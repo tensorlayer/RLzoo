@@ -147,7 +147,7 @@ class DiagGaussian(Distribution):
 
     def get_param(self):
         """ Get parameters """
-        return tf.concat([copy.deepcopy(self.mean), copy.deepcopy(self.logstd)], axis=-1)
+        return copy.deepcopy(self.mean), copy.deepcopy(self.logstd)
 
     def sample(self):
         """ Get actions in deterministic or stochastic manner """
