@@ -74,7 +74,14 @@ Run the following line in the root file to install all required packages:
 `pip install -r requirements.txt`
 
 ## Usage:
-We provide at least two types of interfaces for running the learning algorithms, with (1) implicit configurations or (2) explicit configurations. Both of them start learning program through running a python script, instead of running a long command line with all configurations shortened to be arguments of it (e.g. in Openai Baseline). Our approaches are found to be more interpretable, flexible and convenient to apply in practice. According to the level of explicitness of learning configurations, we provided two different ways of setting learning configurations in python scripts: the first one with implicit configurations uses a `default.py` script to record all configurations for each algorithm, while the second one with explicit configurations exposes all configurations to the running scripts. Both of them can run any RL algorithms on any environments supported in our repository with a simple command line.
+
+### 0. Quick Start
+Choose whatever environments with whatever RL algorithms supported in RLzoo, and enjoy the game by running:
+```
+python run_rlzoo.py
+```
+**General Descriptions:**
+RLzoo provides at least two types of interfaces for running the learning algorithms, with (1) implicit configurations or (2) explicit configurations. Both of them start learning program through running a python script, instead of running a long command line with all configurations shortened to be arguments of it (e.g. in Openai Baseline). Our approaches are found to be more interpretable, flexible and convenient to apply in practice. According to the level of explicitness of learning configurations, we provided two different ways of setting learning configurations in python scripts: the first one with implicit configurations uses a `default.py` script to record all configurations for each algorithm, while the second one with explicit configurations exposes all configurations to the running scripts. Both of them can run any RL algorithms on any environments supported in our repository with a simple command line.
 
 ### 1. Implicit Configurations
 
