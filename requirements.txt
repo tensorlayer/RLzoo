@@ -76,5 +76,5 @@ traitlets==4.3.2
 urllib3==1.24.3
 virtualenv==16.5.0
 wcwidth==0.1.7
-Werkzeug==0.15.2
+Werkzeug==0.15.3
 wrapt==1.11.2
