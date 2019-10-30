@@ -76,7 +76,7 @@ class TD3():
 
         # get all networks
         [self.q_net1, self.q_net2, self.target_q_net1, self.target_q_net2, self.policy_net, self.target_policy_net]=net_list
-       
+        
         print('Q Network (1,2): ', self.q_net1)
         print('Policy Network: ', self.policy_net)
 

@@ -50,12 +50,20 @@ def build_env(env_id, env_type, vectorized=False,
     """
     nenv = nenv or cpu_count() // (1 + (platform == 'darwin'))
     stack = env_type == 'atari'
-    if not vectorized:
-        env = _make_env(env_id, env_type, seed,
-                        reward_shaping, stack, **kwargs)
+    if nenv>1:
+        if vectorized:
+            env = _make_vec_env(env_id, env_type, nenv, seed,
+                                reward_shaping, stack, **kwargs)
+        else:
+            env=[]
+            for _ in range(nenv):
+                single_env = _make_env(env_id, env_type, seed,
+                                reward_shaping, stack, **kwargs)
+                env.append(single_env)  # get env as a list of same single env
+
     else:
-        env = _make_vec_env(env_id, env_type, nenv, seed,
-                            reward_shaping, stack, **kwargs)
+        env = _make_env(env_id, env_type, seed,
+                reward_shaping, stack, **kwargs)
 
     return env
 

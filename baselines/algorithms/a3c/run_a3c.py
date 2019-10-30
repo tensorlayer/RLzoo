@@ -22,9 +22,9 @@ net_list2 = []
 for i in range(num_workers+1):
     with tf.name_scope('A3C'):
         with tf.name_scope('Actor'):
-            actor = StochasticPolicyNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
+            actor = StochasticPolicyNetwork(env.observation_space, env.action_space, hidden_dim_list=num_hidden_layer*[hidden_dim])
         with tf.name_scope('Critic'):
-            critic = MlpValueNetwork(state_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
+            critic = ValueNetwork(env.observation_space, hidden_dim_list=num_hidden_layer*[hidden_dim])
     net_list = [actor, critic]
     net_list2.append(net_list)
 
@@ -34,7 +34,7 @@ a_optimizer = tf.optimizers.RMSprop(actor_lr)
 c_optimizer = tf.optimizers.RMSprop(critic_lr)
 optimizers_list= [a_optimizer, c_optimizer]
 
-model=A3C(net_list2, optimizers_list, state_dim=state_shape[0], action_dim=action_shape[0])
+model=A3C(net_list2, optimizers_list)
 ''' 
 full list of arguments for the algorithm
 ----------------------------------------
@@ -73,11 +73,3 @@ save_interval: timesteps for saving the weights and plotting the results
 mode: train or test
 '''
 
-
-obs = env.reset()
-for i in range(1000):
-    action = model.get_action(obs)
-    obs, rewards, dones, info = env.step(action)
-    env.render()
-
-env.close()
