@@ -54,7 +54,7 @@ def classic_control(env):
         alg_params['optimizers_list'] = optimizers_list
 
     learn_params = dict(
-        max_steps=3000,
+        max_steps=150,
         gamma=0.95,
         seed=2)
 

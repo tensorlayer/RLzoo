@@ -12,7 +12,7 @@ from algorithms import *
 #           save_interval=0, **learn_params)
 
 
-# # EnvName = 'Pendulum-v0'
+# EnvName = 'Pendulum-v0'
 # EnvName = 'FetchReach-v1'
 # EnvName = 'Ant-v2' 
 # EnvName = 'CartPole-v0'  # classic_control, ac cannot learn cartpole-v1
@@ -30,6 +30,8 @@ from algorithms import *
 # EnvName = 'Ant-v2'  # mujoco
 # EnvName = 'FetchReach-v1'  # robotics
 # EnvName = 'BipedalWalker-v2'  # box2d
+
+# EnvName = 'Pendulum-v0'
 # EnvName = 'CartPole-v1'  # classic_control
 # EnvType = ['classic_control', 'atari', 'box2d', 'mujoco', 'robotics', 'dm_control'][0]
 # EnvName = 'ToiletSeatUp'
@@ -44,13 +46,13 @@ from algorithms import *
 
 # EnvName = 'ToiletSeatUp'
 # EnvType = ['atari', 'box2d', 'classic_control', 'mujoco', 'robotics', 'dm_control', 'rlbench'][-1]
-EnvName = 'Pendulum-v0'
-EnvType = ['classic_control', 'atari', 'box2d', 'mujoco', 'dm_control'][0]
-env = build_env(EnvName, EnvType)
-alg_params, learn_params = call_default_params(env, EnvType, 'SAC')
-alg = SAC(**alg_params)
-alg.learn(env=env, train_episodes=1000, test_episodes=1000, 
-        save_interval=100, mode='train', render=False, **learn_params)
+# # EnvName = 'Pendulum-v0'
+# # EnvType = ['classic_control', 'atari', 'box2d', 'mujoco', 'dm_control'][0]
+# env = build_env(EnvName, EnvType)
+# alg_params, learn_params = call_default_params(env, EnvType, 'SAC')
+# alg = SAC(**alg_params)
+# alg.learn(env=env, train_episodes=1000, test_episodes=1000, 
+#         save_interval=100, mode='train', render=False, **learn_params)
 
 
 # EnvName = 'Pendulum-v0'
@@ -63,4 +65,15 @@ alg.learn(env=env, train_episodes=1000, test_episodes=1000,
 # alg = TD3(**alg_params)
 # alg.learn(env=env, train_episodes=1000, test_episodes=1000, 
 #         save_interval=100, mode='train', render=False, **learn_params)
+
+
+# EnvName = 'CartPole-v1'
+# EnvType = 'classic_control'
+EnvName = 'PongNoFrameskip-v4'
+EnvType = 'atari'
+env = build_env(EnvName, EnvType)
+alg_params, learn_params = call_default_params(env, EnvType, 'DQN')
+alg = DQN(**alg_params)
+alg.learn(env=env, number_timesteps=int(5e4), test_episodes=10, save_path=None,
+          save_interval=10000, mode='train', **learn_params)
 

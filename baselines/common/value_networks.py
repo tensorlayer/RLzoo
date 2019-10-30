@@ -159,7 +159,7 @@ class QNetwork(Model):
                 current_layer = Dense(n_units=self._action_shape[0], act=output_activation, W_init=w_init)(
                     current_layer)
 
-                act_one_hot = tl.layers.OneHot(depth=self._action_shape[0], axis=1)(act_inputs)
+                act_one_hot = tl.layers.OneHot(depth=self._action_shape[0], axis=1)(act_inputs)  # discrete action choice to one-hot vector
                 outputs = tl.layers.Lambda(
                     lambda x: tf.reduce_sum(tf.reduce_prod(x, axis=0), axis=1))((current_layer, act_one_hot))
             elif isinstance(self._action_space, spaces.Box):

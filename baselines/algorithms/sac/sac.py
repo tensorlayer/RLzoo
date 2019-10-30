@@ -61,8 +61,8 @@ class SAC():
     def evaluate(self, state, epsilon=1e-6):
         ''' generate action with state for calculating gradients '''
         state = state.astype(np.float32)
-        mean_log_std = self.policy_net(state).policy_dist.get_param()  # as SAC uses TanhNorm instead of normal distribution, need original mean_std
-        mean, log_std = tf.split(mean_log_std, 2, -1)
+        _ = self.policy_net(state)
+        mean, log_std = self.policy_net.policy_dist.get_param()  # as SAC uses TanhNorm instead of normal distribution, need original mean_std
         std = tf.math.exp(log_std)  # no clip in evaluation, clip affects gradients flow
 
         normal = Normal(0, 1)
@@ -81,8 +81,8 @@ class SAC():
 
     def get_action(self, state, deterministic=False):
         ''' generate action with state for interaction with envronment '''
-        mean_log_std = self.policy_net(np.array([state.astype(np.float32)]))
-        mean, log_std = tf.split(mean_log_std, 2, -1)
+        _ = self.policy_net(np.array([state.astype(np.float32)]))
+        mean, log_std = self.policy_net.policy_dist.get_param()
         std = tf.math.exp(log_std)
 
         normal = Normal(0, 1)
