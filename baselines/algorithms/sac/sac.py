@@ -61,7 +61,7 @@ class SAC():
     def evaluate(self, state, epsilon=1e-6):
         ''' generate action with state for calculating gradients '''
         state = state.astype(np.float32)
-        mean_log_std = self.policy_net(state)
+        mean_log_std = self.policy_net(state).policy_dist.get_param()  # as SAC uses TanhNorm instead of normal distribution, need original mean_std
         mean, log_std = tf.split(mean_log_std, 2, -1)
         std = tf.math.exp(log_std)  # no clip in evaluation, clip affects gradients flow
 
@@ -91,7 +91,7 @@ class SAC():
             mean + std * z
         )  # TanhNormal distribution as actions; reparameterization trick
 
-        action = self.action_range * mean if deterministic else action
+        action = self.action_range * tf.math.tanh(mean) if deterministic else action
         return action.numpy()[0]
 
     def sample_action(self, ):

@@ -44,7 +44,6 @@ class StochasticContinuousPolicyNetwork(Model):
         """
 
         action_dim = action_shape[0]
-        state_dim = state_shape[0]  # need modification for cnn
         if len(state_shape) == 1:
             with tf.name_scope('MLP'):
                 state_dim = state_shape[0]
