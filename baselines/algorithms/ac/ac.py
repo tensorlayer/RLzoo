@@ -59,17 +59,19 @@ tl.logging.set_verbosity(tl.logging.DEBUG)
 
 
 ###############################  Actor-Critic  ####################################
-class AC():
-    def __init__(self, net_list, optimizers_list, state_dim, action_dim, action_range, gamma=0.9):
-        [self.actor, self.critic] = net_list
-        [self.a_optimizer, self.c_optimizer] = optimizers_list
+class AC:
+    def __init__(self, net_list, optimizers_list, action_range=1., gamma=0.9):
+        assert len(net_list) == 2
+        assert len(optimizers_list) == 2
+        self.name = 'AC'
+        self.actor, self.critic = net_list
+        assert isinstance(self.critic, ValueNetwork)
+        assert isinstance(self.actor, StochasticPolicyNetwork)
+        self.a_optimizer, self.c_optimizer = optimizers_list
         self.GAMMA = gamma
-        self.state_dim = state_dim
         self.action_range = action_range
 
     def update(self, s, a, r, s_):
-        s=s.astype(np.float32)
-        s_=s_.astype(np.float32)
         # critic update
         v_ = self.critic(np.array([s_]))
         with tf.GradientTape() as tape:
@@ -81,33 +83,23 @@ class AC():
 
         # actor update
         with tf.GradientTape() as tape:
-            _logits = self.actor(np.array([s]))
+            # _logits = self.actor(np.array([s]))
             ## cross-entropy loss weighted by td-error (advantage),
             # the cross-entropy mearsures the difference of two probability distributions: the predicted logits and sampled action distribution,
             # then weighted by the td-error: small difference of real and predict actions for large td-error (advantage); and vice versa.
-            # _exp_v = tl.rein.cross_entropy_reward_loss(logits=_logits, actions=[a], rewards=td_error[0])  # deprecated!
-            policy_dist=self.actor.policy_dist.set_param(_logits)
-            neg_log_prob = policy_dist.neglogp([a])
-            _exp_v = tf.reduce_mean(neg_log_prob * td_error[0])
+
+            _ = self.actor(np.array([s]))
+            neg_log_prob = self.actor.policy_dist.neglogp([a])
+            _exp_v = tf.reduce_mean(neg_log_prob * td_error)
         grad = tape.gradient(_exp_v, self.actor.trainable_weights)
         self.a_optimizer.apply_gradients(zip(grad, self.actor.trainable_weights))
         return _exp_v
 
     def get_action(self, s):
-        s=s.astype(np.float32)
-        _logits = self.actor(np.array([s]))
-        # _probs = tf.nn.softmax(_logits).numpy() # deprecated!
-        # return tl.rein.choice_action_by_probs(_probs.ravel())  # sample according to probability distribution
-        policy_dist=self.actor.policy_dist.set_param(_logits)
-        return self.action_range*policy_dist.sample().numpy()[0]
+        return self.actor(np.array([s]))[0].numpy()*self.action_range
 
-    def choose_action_greedy(self, s):
-        s=s.astype(np.float32)
-        _logits = self.actor(np.array([s]))  # logits: probability distribution of actions
-        # _probs = tf.nn.softmax(_logits).numpy() # deprecated!
-        # return np.argmax(_probs.ravel())
-        policy_dist=self.actor.policy_dist.set_param(_logits)
-        return self.action_range*policy_dist.greedy_sample().numpy()[0]
+    def get_action_greedy(self, s):
+        return self.actor(np.array([s]), greedy=True)[0].numpy()*self.action_range
 
     def save_ckpt(self):  # save trained weights
         save_model(self.actor, 'model_actor', 'AC')
@@ -117,10 +109,9 @@ class AC():
         load_model(self.actor, 'model_actor', 'AC')
         load_model(self.critic, 'model_critic', 'AC')
 
-
-    def learn(self, env, train_episodes, test_episodes=1000, max_steps=1000,
-        seed=2, save_interval=100, mode='train', render=False):
-        '''
+    def learn(self, env, train_episodes, test_episodes=500, max_steps=200,
+              seed=None, save_interval=100, mode='train', render=False):
+        """
         parameters
         -----------
         env: learning environment
@@ -128,35 +119,30 @@ class AC():
         test_episodes:  total number of episodes for testing
         max_steps:  maximum number of steps for one episode
         seed: random seed
-        save_interval: timesteps for saving the weights and plotting the results
+        save_interval: time steps for saving the weights and plotting the results
         mode: 'train' or 'test'
         render:  if true, visualize the environment
-        '''
+        """
 
         env.seed(seed)  # reproducible
         np.random.seed(seed)
         tf.random.set_seed(seed)  # reproducible
 
-        if mode=='train':
-            t0 = time.time()
-            rewards = []
+        t0 = time.time()
+        if mode == 'train':
+            reward_buffer = []
             for i_episode in range(train_episodes):
                 s = env.reset().astype(np.float32)
-                t = 0  # number of step in this episode
-                all_r = []  # rewards of all steps
-                
-                while True:
+                ep_rs_sum = 0  # rewards of all steps
 
-                    if render: env.render()
+                for step in range(max_steps):
+
+                    if render:
+                        env.render()
 
                     a = self.get_action(s)
-
                     s_new, r, done, info = env.step(a)
-                    s_new = s_new
-
-                    # if done: r = -20  # for cartpole env
-
-                    all_r.append(r)
+                    ep_rs_sum += r
 
                     try:
                         self.update(s, a, r, s_new)  # learn Policy : true_gradient = grad[logPi(s, a) * td_error]
@@ -164,94 +150,42 @@ class AC():
                         self.save_ckpt()
 
                     s = s_new
-                    t += 1
 
-                    if done or t >= max_steps:
-                        ep_rs_sum = sum(all_r)
-
-                        if 'running_reward' not in globals():
-                            running_reward = ep_rs_sum
-                        else:
-                            running_reward = running_reward * 0.95 + ep_rs_sum * 0.05
-
-                        rewards.append(running_reward)
-
-                        print('Episode: {}/{}  | Episode Reward: {:.4f}  | Running Time: {:.4f}'\
-                        .format(i_episode, train_episodes, ep_rs_sum, time.time()-t0 ))
-
-                        # Early Stopping for quick check
-                        # if t >= max_steps:
-                        #     print("Early Stopping")
-                        #     s = env.reset().astype(np.float32)
-                        #     rall = 0
-                        #     while True:
-                        #         env.render()
-                        #         # a = actor.choose_action(s)
-                        #         a = self.choose_action_greedy(s)  # Hao Dong: it is important for this task
-                        #         s_new, r, done, info = env.step(a)
-                        #         s_new = np.concatenate((s_new[0:self.state_dim], s[self.state_dim:]), axis=0).astype(np.float32)
-                        #         rall += r
-                        #         s = s_new
-                        #         if done:
-                        #             s = env.reset().astype(np.float32)
-                        #             rall = 0
+                    if done:
                         break
 
-                    
+                reward_buffer.append(ep_rs_sum)
 
-                if i_episode%save_interval==0: 
+                print('Episode: {}/{}  | Episode Reward: {:.4f}  | Running Time: {:.4f}' \
+                      .format(i_episode, train_episodes, ep_rs_sum, time.time() - t0))
+
+                if i_episode % save_interval == 0:
                     self.save_ckpt()
-                    plot(rewards, Algorithm_name='AC', Env_name=env.spec.id)
+                    plot_save_log(reward_buffer, Algorithm_name='AC', Env_name=env.spec.id)
+
             self.save_ckpt()
+            plot_save_log(reward_buffer, Algorithm_name='AC', Env_name=env.spec.id)
 
-
-        elif mode=='test':
+        elif mode == 'test':
             self.load_ckpt()
-            t0 = time.time()
 
             for i_episode in range(test_episodes):
-                episode_time = time.time()
                 s = env.reset().astype(np.float32)
-                t = 0  # number of step in this episode
-                all_r = []  # rewards of all steps
-                while True:
+                ep_rs_sum = 0  # rewards of all steps
+                for step in range(max_steps):
                     if render: env.render()
                     a = self.get_action(s)
                     s_new, r, done, info = env.step(a)
                     s_new = s_new.astype(np.float32)
-                    if done: r = -20
 
-                    all_r.append(r)
+                    ep_rs_sum += r
                     s = s_new
-                    t += 1
 
-                    if done or t >= max_steps:
-                        ep_rs_sum = sum(all_r)
-
-                        if 'running_reward' not in globals():
-                            running_reward = ep_rs_sum
-                        else:
-                            running_reward = running_reward * 0.95 + ep_rs_sum * 0.05
-                        print('Episode: {}/{}  | Episode Reward: {:.4f}  | Running Time: {:.4f}'\
-                        .format(i_episode, test_episodes, ep_rs_sum, time.time()-t0 ))
-
-                        # Early Stopping for quick check
-                        if t >= max_steps:
-                            print("Early Stopping")
-                            s = env.reset().astype(np.float32)
-                            rall = 0
-                            while True:
-                                env.render()
-                                # a = actor.choose_action(s)
-                                a = self.choose_action_greedy(s)  # Hao Dong: it is important for this task
-                                s_new, r, done, info = env.step(a)
-                                s_new = np.concatenate((s_new[0:self.state_dim], s[self.state_dim:]), axis=0).astype(np.float32)
-                                rall += r
-                                s = s_new
-                                if done:
-                                    s = env.reset().astype(np.float32)
-                                    rall = 0
+                    if done:
                         break
 
+                print('Episode: {}/{}  | Episode Reward: {:.4f}  | Running Time: {:.4f}'.format(
+                    i_episode, test_episodes, ep_rs_sum, time.time() - t0))
+
         elif mode is not 'test':
-            print('unknow mode type, activate test mode as default')
+            print('unknow mode type')
