@@ -1,11 +1,13 @@
 """Basic neural networks"""
+import math
+
 import tensorflow as tf
 import tensorlayer as tl
 from tensorlayer.layers import Dense, Input
 
 
-def MLP(input_dim, hidden_dim_list,
-        w_init=tf.initializers.Orthogonal(0.2), activation=tf.nn.relu):
+def MLP(input_dim, hidden_dim_list, w_init=tf.initializers.Orthogonal(0.2),
+        activation=tf.nn.relu, *args, **kwargs):
     """Multiple fully-connected layers for approximation
 
     Args:
@@ -19,11 +21,30 @@ def MLP(input_dim, hidden_dim_list,
 
     l = inputs = Input([None, input_dim], name='input_layer')
     for i in range(len(hidden_dim_list)):
-        l = Dense(n_units=hidden_dim_list[i], act=activation,
-                  W_init=w_init, name='hidden_layer%d' % (i+1))(l)
+        l = Dense(n_units=hidden_dim_list[i], act=activation, W_init=w_init, name='mlp_layer%d' % (i + 1))(l)
     outputs = l
 
     return inputs, outputs
+
+
+def MLPModel(input_dim, hidden_dim_list, w_init=tf.initializers.Orthogonal(0.2),
+             activation=tf.nn.relu, *args, **kwargs):
+    """Multiple fully-connected layers for approximation
+
+    Args:
+        input_dim (int): size of input tensor
+        hidden_dim_list (list[int]): a list of dimensions of hidden layers
+        w_init (callable): initialization method for weights
+        activation (callable): activation function of hidden layers
+    Return:
+        input tensor, output tensor
+    """
+    l = inputs = Input([None, input_dim], name='Input_Layer')
+    for i in range(len(hidden_dim_list)):
+        l = Dense(n_units=hidden_dim_list[i], act=activation, W_init=w_init, name='Hidden_Layer%d' % (i + 1))(l)
+    outputs = l
+
+    return tl.models.Model(inputs=inputs, outputs=outputs)
 
 
 def CNN(input_shape, conv_kwargs=None):
@@ -55,35 +76,14 @@ def CNN(input_shape, conv_kwargs=None):
                 'W_init': tf.initializers.GlorotUniform()
             }
         ]
-    l=inputs = tl.layers.Input((1, ) + input_shape, name='input_layer')
+    l = inputs = tl.layers.Input((1,) + input_shape, name='input_layer')
 
     for i, kwargs in enumerate(conv_kwargs):
-        kwargs['name'] = kwargs.get('name', 'hidden_layer{}'.format(i + 1))
+        kwargs['name'] = kwargs.get('name', 'cnn_layer{}'.format(i + 1))
         l = tl.layers.Conv2d(**kwargs)(l)
     outputs = tl.layers.Flatten(name='flatten_layer')(l)
 
     return inputs, outputs
-
-
-def MLPModel(input_dim, hidden_dim_list,
-             w_init=tf.initializers.Orthogonal(0.2), activation=tf.nn.relu):
-    """Multiple fully-connected layers for approximation
-
-    Args:
-        input_dim (int): size of input tensor
-        hidden_dim_list (list[int]): a list of dimensions of hidden layers
-        w_init (callable): initialization method for weights
-        activation (callable): activation function of hidden layers
-    Return:
-        input tensor, output tensor
-    """
-    l = inputs = Input([None, input_dim], name='Input_Layer')
-    for i in range(len(hidden_dim_list)):
-        l = Dense(n_units=hidden_dim_list[i], act=activation,
-                  W_init=w_init, name='Hidden_Layer%d' % (i+1))(l)
-    outputs = l
-
-    return tl.models.Model(inputs=inputs, outputs=outputs)
 
 
 def CNNModel(input_shape, conv_kwargs=None):
@@ -116,7 +116,7 @@ def CNNModel(input_shape, conv_kwargs=None):
             }
         ]
 
-    ni = tl.layers.Input((1, ) + input_shape, name='CNN_Input')
+    ni = tl.layers.Input((1,) + input_shape, name='CNN_Input')
     hi = ni
 
     for i, kwargs in enumerate(conv_kwargs):

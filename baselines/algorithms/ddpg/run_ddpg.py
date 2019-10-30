@@ -1,7 +1,6 @@
 import gym
 
 # from common.env_wrappers import DummyVecEnv
-from common.utils import make_env
 from algorithms.ddpg.ddpg import DDPG
 from common.value_networks import *
 from common.policy_networks import *
@@ -9,24 +8,20 @@ from common.policy_networks import *
 ''' load environment '''
 env = gym.make('Pendulum-v0').unwrapped
 
-state_dim = env.observation_space.shape
-action_dim = env.action_space.shape
-action_max = env.action_space.high
-action_min = env.action_space.low
+obs_space = env.observation_space
+act_space = env.action_space
 
 ''' build networks for the algorithm '''
 name = 'ddpg'
 num_hidden_layer = 1  # number of hidden layers for the networks
 hidden_dim = 30  # dimension of hidden layers for the networks
 
-actor = DeterministicPolicyNetwork(state_dim, action_dim, [hidden_dim] * num_hidden_layer, name=name + '_policy')
-critic = MlpQNetwork(state_dim, action_dim, [2 * hidden_dim] * num_hidden_layer, name=name + '_value')
+actor = DeterministicPolicyNetwork(obs_space, act_space, [hidden_dim] * num_hidden_layer)
+critic = QNetwork(obs_space, act_space, [hidden_dim] * num_hidden_layer)
 
-actor_target = DeterministicPolicyNetwork(state_dim, action_dim, [hidden_dim] * num_hidden_layer,
-                                          name=name + '_policy_target', trainable=False)
+actor_target = DeterministicPolicyNetwork(obs_space, act_space, [hidden_dim] * num_hidden_layer, trainable=False)
 
-critic_target = MlpQNetwork(state_dim, action_dim, [2 * hidden_dim] * num_hidden_layer, name=name + '_value_target',
-                            trainable=False)
+critic_target = QNetwork(obs_space, act_space, [hidden_dim] * num_hidden_layer, trainable=False)
 
 net_list = [critic, critic_target, actor, actor_target]
 
@@ -35,7 +30,7 @@ actor_lr = 1e-3
 critic_lr = 2e-3
 optimizers_list = [tf.optimizers.Adam(critic_lr), tf.optimizers.Adam(actor_lr)]
 replay_buffer_size = 10000
-model = DDPG(net_list, optimizers_list, state_dim[0], action_dim[0], [action_min, action_max], replay_buffer_size)
+model = DDPG(net_list, optimizers_list, replay_buffer_size)
 ''' 
 full list of arguments for the algorithm
 ----------------------------------------
@@ -49,7 +44,8 @@ tau: soft update factor
 var: control exploration
 '''
 
-model.learn(env, gamma=0.9, batch_size=32, reward_shaping=lambda x: x/10)
+model.learn(env, train_episodes=200, test_episodes=100, max_steps=200, save_interval=10,
+              mode='train', render=False, batch_size=32, gamma=0.9, seed=1)
 '''
 full list of parameters for training
 ---------------------------------------

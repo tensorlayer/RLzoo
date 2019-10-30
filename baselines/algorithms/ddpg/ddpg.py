@@ -19,14 +19,13 @@ tensorlayer >=2.0.0
 
 """
 
-import os
 import time
 
 import numpy as np
 
-import gym
 import tensorflow as tf
 import tensorlayer as tl
+import gym
 
 from common.utils import *
 from common.buffer import *
@@ -40,13 +39,10 @@ class DDPG(object):
     DDPG class
     """
 
-    def __init__(self, net_list, optimizers_list, state_dim, action_dim, a_bounds, replay_buffer_size, tau=0.01, var=3):
+    def __init__(self, net_list, optimizers_list, replay_buffer_size, tau=0.01, var=3):
         """
         :param net_list: a list of networks (value and policy) used in the algorithm, from common functions or customization
         :param optimizers_list: a list of optimizers for all networks and differentiable variables
-        :param state_dim: dimension of state for the environment
-        :param action_dim: dimension of action for the environment
-        :param a_bounds: a list of [min_action, max_action] action bounds for the environment
         :param replay_buffer_size: the size of buffer for storing explored samples
         :param tau: soft update factor
         :param var: control exploration
@@ -67,13 +63,6 @@ class DDPG(object):
         self.replay_buffer_size = replay_buffer_size
         self.buffer = ReplayBuffer(replay_buffer_size)
 
-        if a_bounds[0] == a_bounds[1]:
-            raise ValueError('a_bounds value error: min == max')
-        self.a_bounds = a_bounds
-        self.a_mean = np.mean(a_bounds, 0)
-        self.a_scale = a_bounds[1] - self.a_mean
-
-        self.a_dim, self.s_dim = action_dim, state_dim
         self.ema = tf.train.ExponentialMovingAverage(decay=1 - tau)  # soft replacement
         self.var = var
 
@@ -95,7 +84,7 @@ class DDPG(object):
         :param s: state
         :return: action
         """
-        return self.actor(np.array([s], dtype=np.float32))[0] * self.a_scale + self.a_mean
+        return self.actor([s])[0].numpy()
 
     def update(self, batch_size, gamma):
         """
@@ -106,21 +95,20 @@ class DDPG(object):
         """
         self.var *= 0.995
         bs, ba, br, bs_, bd = self.buffer.sample(batch_size)
+
         ba_ = self.actor_target(bs_)
-        target_q_input = tf.concat([bs_, ba_], 1)
-        q_input = tf.concat([bs, ba], 1)
-        q_ = self.critic_target(target_q_input)
+
+        q_ = self.critic_target([bs_, ba_])
         y = br + (1 - bd) * gamma * q_
         with tf.GradientTape() as tape:
-            q = self.critic(q_input)
+            q = self.critic([bs, ba])
             td_error = tf.losses.mean_squared_error(y, q)
         c_grads = tape.gradient(td_error, self.critic.trainable_weights)
         self.critic_opt.apply_gradients(zip(c_grads, self.critic.trainable_weights))
 
         with tf.GradientTape() as tape:
             a = self.actor(bs)
-            q_input = tf.concat([bs, a], 1)
-            q = self.critic(q_input)
+            q = self.critic([bs, a])
             a_loss = - tf.reduce_mean(q)  # maximize the q
         a_grads = tape.gradient(a_loss, self.actor.trainable_weights)
         self.actor_opt.apply_gradients(zip(a_grads, self.actor.trainable_weights))
@@ -135,9 +123,6 @@ class DDPG(object):
         :param s_: next state
         :return: None
         """
-        s = s.astype(np.float32)
-        s_ = s_.astype(np.float32)
-        a = (a - self.a_mean) / self.a_scale
         d = 1 if d else 0
 
         self.buffer.push(s, a, [r], s_, d)
@@ -163,7 +148,7 @@ class DDPG(object):
         load_model(self.critic_target, 'critic_target', 'ddpg', )
 
     def learn(self, env, train_episodes=200, test_episodes=100, max_steps=200, save_interval=10,
-              mode='train', render=False, batch_size=32, gamma=0.9, seed=1, reward_shaping=None):
+              mode='train', render=False, batch_size=32, gamma=0.9, seed=None):
         """
         learn function
         :param env: learning environment
@@ -176,7 +161,6 @@ class DDPG(object):
         :param batch_size: update batch size
         :param gamma: reward decay factor
         :param seed: random seed
-        :param reward_shaping: reward shaping function
         :return: None
         """
         # reproducible
@@ -184,11 +168,11 @@ class DDPG(object):
         np.random.seed(seed)
         tf.random.set_seed(seed)
 
+        t0 = time.time()
+
         if mode == 'train':  # train
             reward_buffer = []
-            t0 = time.time()
             for i in range(1, train_episodes + 1):
-                t1 = time.time()
                 s = env.reset()
                 if render:
                     env.render()
@@ -196,30 +180,29 @@ class DDPG(object):
                 for j in range(max_steps):
                     # Add exploration noise
                     a = self.choose_action(s)
-                    a = np.clip(np.random.normal(a, self.var), self.a_bounds[0], self.a_bounds[1])
+                    if isinstance(env.action_space, gym.spaces.Box):
+                        a = np.clip(np.random.normal(a, self.var), env.action_space.low, env.action_space.high)
                     # add randomness to action selection for exploration
 
                     s_, r, done, info = env.step(a)
-                    shaped_reward = reward_shaping(r) if reward_shaping else r
 
-                    self.store_transition(s, a, shaped_reward, s_, done)
+                    self.store_transition(s, a, r, s_, done)
 
                     if len(self.buffer) >= self.replay_buffer_size:
                         self.update(batch_size, gamma)
-
+                    # print('s_', s_)
                     s = s_
                     ep_reward += r
                     if j == max_steps - 1:
                         print(
-                            '\rEpisode: {}/{}  | Episode Reward: {:.4f}  | Running Time(training): {:.4f}'.format(
+                            '\rEpisode: {}/{}  | Episode Reward: {:.4f}  | Running Time: {:.4f}'.format(
                                 i, train_episodes, ep_reward,
-                                time.time() - t1
+                                time.time() - t0
                             ), end=''
                         )
                     plt.show()
                 # test
                 if i and not i % save_interval:
-                    t1 = time.time()
                     s = env.reset()
                     ep_reward = 0
                     for j in range(max_steps):
@@ -231,9 +214,9 @@ class DDPG(object):
                         ep_reward += r
                         if j == max_steps - 1:
                             print(
-                                '\rEpisode: {}/{}  | Episode Reward: {:.4f}  | Running Time(testing): {:.4f}'.format(
+                                '\rEpisode: {}/{}  | Episode Reward: {:.4f}  | Running Time: {:.4f}'.format(
                                     i, train_episodes, ep_reward,
-                                    time.time() - t1
+                                    time.time() - t0
                                 )
                             )
 
@@ -244,13 +227,24 @@ class DDPG(object):
         # test
         elif mode == 'test':
             self.load_ckpt()
-            for i in range(test_episodes):
+            ep_rs_sum = 0
+            for eps in range(test_episodes):
                 s = env.reset()
-                for i in range(max_steps):
-                    env.render()
-                    s, r, done, info = env.step(self.choose_action(s))
+                for step in range(max_steps):
+                    if render:
+                        env.render()
+                    action = self.choose_action(s)
+                    observation, reward, done, info = env.step(action)
+                    ep_rs_sum += reward
                     if done:
                         break
+                try:
+                    running_reward = running_reward * 0.99 + ep_rs_sum * 0.01
+                except:
+                    running_reward = ep_rs_sum
 
+                print('Episode: {}/{}  | Episode Reward: {:.4f}  | Running Time: {:.4f}'.format(
+                    eps, test_episodes, ep_rs_sum, time.time() - t0)
+                )
         else:
             print('unknown mode type')
