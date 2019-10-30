@@ -137,10 +137,6 @@ def rlbench(env):
             with tf.name_scope('Policy'):
                 policy_net = StochasticPolicyNetwork(env.observation_space, env.action_space, hidden_dim_list=num_hidden_layer*[hidden_dim])
         net_list = [soft_q_net1, soft_q_net2, target_soft_q_net1, target_soft_q_net2, policy_net]
-        # soft_q_net1.train()
-        # soft_q_net2.train()
-        # target_soft_q_net1.train()
-        # target_soft_q_net2.train()
         alg_params['net_list'] = net_list
     if alg_params.get('optimizers_list') is None:
         soft_q_lr, policy_lr, alpha_lr = 3e-4, 3e-4, 3e-4  # soft_q_lr: learning rate of the Q network; policy_lr: learning rate of the policy network; alpha_lr: learning rate of the variable alpha
