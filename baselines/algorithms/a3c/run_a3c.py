@@ -72,4 +72,5 @@ seed: random seed
 save_interval: timesteps for saving the weights and plotting the results
 mode: train or test
 '''
-
+# test
+model.learn(env_list, test_episodes=10, mode='test', render=True)

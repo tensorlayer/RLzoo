@@ -39,7 +39,10 @@ def atari(env):
     learn_params = dict(
         seed=2, 
         max_steps=1000,
-        gamma = 0.9
+        gamma = 0.9,
+        train_episodes=1000, 
+        test_episodes=10, 
+        save_interval=100
     )
 
     return alg_params, learn_params
@@ -78,6 +81,9 @@ def classic_control(env):
         seed=2, 
         max_steps=100,
         gamma = 0.9
+        train_episodes=1000, 
+        test_episodes=10, 
+        save_interval=100
     )
 
     return alg_params, learn_params

@@ -52,34 +52,23 @@ from algorithms import *
 # EnvName = 'ToiletSeatUp'
 # EnvType = ['atari', 'box2d', 'classic_control', 'mujoco', 'robotics', 'dm_control', 'rlbench'][-1]
 
-# env = build_env(EnvName, EnvType)
-# alg_params, learn_params = call_default_params(env, EnvType, 'TD3')
-# alg = TD3(**alg_params)
-# alg.learn(env=env, train_episodes=1000, test_episodes=1000, 
-#         save_interval=100, mode='train', render=False, **learn_params)
+env = build_env(EnvName, EnvType)
+alg_params, learn_params = call_default_params(env, EnvType, 'TD3')
+alg = TD3(**alg_params)
+alg.learn(env=env, train_episodes=1000, test_episodes=1000, 
+        save_interval=100, mode='train', render=False, **learn_params)
 
 # EnvName = 'Pendulum-v0'
-EnvName = 'CartPole-v0'  # classic_control, ac cannot learn cartpole-v1
-EnvType = ['classic_control', 'atari', 'box2d', 'mujoco', 'robotics', 'dm_control'][0]
+# EnvName = 'CartPole-v0'  # classic_control, ac cannot learn cartpole-v1
+# EnvType = ['classic_control', 'atari', 'box2d', 'mujoco', 'robotics', 'dm_control'][0]
 # EnvName = 'ReachTarget'
 # EnvType = ['atari', 'box2d', 'classic_control', 'mujoco', 'robotics', 'dm_control', 'rlbench'][-1]
+# number_workers = 2
+# env = build_env(EnvName, EnvType, nenv=number_workers)
+# alg_params, learn_params = call_default_params(env, EnvType, 'A3C')
+# alg = A3C(**alg_params)
+# alg.learn(env=env,  mode='train', number_workers=number_workers, render=False, **learn_params)
 
-number_workers = 2
-env = build_env(EnvName, EnvType, nenv=number_workers)
-alg_params, learn_params = call_default_params(env, EnvType, 'A3C')
-alg = A3C(**alg_params)
-alg.learn(env=env, train_episodes=1000, test_episodes=1000, 
-        save_interval=100, mode='train', number_workers=number_workers, render=False, **learn_params)
-
-
-# EnvName = 'CartPole-v1'
-# EnvType = ['classic_control', 'atari', 'box2d', 'mujoco', 'dm_control'][0]
-
-# env = build_env(EnvName, EnvType)
-# alg_params, learn_params = call_default_params(env, EnvType, 'DQN')
-# alg = DQN('train', **alg_params)
-# alg.learn(env=env, number_timesteps=int(1e4), save_path=None,
-#           save_interval=0, **learn_params)
 
 
 # EnvName = 'CartPole-v1'
@@ -89,6 +78,5 @@ alg.learn(env=env, train_episodes=1000, test_episodes=1000,
 # env = build_env(EnvName, EnvType)
 # alg_params, learn_params = call_default_params(env, EnvType, 'DQN')
 # alg = DQN(**alg_params)
-# alg.learn(env=env, number_timesteps=int(5e4), test_episodes=10, save_path=None,
-#           save_interval=10000, mode='train', **learn_params)
+# alg.learn(env=env, mode='train', **learn_params)
 

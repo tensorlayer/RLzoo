@@ -36,7 +36,7 @@ cv2.ocl.setUseOpenCL(False)
 
 
 def build_env(env_id, env_type, vectorized=False,
-              seed=0, reward_shaping=None, nenv=0, **kwargs):
+              seed=0, reward_shaping=None, nenv=1, **kwargs):
     """Build env based on options
     Args:
         env_id (str): environment id

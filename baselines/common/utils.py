@@ -120,13 +120,6 @@ def learn(env_id, algorithm, train_episodes, **kwargs):
     getattr(module, 'learn')(env_id=env_id, train_episodes=train_episodes, **kwargs)  # call module.learn()
 
 
-
-# def get_algorithm_parameters(env, env_type, algorithm, **kwargs):
-#     """ Get algorithm hyper-parameters """
-#     module = get_algorithm_module(algorithm, 'default')
-#     return getattr(module, env_type)(env, **kwargs)
-
-
 def get_algorithm_module(algorithm, submodule):
     """ Get algorithm module in the corresponding folder """
     return import_module('.'.join(['algorithms', algorithm, submodule]))

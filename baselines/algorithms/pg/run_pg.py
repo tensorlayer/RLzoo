@@ -37,7 +37,7 @@ state_dim: dimension of state for the environment
 action_dim: dimension of action for the environment
 '''
 
-model.learn(env, train_episodes=300, test_episodes=200, max_steps=3000, save_interval=100,
+model.learn(env, train_episodes=300, max_steps=3000, save_interval=100,
             mode='train', render=False, gamma=0.95, seed=2,)
 """
 full list of parameters for training
@@ -55,10 +55,5 @@ seed: random seed
 """
 
 # test
-observation = env.reset()
-for step in range(3000):
-    env.render()
-    action = model.choose_action_greedy(observation)
-    observation, reward, done, info = env.step(action)
-    if done: break
-env.close()
+model.learn(env, test_episodes=200, max_steps=3000,
+            mode='test', render=True,)

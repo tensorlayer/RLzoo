@@ -194,7 +194,7 @@ class A3C():
         self.net_list = net_list
         self.optimizers_list = optimizers_list
 
-    def learn(self, env, train_episodes, render=False, test_episodes=1000, max_steps=150, number_workers=1, update_itr=10,
+    def learn(self, env, train_episodes=1000, render=False, test_episodes=10, max_steps=150, number_workers=1, update_itr=10,
         gamma=0.99, entropy_beta=0.005 , actor_lr=5e-5, critic_lr=1e-4, seed=2, save_interval=500, mode='train'):
 
         '''

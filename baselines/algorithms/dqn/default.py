@@ -8,6 +8,10 @@ def atari(env, **kwargs):
     in_dim = env.observation_space.shape
     act_dim = env.action_space.n
     params = dict(
+        number_timesteps=int(5e4), 
+        test_episodes=10, 
+        save_path=None,
+        save_interval=1e4,
         batch_size=32,
         double_q=True,
         buffer_size=10000,
@@ -36,6 +40,10 @@ def classic_control(env, **kwargs):
     in_dim = env.observation_space.shape[0]
     act_dim = env.action_space.n
     params = dict(
+        number_timesteps=int(1e4), 
+        test_episodes=10, 
+        save_path=None,
+        save_interval=1e3,
         batch_size=32,
         double_q=True,
         buffer_size=1000,
