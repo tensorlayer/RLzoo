@@ -131,12 +131,9 @@ def get_algorithm_module(algorithm, submodule):
     return import_module('.'.join(['algorithms', algorithm, submodule]))
 
 
-def call_default_params(env, envtype, alg, set_seed=False):
+def call_default_params(env, envtype, alg, default_seed=True):
     """ Get the default parameters for training from the default script """
     alg = alg.lower()
     default = import_module('.'.join(['algorithms', alg, 'default']))
-    if set_seed:
-        params = getattr(default, envtype)(env, set_seed)
-    else:
-        params = getattr(default, envtype)(env)
+    params = getattr(default, envtype)(env, default_seed)
     return params
