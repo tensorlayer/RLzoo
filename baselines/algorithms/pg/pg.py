@@ -4,7 +4,7 @@ Vanilla Policy Gradient(VPG or REINFORCE)
 The policy gradient algorithm works by updating policy parameters via stochastic gradient ascent on policy performance.
 It's an on-policy algorithm can be used for environments with either discrete or continuous action spaces.
 Here is an example on discrete action space game CartPole-v0.
-To apply it on continuous action space, you need to change the last softmax layer and the choose_action function.
+To apply it on continuous action space, you need to change the last softmax layer and the get_action function.
 
 Reference
 ---------
@@ -27,6 +27,7 @@ import tensorflow as tf
 import tensorlayer as tl
 
 from common.utils import *
+from common.policy_networks import *
 
 
 ###############################  PG  ####################################
@@ -41,18 +42,18 @@ class PG:
         """
         :param net_list: a list of networks (value and policy) used in the algorithm, from common functions or customization
         :param optimizers_list: a list of optimizers for all networks and differentiable variables
-        :param state_dim: dimension of state for the environment
-        :param action_dim: dimension of action for the environment
+
         """
         assert len(net_list) == 1
         assert len(optimizers_list) == 1
         self.name = 'pg'
         self.model = net_list[0]
+        assert isinstance(self.model, StochasticPolicyNetwork)
         self.buffer = []
         print('Policy Network', self.model)
         self.optimizer = optimizers_list[0]
 
-    def choose_action(self, s):
+    def get_action(self, s):
         """
         choose action with probabilities.
         :param s: state
@@ -60,7 +61,7 @@ class PG:
         """
         return self.model(np.array([s], np.float32))[0].numpy()
 
-    def choose_action_greedy(self, s):
+    def get_action_greedy(self, s):
         """
         choose action with greedy policy
         :param s: state
@@ -87,6 +88,7 @@ class PG:
         s, a, r = zip(*self.buffer)
         s, a, r = np.array(s), np.array(a), np.array(r).flatten()
         discounted_ep_rs_norm = self._discount_and_norm_rewards(r, gamma)
+        # print(discounted_ep_rs_norm)
 
         with tf.GradientTape() as tape:
             self.model(np.vstack(s))
@@ -114,24 +116,25 @@ class PG:
         # normalize episode rewards
         discounted_ep_rs -= np.mean(discounted_ep_rs)
         discounted_ep_rs /= np.std(discounted_ep_rs)
+        discounted_ep_rs = discounted_ep_rs[:, np.newaxis]
         return discounted_ep_rs
 
-    def save(self, name='policy'):
+    def save_ckpt(self, name='model_policy'):
         """
         save trained weights
         :return: None
         """
         save_model(self.model, name, self.name)
 
-    def load_ckpt(self, name='policy'):
+    def load_ckpt(self, name='model_policy'):
         """
         load trained weights
         :return: None
         """
         load_model(self.model, name, self.name)
 
-    def learn(self, env, train_episodes=300, test_episodes=200, max_steps=3000, save_interval=100,
-              mode='train', render=False, gamma=0.95, seed=None):
+    def learn(self, env, train_episodes=200, test_episodes=100, max_steps=200, save_interval=100,
+              mode='train', render=False, gamma=0.95):
         """
         parameters
         ----------
@@ -139,18 +142,12 @@ class PG:
         :param train_episodes: total number of episodes for training
         :param test_episodes: total number of episodes for testing
         :param max_steps: maximum number of steps for one episode
-        :param save_interval: timesteps for saving
+        :param save_interval: time steps for saving
         :param mode: train or test
         :param render: render each step
         :param gamma: reward decay
-        :param seed: random seed
         :return: None
         """
-        if seed:
-            # reproducible
-            np.random.seed(seed)
-            tf.random.set_seed(seed)
-            env.seed(seed)
 
         if mode == 'train':
             reward_buffer = []
@@ -165,7 +162,7 @@ class PG:
                     if render:
                         env.render()
 
-                    action = self.choose_action(observation)
+                    action = self.get_action(observation)
                     observation_, reward, done, info = env.step(action)
                     self.store_transition(observation, action, reward)
 
@@ -175,20 +172,18 @@ class PG:
                     if done:
                         break
 
-                try:
-                    running_reward = running_reward * 0.99 + ep_rs_sum * 0.01
-                except:
-                    running_reward = ep_rs_sum
-
                 print('Episode: {}/{}  | Episode Reward: {:.4f}  | Running Time: {:.4f}'.format(
                     i_episode, train_episodes, ep_rs_sum, time.time() - t0)
                 )
-                reward_buffer.append(running_reward)
+                reward_buffer.append(ep_rs_sum)
 
                 self.update(gamma)
 
                 if i_episode and i_episode % save_interval == 0:
-                    self.save()
+                    self.save_ckpt()
+                    plot_save_log(reward_buffer, Algorithm_name='PG', Env_name=env.spec.id)
+
+            self.save_ckpt()
             plot_save_log(reward_buffer, Algorithm_name='PG', Env_name=env.spec.id)
 
         elif mode == 'test':
@@ -201,15 +196,11 @@ class PG:
                 for step in range(max_steps):
                     if render:
                         env.render()
-                    action = self.choose_action_greedy(observation)
+                    action = self.get_action_greedy(observation)
                     observation, reward, done, info = env.step(action)
                     ep_rs_sum += reward
                     if done:
                         break
-                try:
-                    running_reward = running_reward * 0.99 + ep_rs_sum * 0.01
-                except:
-                    running_reward = ep_rs_sum
                 print('Episode: {}/{}  | Episode Reward: {:.4f}  | Running Time: {:.4f}'.format(
                     eps, test_episodes, ep_rs_sum, time.time() - t0)
                 )

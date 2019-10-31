@@ -9,7 +9,6 @@ tensorlayer==2.0.1
 import operator
 import os
 import re
-import random
 import gym
 
 
@@ -125,10 +124,9 @@ def get_algorithm_module(algorithm, submodule):
     return import_module('.'.join(['algorithms', algorithm, submodule]))
 
 
-def call_default_params(env, envtype, alg):
+def call_default_params(env, envtype, alg, default_seed=True):
     """ Get the default parameters for training from the default script """
     alg = alg.lower()
     default = import_module('.'.join(['algorithms', alg, 'default']))
-    params = getattr(default, envtype)(env)
-    
+    params = getattr(default, envtype)(env, default_seed)
     return params
