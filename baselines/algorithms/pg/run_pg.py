@@ -42,7 +42,7 @@ state_dim: dimension of state for the environment
 action_dim: dimension of action for the environment
 '''
 
-model.learn(env, train_episodes=200, max_steps=150, save_interval=100, mode='train', render=False, gamma=0.95)
+model.learn(env, train_episodes=200, max_steps=200, save_interval=100, mode='train', render=False, gamma=0.95)
 """
 full list of parameters for training
 ---------------------------------------
@@ -59,4 +59,4 @@ seed: random seed
 """
 
 # test
-model.learn(env, test_episodes=100, max_steps=150, mode='test', render=True)
+model.learn(env, test_episodes=100, max_steps=200, mode='test', render=True)

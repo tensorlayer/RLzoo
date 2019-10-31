@@ -34,7 +34,7 @@ def atari(env, set_seed=False):
     learn_params = dict(
         train_episodes=200,
         test_episodes=100,
-        max_steps=150,
+        max_steps=200,
         save_interval=100,
         gamma=0.95
     )
@@ -71,7 +71,7 @@ def classic_control(env, set_seed=False):
     learn_params = dict(
         train_episodes=200,
         test_episodes=100,
-        max_steps=150,
+        max_steps=200,
         save_interval=100,
         gamma=0.95
     )
@@ -108,7 +108,7 @@ def box2d(env, set_seed=False):
     learn_params = dict(
         train_episodes=200,
         test_episodes=100,
-        max_steps=150,
+        max_steps=200,
         save_interval=100,
         gamma=0.95
     )
@@ -145,7 +145,7 @@ def mujoco(env, set_seed=False):
     learn_params = dict(
         train_episodes=200,
         test_episodes=100,
-        max_steps=150,
+        max_steps=200,
         save_interval=100,
         gamma=0.95
     )
@@ -182,7 +182,7 @@ def robotics(env, set_seed=False):
     learn_params = dict(
         train_episodes=200,
         test_episodes=100,
-        max_steps=150,
+        max_steps=200,
         save_interval=100,
         gamma=0.95
     )
@@ -219,7 +219,7 @@ def rlbench(env, set_seed=False):
     learn_params = dict(
         train_episodes=200,
         test_episodes=100,
-        max_steps=150,
+        max_steps=200,
         save_interval=100,
         gamma=0.95
     )

@@ -133,7 +133,7 @@ class PG:
         """
         load_model(self.model, name, self.name)
 
-    def learn(self, env, train_episodes=200, test_episodes=100, max_steps=500, save_interval=100,
+    def learn(self, env, train_episodes=200, test_episodes=100, max_steps=200, save_interval=100,
               mode='train', render=False, gamma=0.95):
         """
         parameters
