@@ -17,7 +17,7 @@ from importlib import import_module
 import numpy as np
 
 import tensorlayer as tl
-
+import tensorflow as tf
 
 def plot(episode_rewards, Algorithm_name, Env_name):
     '''
@@ -112,11 +112,10 @@ def make_env(env_id):
     return env 
 
 
-def learn(env_id, algorithm, train_episodes, **kwargs):
-    algorithm = algorithm.lower()
-    module = get_algorithm_module(algorithm, algorithm)
-    # env = make_env(env_id)
-    getattr(module, 'learn')(env_id=env_id, train_episodes=train_episodes, **kwargs)  # call module.learn()
+# def learn(env_id, algorithm, train_episodes, **kwargs):
+#     algorithm = algorithm.lower()
+#     module = get_algorithm_module(algorithm, algorithm)
+#     getattr(module, 'learn')(env_id=env_id, train_episodes=train_episodes, **kwargs)  # call module.learn()
 
 
 def get_algorithm_module(algorithm, submodule):
@@ -128,5 +127,12 @@ def call_default_params(env, envtype, alg, default_seed=True):
     """ Get the default parameters for training from the default script """
     alg = alg.lower()
     default = import_module('.'.join(['algorithms', alg, 'default']))
-    params = getattr(default, envtype)(env, default_seed)
+    params = getattr(default, envtype)(env, default_seed)  # need manually set seed in the main script if default_seed = False
     return params
+
+def set_seed(seed, env=None):
+    """ set random seed for reproduciblity """
+    if env is not None:
+        env.seed(seed)
+    np.random.seed(seed)
+    tf.random.set_seed(seed)

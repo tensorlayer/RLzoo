@@ -3,6 +3,7 @@ import tensorflow as tf
 # from common.env_wrappers import DummyVecEnv
 from common.utils import make_env
 from algorithms.td3.td3 import TD3
+import numpy as np
 from common.value_networks import *
 from common.policy_networks import *
 
@@ -11,6 +12,11 @@ env = gym.make('Pendulum-v0').unwrapped
 # env = DummyVecEnv([lambda: env])  # The algorithms require a vectorized/wrapped environment to run
 action_shape = env.action_space.shape
 state_shape = env.observation_space.shape
+# reproducible
+seed = 2
+np.random.seed(seed)
+tf.random.set_seed(seed)
+env.seed(seed)
 
 ''' build networks for the algorithm '''
 num_hidden_layer = 4 #number of hidden layers for the networks
@@ -51,7 +57,7 @@ action_range: value of each action in [-action_range, action_range]
 '''
 
 model.learn(env, train_episodes=100, max_steps=150, batch_size=64, explore_steps=500, update_itr=3, 
-reward_scale = 1. , seed=2, save_interval=10, explore_noise_scale = 1.0, eval_noise_scale = 0.5, mode='train', render=False)
+reward_scale = 1., save_interval=10, explore_noise_scale = 1.0, eval_noise_scale = 0.5, mode='train', render=False)
 ''' 
 full list of parameters for training
 ---------------------------------------
@@ -63,7 +69,6 @@ batch_size:  udpate batchsize
 explore_steps:  for random action sampling in the beginning of training
 update_itr: repeated updates for single step
 reward_scale: value range of reward
-seed: random seed
 save_interval: timesteps for saving the weights and plotting the results
 explore_noise_scale: range of action noise for exploration
 eval_noise_scale: range of action noise for evaluation of action value
@@ -71,12 +76,5 @@ mode: 'train' or 'test'
 render: if true, visualize the environment
 
 '''
-
-
-obs = env.reset()
-for i in range(1000):
-    action = model.get_action(obs)
-    obs, rewards, dones, info = env.step(action)
-    env.render()
-
-env.close()
+# test
+model.learn(env, test_episodes=100, max_steps=150, mode='test', render=True)

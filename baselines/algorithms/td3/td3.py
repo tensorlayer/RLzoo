@@ -209,8 +209,8 @@ class TD3():
         load_model(self.target_policy_net, 'model_target_policy_net', 'TD3')
 
 
-    def learn(self, env, train_episodes, test_episodes=1000, max_steps=150, batch_size=64, explore_steps=500, update_itr=3, 
-        reward_scale = 1. , seed=2, save_interval=10, explore_noise_scale = 1.0, eval_noise_scale = 0.5, mode='train', render=False):
+    def learn(self, env, train_episodes=1000, test_episodes=1000, max_steps=150, batch_size=64, explore_steps=500, update_itr=3, 
+        reward_scale = 1. , save_interval=10, explore_noise_scale = 1.0, eval_noise_scale = 0.5, mode='train', render=False):
         '''
         parameters
         ----------
@@ -222,7 +222,6 @@ class TD3():
         explore_steps:  for random action sampling in the beginning of training
         update_itr: repeated updates for single step
         reward_scale: value range of reward
-        seed: random seed
         save_interval: timesteps for saving the weights and plotting the results
         explore_noise_scale: range of action noise for exploration
         eval_noise_scale: range of action noise for evaluation of action value
@@ -230,9 +229,6 @@ class TD3():
         render: if true, visualize the environment
 
         '''
-        random.seed(seed)
-        np.random.seed(seed)
-        tf.random.set_seed(seed)  # reproducible
 
         # training loop
         if mode=='train':

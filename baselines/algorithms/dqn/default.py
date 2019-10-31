@@ -2,9 +2,14 @@ import tensorflow as tf
 import tensorlayer as tl
 
 from common import basic_nets
+from common.utils import set_seed
 
 
-def atari(env, **kwargs):
+def atari(env, default_seed=False, **kwargs):
+    if default_seed:
+        seed = 2
+        set_seed(seed, env) # reproducible
+
     in_dim = env.observation_space.shape
     act_dim = env.action_space.n
     params = dict(
@@ -36,7 +41,11 @@ def atari(env, **kwargs):
     return dict(), params
 
 
-def classic_control(env, **kwargs):
+def classic_control(env, default_seed=False, **kwargs):
+    if default_seed:
+        seed = 2
+        set_seed(seed, env) # reproducible
+
     in_dim = env.observation_space.shape[0]
     act_dim = env.action_space.n
     params = dict(

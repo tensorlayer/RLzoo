@@ -4,9 +4,14 @@ import tensorlayer as tl
 from common import math_utils
 from common.value_networks import *
 from common.policy_networks import *
+from common.utils import set_seed
 
 
-def atari(env):
+def atari(env, default_seed=True):
+    if default_seed:
+        seed = 2 
+        set_seed(seed) # reproducible
+    
     # for multi-threading
     if isinstance(env, list):  # judge if multiple envs are passed in for parallel computing
         num_env = len(env)  # number of envs passed in
@@ -37,7 +42,6 @@ def atari(env):
         alg_params['optimizers_list'] = optimizers_list
 
     learn_params = dict(
-        seed=2, 
         max_steps=1000,
         gamma = 0.9,
         train_episodes=1000, 
@@ -48,7 +52,11 @@ def atari(env):
     return alg_params, learn_params
 
 
-def classic_control(env):
+def classic_control(env, default_seed=True):
+    if default_seed:
+        seed = 2 
+        set_seed(seed) # reproducible
+    
     # for multi-threading
     if isinstance(env, list):  # judge if multiple envs are passed in for parallel computing
         num_env = len(env)  # number of envs passed in
@@ -78,9 +86,8 @@ def classic_control(env):
         alg_params['optimizers_list'] = optimizers_list
 
     learn_params = dict(
-        seed=2, 
         max_steps=100,
-        gamma = 0.9
+        gamma = 0.9,
         train_episodes=1000, 
         test_episodes=10, 
         save_interval=100

@@ -1,6 +1,6 @@
 import gym
 # from common.env_wrappers import DummyVecEnv
-from common.utils import make_env
+from common.utils import make_env, set_seed
 from algorithms.ac.ac import AC
 from common.value_networks import *
 from common.policy_networks import *
@@ -10,6 +10,9 @@ from common.policy_networks import *
 env = gym.make('Pendulum-v0').unwrapped
 obs_space = env.observation_space
 act_space = env.action_space
+# reproducible
+seed = 2
+set_seed(seed, env)
 
 # env = DummyVecEnv([lambda: env])  # The algorithms require a vectorized/wrapped environment to run
 
@@ -41,7 +44,7 @@ gamma: discounted factor of reward
 '''
 
 model.learn(env, train_episodes=500, test_episodes=100, max_steps=200,
-            seed=2, save_interval=50, mode='train', render=False)
+            save_interval=50, mode='train', render=False)
 ''' 
 full list of parameters for training
 ---------------------------------------
@@ -49,7 +52,6 @@ env: learning environment
 train_episodes:  total number of episodes for training
 test_episodes:  total number of episodes for testing
 max_steps:  maximum number of steps for one episode
-seed: random seed
 save_interval: time steps for saving the weights and plotting the results
 mode: 'train' or 'test'
 render:  if true, visualize the environment

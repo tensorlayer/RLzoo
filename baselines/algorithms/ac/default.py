@@ -5,9 +5,14 @@ from common import math_utils
 from common.value_networks import *
 from common.policy_networks import *
 from gym import spaces
+from common.utils import set_seed
 
 
-def atari(env):
+def atari(env, default_seed=True):
+    if default_seed:
+        seed = 2 
+        set_seed(seed, env) # reproducible
+    
     alg_params = dict(
         gamma=0.9,
     )
@@ -31,14 +36,20 @@ def atari(env):
         alg_params['optimizers_list'] = optimizers_list
 
     learn_params = dict(
-        seed=2,
-        max_steps=200
+        max_steps=200, 
+        train_episodes=1000, 
+        test_episodes=10, 
+        save_interval=100,
     )
 
     return alg_params, learn_params
 
 
-def classic_control(env):
+def classic_control(env, default_seed=True):
+    if default_seed:
+        seed = 2 
+        set_seed(seed, env) # reproducible
+    
     alg_params = dict(
         gamma=0.9,
     )
@@ -62,14 +73,20 @@ def classic_control(env):
         alg_params['optimizers_list'] = optimizers_list
 
     learn_params = dict(
-        seed=2,
-        max_steps=200
+        max_steps=200, 
+        train_episodes=1000, 
+        test_episodes=10, 
+        save_interval=100,
     )
 
     return alg_params, learn_params
 
 
-def box2d(env):
+def box2d(env, default_seed=True):
+    if default_seed:
+        seed = 2 
+        set_seed(seed, env) # reproducible
+    
     alg_params = dict(
         gamma=0.9,
     )
@@ -93,14 +110,20 @@ def box2d(env):
         alg_params['optimizers_list'] = optimizers_list
 
     learn_params = dict(
-        seed=2,
-        max_steps=200
+        max_steps=200, 
+        train_episodes=1000, 
+        test_episodes=10, 
+        save_interval=100,
     )
 
     return alg_params, learn_params
 
 
-def mujoco(env):
+def mujoco(env, default_seed=True):
+    if default_seed:
+        seed = 2 
+        set_seed(seed, env) # reproducible
+    
     alg_params = dict(
         gamma=0.9,
     )
@@ -124,14 +147,20 @@ def mujoco(env):
         alg_params['optimizers_list'] = optimizers_list
 
     learn_params = dict(
-        seed=2,
-        max_steps=200
+        max_steps=200, 
+        train_episodes=1000, 
+        test_episodes=10, 
+        save_interval=100,
     )
 
     return alg_params, learn_params
 
 
-def robotics(env):
+def robotics(env, default_seed=True):
+    if default_seed:
+        seed = 2 
+        set_seed(seed, env) # reproducible
+    
     alg_params = dict(
         gamma=0.9,
     )
@@ -155,14 +184,20 @@ def robotics(env):
         alg_params['optimizers_list'] = optimizers_list
 
     learn_params = dict(
-        seed=2,
-        max_steps=200
+        max_steps=200, 
+        train_episodes=1000, 
+        test_episodes=10, 
+        save_interval=100,
     )
 
     return alg_params, learn_params
 
 
-def rlbench(env):
+def rlbench(env, default_seed=True):
+    if default_seed:
+        seed = 2 
+        set_seed(seed, env) # reproducible
+    
     alg_params = dict(
         gamma=0.9,
     )
@@ -186,8 +221,10 @@ def rlbench(env):
         alg_params['optimizers_list'] = optimizers_list
 
     learn_params = dict(
-        seed=2,
-        max_steps=200
+        max_steps=200,
+        train_episodes=1000, 
+        test_episodes=10, 
+        save_interval=100,
     )
 
     return alg_params, learn_params

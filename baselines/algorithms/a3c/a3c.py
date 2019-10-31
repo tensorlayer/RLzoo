@@ -195,7 +195,7 @@ class A3C():
         self.optimizers_list = optimizers_list
 
     def learn(self, env, train_episodes=1000, render=False, test_episodes=10, max_steps=150, number_workers=1, update_itr=10,
-        gamma=0.99, entropy_beta=0.005 , actor_lr=5e-5, critic_lr=1e-4, seed=2, save_interval=500, mode='train'):
+        gamma=0.99, entropy_beta=0.005 , actor_lr=5e-5, critic_lr=1e-4, save_interval=500, mode='train'):
 
         '''
         parameters
@@ -210,7 +210,6 @@ class A3C():
         entropy_beta: factor for entropy boosted exploration
         actor_lr: learning rate for actor
         critic_lr: learning rate for critic
-        seed: random seed
         save_interval: timesteps for saving the weights and plotting the results
         mode: train or test
 
@@ -220,9 +219,6 @@ class A3C():
         GLOBAL_RUNNING_R = []
         GLOBAL_EP = 0  # will increase during training, stop training when it >= MAX_GLOBAL_EP
         N_WORKERS = number_workers if number_workers>0 else multiprocessing.cpu_count()
-
-        np.random.seed(seed)
-        tf.random.set_seed(seed)  # reproducible
 
         if mode=='train':
             # ============================= TRAINING ===============================

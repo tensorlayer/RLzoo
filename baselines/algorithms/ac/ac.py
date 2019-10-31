@@ -109,8 +109,8 @@ class AC:
         load_model(self.actor, 'model_actor', 'AC')
         load_model(self.critic, 'model_critic', 'AC')
 
-    def learn(self, env, train_episodes, test_episodes=500, max_steps=200,
-              seed=None, save_interval=100, mode='train', render=False):
+    def learn(self, env, train_episodes=1000, test_episodes=500, max_steps=200,
+              save_interval=100, mode='train', render=False):
         """
         parameters
         -----------
@@ -118,15 +118,10 @@ class AC:
         train_episodes:  total number of episodes for training
         test_episodes:  total number of episodes for testing
         max_steps:  maximum number of steps for one episode
-        seed: random seed
         save_interval: time steps for saving the weights and plotting the results
         mode: 'train' or 'test'
         render:  if true, visualize the environment
         """
-
-        env.seed(seed)  # reproducible
-        np.random.seed(seed)
-        tf.random.set_seed(seed)  # reproducible
 
         t0 = time.time()
         if mode == 'train':

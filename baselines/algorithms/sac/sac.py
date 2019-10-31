@@ -188,8 +188,8 @@ class SAC():
         load_model(self.policy_net, 'model_policy_net', 'SAC')
 
 
-    def learn(self, env, train_episodes, test_episodes=1000, max_steps=150, batch_size=64, explore_steps=500, \
-        update_itr=3, policy_target_update_interval = 3,  reward_scale = 1. , seed=2, save_interval=20, \
+    def learn(self, env, train_episodes=1000, test_episodes=1000, max_steps=150, batch_size=64, explore_steps=500, \
+        update_itr=3, policy_target_update_interval = 3,  reward_scale = 1. , save_interval=20, \
         mode='train', AUTO_ENTROPY = True, DETERMINISTIC = False, render=False):
         '''
         parameters
@@ -203,15 +203,12 @@ class SAC():
         update_itr: repeated updates for single step
         policy_target_update_interval: delayed update for the policy network and target networks
         reward_scale: value range of reward
-        seed: random seed
         save_interval: timesteps for saving the weights and plotting the results
         mode: 'train' or 'test'
         AUTO_ENTROPY: automatically updating variable alpha for entropy
         DETERMINISTIC: stochastic action policy if False, otherwise deterministi
         render: if true, visualize the environment
         '''
-        np.random.seed(seed)
-        tf.random.set_seed(seed)  # reproducible
 
         # training loop
         if mode=='train':

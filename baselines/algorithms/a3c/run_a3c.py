@@ -13,6 +13,11 @@ env = gym.make(env_id).unwrapped
 # env = DummyVecEnv([lambda: env])  # The algorithms require a vectorized/wrapped environment to run
 action_shape = env.action_space.shape
 state_shape = env.observation_space.shape
+# reproducible
+seed = 2
+np.random.seed(seed)
+tf.random.set_seed(seed)
+env.seed(seed)
 
 ''' build networks for the algorithm '''
 num_hidden_layer = 4 #number of hidden layers for the networks
@@ -54,7 +59,7 @@ env_list=[]
 for i in range(num_workers):
     env_list.append(gym.make(env_id).unwrapped)
 model.learn(env_list, train_episodes=100, test_episodes=1000, max_steps=150, number_workers=num_workers, update_itr=10,
-        gamma=0.99, entropy_beta=0.005 , actor_lr=5e-5, critic_lr=1e-4, seed=2, save_interval=500, mode='train')
+        gamma=0.99, entropy_beta=0.005 , actor_lr=5e-5, critic_lr=1e-4, save_interval=500, mode='train')
 ''' 
 full list of parameters for training
 ---------------------------------------
@@ -68,7 +73,6 @@ gamma: reward discount factor
 entropy_beta: factor for entropy boosted exploration
 actor_lr: learning rate for actor
 critic_lr: learning rate for critic
-seed: random seed
 save_interval: timesteps for saving the weights and plotting the results
 mode: train or test
 '''

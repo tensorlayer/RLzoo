@@ -13,6 +13,11 @@ env = gym.make('Pendulum-v0').unwrapped
 # env = DummyVecEnv([lambda: env])  # The algorithms require a vectorized/wrapped environment to run
 action_shape = env.action_space.shape
 state_shape = env.observation_space.shape
+# reproducible
+seed = 2
+np.random.seed(seed)
+tf.random.set_seed(seed)
+env.seed(seed)
 
 ''' build networks for the algorithm '''
 num_hidden_layer = 4 #number of hidden layers for the networks
@@ -51,7 +56,7 @@ action_range: value of each action in [-action_range, action_range]
 '''
 
 model.learn(env, train_episodes=100, max_steps=150, batch_size=64, explore_steps=500, \
-update_itr=3, policy_target_update_interval = 3,  reward_scale = 1. , seed=2, save_interval=20, \
+update_itr=3, policy_target_update_interval = 3,  reward_scale = 1., save_interval=20, \
 mode='train', AUTO_ENTROPY = True, DETERMINISTIC = False, render=False)
 ''' 
 full list of parameters for training
@@ -65,19 +70,11 @@ explore_steps:  for random action sampling in the beginning of training
 update_itr: repeated updates for single step
 policy_target_update_interval: delayed update for the policy network and target networks
 reward_scale: value range of reward
-seed: random seed
 save_interval: timesteps for saving the weights and plotting the results
 mode: 'train'  or 'test'
 AUTO_ENTROPY: automatically udpating variable alpha for entropy
 DETERMINISTIC: stochastic action policy if False, otherwise deterministic
 render: if true, visualize the environment
 '''
-
-
-obs = env.reset()
-for i in range(1000):
-    action = model.get_action(obs)
-    obs, rewards, dones, info = env.step(action)
-    env.render()
-
-env.close()
+# test
+model.learn(env, test_episodes=10, max_steps=150, mode='test', render=False)

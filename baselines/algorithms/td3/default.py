@@ -4,9 +4,14 @@ import tensorlayer as tl
 from common import math_utils
 from common.value_networks import *
 from common.policy_networks import *
+from common.utils import set_seed
 
 
-def atari(env):
+def atari(env, default_seed=True):
+    if default_seed:
+        seed = 2 
+        set_seed(seed, env) # reproducible
+    
     state_shape = env.observation_space.shape
     action_shape = (env.action_space.n,)
 
@@ -49,15 +54,21 @@ def atari(env):
         explore_steps=500,
         update_itr=3, 
         reward_scale = 1. , 
-        seed=2, 
         explore_noise_scale = 1.0, 
         eval_noise_scale = 0.5,
+        train_episodes=1000, 
+        test_episodes=10, 
+        save_interval=100,
     )
 
     return alg_params, learn_params
 
 
-def classic_control(env):
+def classic_control(env, default_seed=True):
+    if default_seed:
+        seed = 2 
+        set_seed(seed, env) # reproducible
+    
     state_shape = env.observation_space.shape
     action_shape = env.action_space.shape
 
@@ -100,15 +111,21 @@ def classic_control(env):
         explore_steps=500,
         update_itr=3, 
         reward_scale = 1. , 
-        seed=2, 
         explore_noise_scale = 1.0, 
         eval_noise_scale = 0.5,
+        train_episodes=1000, 
+        test_episodes=10, 
+        save_interval=100,
     )
 
     return alg_params, learn_params
 
 
-def rlbench(env):
+def rlbench(env, default_seed=True):
+    if default_seed:
+        seed = 2 
+        set_seed(seed, env) # reproducible
+    
     state_shape = env.observation_space.shape
     action_shape = env.action_space.shape
 
@@ -151,9 +168,11 @@ def rlbench(env):
         explore_steps=500,
         update_itr=3, 
         reward_scale = 1. , 
-        seed=2, 
         explore_noise_scale = 1.0, 
         eval_noise_scale = 0.5,
+        train_episodes=1000, 
+        test_episodes=10, 
+        save_interval=100,
     )
 
     return alg_params, learn_params
