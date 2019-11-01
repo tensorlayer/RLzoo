@@ -28,6 +28,10 @@ import tensorflow_probability as tfp
 import tensorlayer as tl
 
 from common.utils import *
+from common.distributions import make_dist
+from common.value_networks import *
+from common.policy_networks import *
+
 
 EPS = 1e-8  # epsilon
 
@@ -37,32 +41,30 @@ class PPO_PENALTY(object):
     PPO class
     """
 
-    def __init__(self, net_list, optimizers_list, state_dim, action_dim, a_bounds, kl_target=0.01, lam=0.5):
+    def __init__(self, net_list, optimizers_list, kl_target=0.01, lam=0.5):
         """
         :param net_list: a list of networks (value and policy) used in the algorithm, from common functions or customization
         :param optimizers_list: a list of optimizers for all networks and differentiable variables
-        :param state_dim: dimension of action for the environment
-        :param action_dim: dimension of state for the environment
-        :param a_bounds: a list of [min_action, max_action] action bounds for the environment
         :param kl_target: controls bounds of policy update and adaptive lambda
         :param lam:  KL-regularization coefficient
         """
-        assert len(net_list) == 3
+        assert len(net_list) == 2
         assert len(optimizers_list) == 2
+
+        self.name = 'PPO_PENALTY'
+
+        self.critic, self.actor = net_list
+
+        assert isinstance(self.critic, ValueNetwork)
+        assert isinstance(self.actor, StochasticPolicyNetwork)
 
         self.kl_target = kl_target
         self.lam = lam
-        if a_bounds[0] == a_bounds[1]:
-            raise ValueError('a_bounds value error: min == max')
-        self.a_bounds = a_bounds
-        self.a_mean = np.mean(a_bounds, 0)
-        self.a_scale = a_bounds[1] - self.a_mean
-
-        self.critic, self.actor, self.actor_old = net_list
 
         self.critic_opt, self.actor_opt = optimizers_list
+        self.old_dist = make_dist(self.actor.action_space)
 
-    def a_train(self, tfs, tfa, tfadv):
+    def a_train(self, tfs, tfa, tfadv, oldpi_prob):
         """
         Update policy network
         :param tfs: state
@@ -73,34 +75,21 @@ class PPO_PENALTY(object):
         tfs = np.array(tfs, np.float32)
         tfa = np.array(tfa, np.float32)
         tfadv = np.array(tfadv, np.float32)
+
         with tf.GradientTape() as tape:
-            mu, log_sigma = self.actor(tfs)
-            sigma = tf.math.exp(log_sigma)
-            pi = tfp.distributions.Normal(mu, sigma)
+            _ = self.actor(tfs)
+            pi_prob = tf.exp(self.actor.policy_dist.logp(tfa))
+            ratio = pi_prob / (oldpi_prob + EPS)
 
-            mu_old, log_sigma_old = self.actor_old(tfs)
-            sigma_old = tf.math.exp(log_sigma_old)
-            oldpi = tfp.distributions.Normal(mu_old, sigma_old)
-
-            # ratio = tf.exp(pi.log_prob(self.tfa) - oldpi.log_prob(self.tfa))
-            ratio = pi.prob(tfa) / (oldpi.prob(tfa) + EPS)
             surr = ratio * tfadv
-            kl = tfp.distributions.kl_divergence(oldpi, pi)
+            kl = self.old_dist.kl(self.actor.policy_dist.get_param())
+            # kl = tfp.distributions.kl_divergence(oldpi, pi)
             kl_mean = tf.reduce_mean(kl)
             aloss = -(tf.reduce_mean(surr - self.lam * kl))
         a_gard = tape.gradient(aloss, self.actor.trainable_weights)
         self.actor_opt.apply_gradients(zip(a_gard, self.actor.trainable_weights))
 
-        # exit()
         return kl_mean
-
-    def update_old_pi(self):
-        """
-        Update old policy parameter
-        :return: None
-        """
-        for p, oldp in zip(self.actor.trainable_weights, self.actor_old.trainable_weights):
-            oldp.assign(p)
 
     def c_train(self, tfdc_r, s):
         """
@@ -136,15 +125,19 @@ class PPO_PENALTY(object):
         :param r: reward
         :return: None
         """
-        s, a, r = s.astype(np.float32), a.astype(np.float32), r.astype(np.float32)
-        a = (a - self.a_mean) / self.a_scale
-        self.update_old_pi()
         adv = self.cal_adv(s, r)
         # adv = (adv - adv.mean())/(adv.std()+1e-6)  # normalize advantage, sometimes helpful
 
-        # update actor
+        _ = self.actor(s)
+        oldpi_prob = tf.exp(self.actor.policy_dist.logp(a))
+        oldpi_prob = tf.stop_gradient(oldpi_prob)
+
+        oldpi_param = self.actor.policy_dist.get_param()
+        oldpi_param = tf.stop_gradient(oldpi_param)
+        self.old_dist.set_param(oldpi_param)
+
         for _ in range(a_update_steps):
-            kl = self.a_train(s, a, adv)
+            kl = self.a_train(s, a, adv, oldpi_prob)
             if kl > 4 * self.kl_target:  # this in in google's paper
                 break
         if kl < self.kl_target / 1.5:  # adaptive lambda, this is in OpenAI's paper
@@ -163,14 +156,15 @@ class PPO_PENALTY(object):
         :param s: state
         :return: clipped act
         """
-        s = s[np.newaxis, :].astype(np.float32)
-        mu, log_sigma = self.actor(s)
-        sigma = tf.math.exp(log_sigma)
-        pi = tfp.distributions.Normal(mu, sigma)
-        a = tf.squeeze(pi.sample(1), axis=0)[0]  # choosing action
-        a = a * self.a_scale + self.a_mean
-        a_out = np.clip(a, self.a_bounds[0], self.a_bounds[1])
-        return a_out
+        return self.actor([s])[0].numpy()
+
+    def get_action_greedy(self, s):
+        """
+        Choose action
+        :param s: state
+        :return: clipped act
+        """
+        return self.actor([s], greedy=True)[0].numpy()
 
     def get_v(self, s):
         """
@@ -187,61 +181,50 @@ class PPO_PENALTY(object):
         save trained weights
         :return: None
         """
-        save_model(self.actor, 'actor', 'ppo_penalty', )
-        save_model(self.actor_old, 'actor_old', 'ppo_penalty', )
-        save_model(self.critic, 'critic', 'ppo_penalty', )
+        save_model(self.actor, 'actor', self.name, )
+        save_model(self.critic, 'critic', self.name, )
 
     def load_ckpt(self):
         """
         load trained weights
         :return: None
         """
-        load_model(self.actor, 'actor', 'ppo_penalty', )
-        load_model(self.actor_old, 'actor_old', 'ppo_penalty', )
-        load_model(self.critic, 'critic', 'ppo_penalty', )
+        load_model(self.actor, 'actor', self.name, )
+        load_model(self.critic, 'critic', self.name, )
 
     def learn(self, env, train_episodes=1000, test_episodes=10, max_steps=200, save_interval=10, gamma=0.9,
-              mode='train', render=False, batch_size=32, a_update_steps=10, c_update_steps=10, seed=1,
-              reward_shaping=None):
+              mode='train', render=False, batch_size=32, a_update_steps=10, c_update_steps=10):
         """
         learn function
         :param env: learning environment
         :param train_episodes: total number of episodes for training
         :param test_episodes: total number of episodes for testing
         :param max_steps: maximum number of steps for one episode
-        :param save_interval: timesteps for saving
+        :param save_interval: time steps for saving
         :param gamma: reward discount factor
         :param mode: train or test
         :param render: render each step
-        :param batch_size: udpate batchsize
+        :param batch_size: update batch size
         :param a_update_steps: actor update iteration steps
         :param c_update_steps: critic update iteration steps
-        :param seed: random seed
-        :param reward_shaping: reward shaping function
         :return: None
         """
 
-        # reproducible
-        env.seed(seed)
-        np.random.seed(seed)
-        tf.random.set_seed(seed)
-
+        t0 = time.time()
         if mode == 'train':
-            all_ep_r = []
+            reward_buffer = []
             for ep in range(1, train_episodes + 1):
                 s = env.reset()
                 buffer_s, buffer_a, buffer_r = [], [], []
                 ep_r = 0
-                t0 = time.time()
                 for t in range(max_steps):  # in one episode
                     if render:
                         env.render()
                     a = self.get_action(s)
                     s_, r, done, _ = env.step(a)
-                    shaped_reward = reward_shaping(r) if reward_shaping else r
                     buffer_s.append(s)
                     buffer_a.append(a)
-                    buffer_r.append(shaped_reward)  # normalize reward, find to be useful
+                    buffer_r.append(r)  # normalize reward, find to be useful
                     s = s_
                     ep_r += r
 
@@ -257,10 +240,7 @@ class PPO_PENALTY(object):
                         bs, ba, br = np.vstack(buffer_s), np.vstack(buffer_a), np.array(discounted_r)[:, np.newaxis]
                         buffer_s, buffer_a, buffer_r = [], [], []
                         self.update(bs, ba, br, a_update_steps, c_update_steps)
-                if ep == 1:
-                    all_ep_r.append(ep_r)
-                else:
-                    all_ep_r.append(all_ep_r[-1] * 0.9 + ep_r * 0.1)
+
                 print(
                     'Episode: {}/{}  | Episode Reward: {:.4f}  | Running Time: {:.4f}'.format(
                         ep, train_episodes, ep_r,
@@ -268,19 +248,32 @@ class PPO_PENALTY(object):
                     )
                 )
 
+                reward_buffer.append(ep_r)
                 if ep and not ep % save_interval:
                     self.save_ckpt()
-            plot_save_log(all_ep_r, Algorithm_name='PPO_penalty', Env_name=env.spec.id)
+                    plot_save_log(reward_buffer, Algorithm_name=self.name, Env_name=env.spec.id)
+
+            self.save_ckpt()
+            plot_save_log(reward_buffer, Algorithm_name=self.name, Env_name=env.spec.id)
 
         # test
-        elif mode is 'test':
+        elif mode == 'test':
             self.load_ckpt()
-            for _ in range(test_episodes):
+            for eps in range(test_episodes):
+                ep_rs_sum = 0
                 s = env.reset()
-                for i in range(max_steps):
-                    env.render()
-                    s, r, done, _ = env.step(self.get_action(s))
+                for step in range(max_steps):
+                    if render:
+                        env.render()
+                    action = self.get_action_greedy(s)
+                    s, reward, done, info = env.step(action)
+                    ep_rs_sum += reward
                     if done:
                         break
+
+                print('Episode: {}/{}  | Episode Reward: {:.4f}  | Running Time: {:.4f}'.format(
+                    eps, test_episodes, ep_rs_sum, time.time() - t0)
+                )
         else:
             print('unknown mode type')
+

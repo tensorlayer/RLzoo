@@ -33,6 +33,8 @@ import tensorflow_probability as tfp
 import tensorlayer as tl
 
 from common.utils import *
+from common.value_networks import *
+from common.policy_networks import *
 
 EPS = 1e-8  # epsilon
 
@@ -42,7 +44,7 @@ class DPPO_CLIP(object):
     PPO class
     """
 
-    def __init__(self, net_list, optimizers_list, state_dim, action_dim, a_bounds, epsilon=0.2):
+    def __init__(self, net_list, optimizers_list, epsilon=0.2):
         """
         :param net_list: a list of networks (value and policy) used in the algorithm, from common functions or customization
         :param optimizers_list: a list of optimizers for all networks and differentiable variables
@@ -51,60 +53,42 @@ class DPPO_CLIP(object):
         :param a_bounds: a list of [min_action, max_action] action bounds for the environment
         :param epsilon: clip parameter
         """
-        assert len(net_list) == 3
+        assert len(net_list) == 2
         assert len(optimizers_list) == 2
-        self.name = 'dppo_clip'
-        if a_bounds[0] == a_bounds[1]:
-            raise ValueError('a_bounds value error: min == max')
-        self.a_bounds = a_bounds
-        self.a_mean = np.mean(a_bounds, 0)
-        self.a_scale = a_bounds[1] - self.a_mean
+        self.name = 'DPPO_CLIP'
 
         self.epsilon = epsilon
 
-        self.critic, self.actor, self.actor_old = net_list
+        self.critic, self.actor = net_list
+
+        assert isinstance(self.critic, ValueNetwork)
+        assert isinstance(self.actor, StochasticPolicyNetwork)
 
         self.critic_opt, self.actor_opt = optimizers_list
 
-    def a_train(self, tfs, tfa, tfadv):
+    def a_train(self, tfs, tfa, tfadv, oldpi_prob):
         """
         Update policy network
         :param tfs: state
         :param tfa: act
         :param tfadv: advantage
+        :param oldpi_prob: old pi probability of a in s
         :return:
         """
         tfs = np.array(tfs, np.float32)
         tfa = np.array(tfa, np.float32)
         tfadv = np.array(tfadv, np.float32)
+
         with tf.GradientTape() as tape:
-            mu, log_sigma = self.actor(tfs)
-            sigma = tf.math.exp(log_sigma)
-            pi = tfp.distributions.Normal(mu, sigma)
+            _ = self.actor(tfs)
+            pi_prob = tf.exp(self.actor.policy_dist.logp(tfa))
+            ratio = pi_prob / (oldpi_prob + EPS)
 
-            mu_old, log_sigma_old = self.actor_old(tfs)
-            sigma_old = tf.math.exp(log_sigma_old)
-            oldpi = tfp.distributions.Normal(mu_old, sigma_old)
-
-            # ratio = tf.exp(pi.log_prob(self.tfa) - oldpi.log_prob(self.tfa))
-            ratio = pi.prob(tfa) / (oldpi.prob(tfa) + EPS)
             surr = ratio * tfadv
-            kl = tfp.distributions.kl_divergence(oldpi, pi)
-            kl_mean = tf.reduce_mean(kl)
             aloss = -tf.reduce_mean(
                 tf.minimum(surr, tf.clip_by_value(ratio, 1. - self.epsilon, 1. + self.epsilon) * tfadv))
         a_gard = tape.gradient(aloss, self.actor.trainable_weights)
         self.actor_opt.apply_gradients(zip(a_gard, self.actor.trainable_weights))
-
-        return kl_mean
-
-    def update_old_pi(self):
-        """
-        Update old policy parameter
-        :return: None
-        """
-        for p, oldp in zip(self.actor.trainable_weights, self.actor_old.trainable_weights):
-            oldp.assign(p)
 
     def c_train(self, tfdc_r, s):
         """
@@ -134,29 +118,31 @@ class DPPO_CLIP(object):
 
     def update(self, a_update_steps, c_update_steps, save_interval):
         """
-        Update parameter with the constraint of KL divergent
-        :param s: state
-        :param a: act
-        :param r: reward
+        Update
+        :param a_update_steps:
+        :param c_update_steps:
+        :param save_interval:
         :return: None
         """
         global GLOBAL_UPDATE_COUNTER
         while not COORD.should_stop():
             if GLOBAL_EP < EP_MAX:
                 UPDATE_EVENT.wait()  # wait until get batch of data
-                self.update_old_pi()  # copy pi to old pi
                 data = [QUEUE.get() for _ in range(QUEUE.qsize())]  # collect data from all workers
                 s, a, r = zip(*data)
                 s, a, r = np.vstack(s), np.vstack(a), np.vstack(r)
                 s, a, r = np.array(s, np.float32), np.array(a, np.float32), np.array(r, np.float32)
-                a = (a - self.a_mean) / self.a_scale
 
                 adv = self.cal_adv(s, r)
                 # adv = (adv - adv.mean())/(adv.std()+1e-6)     # sometimes helpful
 
+                _ = self.actor(s)
+                oldpi_prob = tf.exp(self.actor.policy_dist.logp(a))
+                oldpi_prob = tf.stop_gradient(oldpi_prob)
+
                 # update actor
                 for _ in range(a_update_steps):
-                    self.a_train(s, a, adv)
+                    self.a_train(s, a, adv, oldpi_prob)
 
                 # update critic
                 for _ in range(c_update_steps):
@@ -175,14 +161,15 @@ class DPPO_CLIP(object):
         :param s: state
         :return: clipped act
         """
-        s = s[np.newaxis, :].astype(np.float32)
-        mu, log_sigma = self.actor(s)
-        sigma = tf.math.exp(log_sigma)
-        pi = tfp.distributions.Normal(mu, sigma)
-        a = tf.squeeze(pi.sample(1), axis=0)[0]  # choosing action
-        a = a * self.a_scale + self.a_mean
-        a_out = np.clip(a, self.a_bounds[0], self.a_bounds[1])
-        return a_out
+        return self.actor([s])[0].numpy()
+
+    def get_action_greedy(self, s):
+        """
+        Choose action
+        :param s: state
+        :return: clipped act
+        """
+        return self.actor([s], greedy=True)[0].numpy()
 
     def get_v(self, s):
         """
@@ -200,7 +187,6 @@ class DPPO_CLIP(object):
         :return: None
         """
         save_model(self.actor, 'actor', self.name, )
-        save_model(self.actor_old, 'actor_old', self.name, )
         save_model(self.critic, 'critic', self.name, )
 
     def load_ckpt(self):
@@ -208,12 +194,11 @@ class DPPO_CLIP(object):
         load trained weights
         :return: None
         """
-        load_model(self.actor, 'actor', 'ppo', )
-        load_model(self.actor_old, 'actor_old', 'ppo', )
-        load_model(self.critic, 'critic', 'ppo', )
+        load_model(self.actor, 'actor', self.name, )
+        load_model(self.critic, 'critic', self.name, )
 
-    def learn(self, env, train_episodes=1000, test_episodes=100, max_steps=200, save_interval=10, gamma=0.9, seed=1,
-              mode='train', batch_size=32, a_update_steps=10, c_update_steps=10, n_worker=4, reward_shaping=None):
+    def learn(self, env, train_episodes=200, test_episodes=100, max_steps=200, save_interval=10, gamma=0.9,
+              mode='train', render=False, batch_size=32, a_update_steps=10, c_update_steps=10, n_worker=4):
         """
         learn function
         :param env: learning environment
@@ -222,19 +207,19 @@ class DPPO_CLIP(object):
         :param max_steps:  maximum number of steps for one episode
         :param save_interval: time steps for saving
         :param gamma: reward discount factor
-        :param seed: random seed
         :param mode: train or test
+        :param render: render each step
         :param batch_size: update batch size
         :param a_update_steps: actor update iteration steps
         :param c_update_steps: critic update iteration steps
         :param n_worker: number of workers
-        :param reward_shaping: reward shaping function
         :return: None
         """
+        t0 = time.time()
         global GLOBAL_PPO, UPDATE_EVENT, ROLLING_EVENT, GLOBAL_UPDATE_COUNTER, GLOBAL_EP, GLOBAL_RUNNING_R, COORD, QUEUE
-        global GAME, RANDOMSEED, EP_LEN, MIN_BATCH_SIZE, GAMMA, EP_MAX, REWARD_SHAPING
-        GAME, RANDOMSEED, EP_LEN, MIN_BATCH_SIZE, GAMMA, EP_MAX = env, seed, max_steps, batch_size, gamma, train_episodes
-        GLOBAL_PPO, REWARD_SHAPING = self, reward_shaping
+        global GAME, EP_LEN, MIN_BATCH_SIZE, GAMMA, EP_MAX, RENDER
+        GAME, EP_LEN, MIN_BATCH_SIZE, GAMMA, EP_MAX, RENDER = env, max_steps, batch_size, gamma, train_episodes, render
+        GLOBAL_PPO = self
         if mode == 'train':  # train
             UPDATE_EVENT, ROLLING_EVENT = threading.Event(), threading.Event()
             UPDATE_EVENT.clear()  # not update now
@@ -257,18 +242,24 @@ class DPPO_CLIP(object):
 
             self.save_ckpt()
 
-            # plot reward change
-
         # test
-        elif mode is 'test':
+        elif mode == 'test':
             self.load_ckpt()
-            for _ in range(test_episodes):
+            for eps in range(test_episodes):
+                ep_rs_sum = 0
                 s = env.reset()
-                for t in range(EP_LEN):
-                    env.render()
-                    s, r, done, info = env.step(self.get_action(s))
+                for step in range(max_steps):
+                    if RENDER:
+                        env.render()
+                    action = self.get_action_greedy(s)
+                    s, reward, done, info = env.step(action)
+                    ep_rs_sum += reward
                     if done:
                         break
+
+                print('Episode: {}/{}  | Episode Reward: {:.4f}  | Running Time: {:.4f}'.format(
+                    eps, test_episodes, ep_rs_sum, time.time() - t0)
+                )
         else:
             print('unknown mode type')
 
@@ -281,7 +272,8 @@ class Worker(object):
     def __init__(self, wid):
         self.wid = wid
         self.env = gym.make(GAME.spec.id).unwrapped
-        self.env.seed(wid * 100 + RANDOMSEED)
+        # self.env.seed(wid * 100 + RANDOMSEED)
+        global GLOBAL_PPO
         self.ppo = GLOBAL_PPO
 
     def work(self):
@@ -289,22 +281,24 @@ class Worker(object):
         Define a worker
         :return: None
         """
-        global GLOBAL_EP, GLOBAL_RUNNING_R, GLOBAL_UPDATE_COUNTER, REWARD_SHAPING
+        t0 = time.time()
+        global GLOBAL_EP, GLOBAL_RUNNING_R, GLOBAL_UPDATE_COUNTER, REWARD_SHAPING, RENDER
         while not COORD.should_stop():
             s = self.env.reset()
             ep_r = 0
             buffer_s, buffer_a, buffer_r = [], [], []
-            t0 = time.time()
-            for t in range(EP_LEN):
+            for t in range(1, EP_LEN + 1):
                 if not ROLLING_EVENT.is_set():  # while global PPO is updating
                     ROLLING_EVENT.wait()  # wait until PPO is updated
                     buffer_s, buffer_a, buffer_r = [], [], []  # clear history buffer, use new policy to collect data
                 a = self.ppo.get_action(s)
+                for step in range(EP_LEN):
+                    if RENDER:
+                        self.env.render()
                 s_, r, done, _ = self.env.step(a)
-                shaped_reward = REWARD_SHAPING(r) if REWARD_SHAPING else r  # normalize reward, find to be useful
                 buffer_s.append(s)
                 buffer_a.append(a)
-                buffer_r.append(shaped_reward)
+                buffer_r.append(r)
                 s = s_
                 ep_r += r
 
@@ -328,11 +322,7 @@ class Worker(object):
                         COORD.request_stop()
                         break
 
-            # record reward changes, plot later
-            if len(GLOBAL_RUNNING_R) == 0:
-                GLOBAL_RUNNING_R.append(ep_r)
-            else:
-                GLOBAL_RUNNING_R.append(GLOBAL_RUNNING_R[-1] * 0.9 + ep_r * 0.1)
+            GLOBAL_RUNNING_R.append(ep_r)
             GLOBAL_EP += 1
 
             print(

@@ -1,6 +1,7 @@
 import gym
 
 # from common.env_wrappers import DummyVecEnv
+from common.utils import make_env, set_seed
 from algorithms.ddpg.ddpg import DDPG
 from common.value_networks import *
 from common.policy_networks import *
@@ -11,8 +12,12 @@ env = gym.make('Pendulum-v0').unwrapped
 obs_space = env.observation_space
 act_space = env.action_space
 
+# reproducible
+seed = 7
+set_seed(seed, env)
+
 ''' build networks for the algorithm '''
-name = 'ddpg'
+name = 'DDPG'
 num_hidden_layer = 1  # number of hidden layers for the networks
 hidden_dim = 30  # dimension of hidden layers for the networks
 
@@ -36,39 +41,28 @@ full list of arguments for the algorithm
 ----------------------------------------
 net_list: a list of networks (value and policy) used in the algorithm, from common functions or customization
 optimizers_list: a list of optimizers for all networks and differentiable variables
-state_dim: dimension of state for the environment
-action_dim: dimension of action for the environment
-a_bounds: a list of [min_action, max_action] action bounds for the environment
 replay_buffer_size: the size of buffer for storing explored samples
 tau: soft update factor
-var: control exploration
 '''
 
-model.learn(env, train_episodes=200, test_episodes=100, max_steps=200, save_interval=10,
-              mode='train', render=False, batch_size=32, gamma=0.9, seed=1)
+model.learn(env, train_episodes=200, max_steps=200, save_interval=10,
+            mode='train', render=False, batch_size=32, gamma=0.9, noise_scale=1., noise_scale_decay=0.995)
 '''
 full list of parameters for training
 ---------------------------------------
-learn function
 env: learning environment
 train_episodes: total number of episodes for training
 test_episodes: total number of episodes for testing
 max_steps: maximum number of steps for one episode
 save_interval: time steps for saving
+explore_steps: for random action sampling in the beginning of training
 mode: train or test mode
 render: render each step
 batch_size: update batch size
 gamma: reward decay factor
-seed: random seed
-reward_shaping: reward shaping function
-:return: None
+noise_scale: range of action noise for exploration
+noise_scale_decay: noise scale decay factor
 '''
 
-obs = env.reset()
-s = env.reset()
-for i in range(200):
-    env.render()
-    s, r, done, info = env.step(model.choose_action(s))
-    if done:
-        break
-env.close()
+model.learn(env, test_episodes=100, max_steps=200, mode='test', render=True)
+
