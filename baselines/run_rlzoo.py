@@ -74,16 +74,16 @@ from algorithms import *
 # alg.learn(env=env, mode='train', render=False, **learn_params)
 
 # EnvName = 'Pendulum-v0'
-EnvName = 'CartPole-v0'  # classic_control, ac cannot learn cartpole-v1
-EnvType = ['classic_control', 'atari', 'box2d', 'mujoco', 'robotics', 'dm_control'][0]
+# EnvName = 'CartPole-v0'  # classic_control, ac cannot learn cartpole-v1
+# EnvType = ['classic_control', 'atari', 'box2d', 'mujoco', 'robotics', 'dm_control'][0]
 # # EnvName = 'ReachTarget'
 # # EnvType = ['atari', 'box2d', 'classic_control', 'mujoco', 'robotics', 'dm_control', 'rlbench'][-1]
-number_workers = 2
-env = build_env(EnvName, EnvType, nenv=number_workers)
-alg_params, learn_params = call_default_params(env, EnvType, 'A3C')
-alg = A3C(**alg_params)
+# number_workers = 2
+# env = build_env(EnvName, EnvType, nenv=number_workers)
+# alg_params, learn_params = call_default_params(env, EnvType, 'A3C')
+# alg = A3C(**alg_params)
 # alg.learn(env=env,  mode='train', n_workers=number_workers, render=False, **learn_params)
-alg.learn(env=env,  mode='test', n_workers=number_workers, render=True, **learn_params)
+# alg.learn(env=env,  mode='test', n_workers=number_workers, render=True, **learn_params)
 
 
 # EnvName = 'Pendulum-v0'
