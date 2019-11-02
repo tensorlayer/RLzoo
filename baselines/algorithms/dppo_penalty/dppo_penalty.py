@@ -328,7 +328,8 @@ class Worker(object):
                     discounted_r.reverse()
 
                     bs = buffer_s if len(buffer_s[0].shape)>1 else np.vstack(buffer_s) # no vstack for raw-pixel input
-                    ba, br = np.vstack(buffer_a), np.array(discounted_r)[:, np.newaxis]                    buffer_s, buffer_a, buffer_r = [], [], []
+                    ba, br = np.vstack(buffer_a), np.array(discounted_r)[:, np.newaxis]                    
+                    buffer_s, buffer_a, buffer_r = [], [], []
                     QUEUE.put((bs, ba, br))  # put data in the queue
                     if GLOBAL_UPDATE_COUNTER >= MIN_BATCH_SIZE:
                         ROLLING_EVENT.clear()  # stop collecting data

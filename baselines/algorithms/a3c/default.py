@@ -19,7 +19,9 @@ def atari(env, default_seed=True):
     else:
         num_env = 1
 
-    alg_params = dict()
+    alg_params = dict(
+        entropy_beta=0.005
+    )
     
     if alg_params.get('net_list') is None:
         num_hidden_layer = 4 #number of hidden layers for the networks
@@ -36,8 +38,8 @@ def atari(env, default_seed=True):
         alg_params['net_list'] = net_list2
     if alg_params.get('optimizers_list') is None:
         a_lr, c_lr = 1e-3, 1e-3  # a_lr: learning rate of the actor; c_lr: learning rate of the critic
-        a_optimizer = tf.optimizers.Adam(a_lr)
-        c_optimizer = tf.optimizers.Adam(c_lr)
+        a_optimizer = tf.optimizers.RMSprop(a_lr, name='RMS_optimizer_actor')
+        c_optimizer = tf.optimizers.RMSprop(c_lr, name='RMS_optimizer_critic')
         optimizers_list=[a_optimizer, c_optimizer]
         alg_params['optimizers_list'] = optimizers_list
 
@@ -46,7 +48,8 @@ def atari(env, default_seed=True):
         gamma = 0.9,
         train_episodes=1000, 
         test_episodes=10, 
-        save_interval=100
+        save_interval=100,
+        update_itr=10,
     )
 
     return alg_params, learn_params
@@ -64,7 +67,9 @@ def classic_control(env, default_seed=True):
     else:
         num_env = 1
 
-    alg_params = dict()
+    alg_params = dict(
+        entropy_beta=0.005
+    )
     if alg_params.get('net_list') is None:
         num_hidden_layer = 4 #number of hidden layers for the networks
         hidden_dim = 64 # dimension of hidden layers for the networks
@@ -80,8 +85,8 @@ def classic_control(env, default_seed=True):
         alg_params['net_list'] = net_list2
     if alg_params.get('optimizers_list') is None:
         a_lr, c_lr = 1e-3, 1e-3  # a_lr: learning rate of the actor; c_lr: learning rate of the critic
-        a_optimizer = tf.optimizers.Adam(a_lr)
-        c_optimizer = tf.optimizers.Adam(c_lr)
+        a_optimizer = tf.optimizers.RMSprop(a_lr, name='RMS_optimizer_actor')
+        c_optimizer = tf.optimizers.RMSprop(c_lr, name='RMS_optimizer_critic')
         optimizers_list=[a_optimizer, c_optimizer]
         alg_params['optimizers_list'] = optimizers_list
 
@@ -90,7 +95,8 @@ def classic_control(env, default_seed=True):
         gamma = 0.9,
         train_episodes=1000, 
         test_episodes=10, 
-        save_interval=100
+        save_interval=100,
+        update_itr=10,
     )
 
     return alg_params, learn_params
@@ -107,7 +113,9 @@ def box2d(env, default_seed=True):
     else:
         num_env = 1
 
-    alg_params = dict()
+    alg_params = dict(
+        entropy_beta=0.005
+    )
     if alg_params.get('net_list') is None:
         num_hidden_layer = 4 #number of hidden layers for the networks
         hidden_dim = 64 # dimension of hidden layers for the networks
@@ -123,8 +131,8 @@ def box2d(env, default_seed=True):
         alg_params['net_list'] = net_list2
     if alg_params.get('optimizers_list') is None:
         a_lr, c_lr = 1e-3, 1e-3  # a_lr: learning rate of the actor; c_lr: learning rate of the critic
-        a_optimizer = tf.optimizers.Adam(a_lr)
-        c_optimizer = tf.optimizers.Adam(c_lr)
+        a_optimizer = tf.optimizers.RMSprop(a_lr, name='RMS_optimizer_actor')
+        c_optimizer = tf.optimizers.RMSprop(c_lr, name='RMS_optimizer_critic')
         optimizers_list=[a_optimizer, c_optimizer]
         alg_params['optimizers_list'] = optimizers_list
 
@@ -133,7 +141,8 @@ def box2d(env, default_seed=True):
         gamma = 0.9,
         train_episodes=1000, 
         test_episodes=10, 
-        save_interval=100
+        save_interval=100,
+        update_itr=10,
     )
 
     return alg_params, learn_params
@@ -150,7 +159,9 @@ def mujoco(env, default_seed=True):
     else:
         num_env = 1
 
-    alg_params = dict()
+    alg_params = dict(
+        entropy_beta=0.005
+    )
     if alg_params.get('net_list') is None:
         num_hidden_layer = 4 #number of hidden layers for the networks
         hidden_dim = 64 # dimension of hidden layers for the networks
@@ -166,8 +177,8 @@ def mujoco(env, default_seed=True):
         alg_params['net_list'] = net_list2
     if alg_params.get('optimizers_list') is None:
         a_lr, c_lr = 1e-3, 1e-3  # a_lr: learning rate of the actor; c_lr: learning rate of the critic
-        a_optimizer = tf.optimizers.Adam(a_lr)
-        c_optimizer = tf.optimizers.Adam(c_lr)
+        a_optimizer = tf.optimizers.RMSprop(a_lr, name='RMS_optimizer_actor')
+        c_optimizer = tf.optimizers.RMSprop(c_lr, name='RMS_optimizer_critic')
         optimizers_list=[a_optimizer, c_optimizer]
         alg_params['optimizers_list'] = optimizers_list
 
@@ -176,7 +187,8 @@ def mujoco(env, default_seed=True):
         gamma = 0.9,
         train_episodes=1000, 
         test_episodes=10, 
-        save_interval=100
+        save_interval=100,
+        update_itr=10,
     )
 
     return alg_params, learn_params
@@ -193,7 +205,9 @@ def robotics(env, default_seed=True):
     else:
         num_env = 1
 
-    alg_params = dict()
+    alg_params = dict(
+        entropy_beta=0.005
+    )
     if alg_params.get('net_list') is None:
         num_hidden_layer = 4 #number of hidden layers for the networks
         hidden_dim = 64 # dimension of hidden layers for the networks
@@ -209,8 +223,8 @@ def robotics(env, default_seed=True):
         alg_params['net_list'] = net_list2
     if alg_params.get('optimizers_list') is None:
         a_lr, c_lr = 1e-3, 1e-3  # a_lr: learning rate of the actor; c_lr: learning rate of the critic
-        a_optimizer = tf.optimizers.Adam(a_lr)
-        c_optimizer = tf.optimizers.Adam(c_lr)
+        a_optimizer = tf.optimizers.RMSprop(a_lr, name='RMS_optimizer_actor')
+        c_optimizer = tf.optimizers.RMSprop(c_lr, name='RMS_optimizer_critic')
         optimizers_list=[a_optimizer, c_optimizer]
         alg_params['optimizers_list'] = optimizers_list
 
@@ -219,7 +233,8 @@ def robotics(env, default_seed=True):
         gamma = 0.9,
         train_episodes=1000, 
         test_episodes=10, 
-        save_interval=100
+        save_interval=100,
+        update_itr=10,
     )
 
     return alg_params, learn_params
@@ -237,7 +252,9 @@ def dm_control(env, default_seed=True):
     else:
         num_env = 1
 
-    alg_params = dict()
+    alg_params = dict(
+        entropy_beta=0.005
+    )
     if alg_params.get('net_list') is None:
         num_hidden_layer = 4 #number of hidden layers for the networks
         hidden_dim = 64 # dimension of hidden layers for the networks
@@ -253,8 +270,8 @@ def dm_control(env, default_seed=True):
         alg_params['net_list'] = net_list2
     if alg_params.get('optimizers_list') is None:
         a_lr, c_lr = 1e-3, 1e-3  # a_lr: learning rate of the actor; c_lr: learning rate of the critic
-        a_optimizer = tf.optimizers.Adam(a_lr)
-        c_optimizer = tf.optimizers.Adam(c_lr)
+        a_optimizer = tf.optimizers.RMSprop(a_lr, name='RMS_optimizer_actor')
+        c_optimizer = tf.optimizers.RMSprop(c_lr, name='RMS_optimizer_critic')
         optimizers_list=[a_optimizer, c_optimizer]
         alg_params['optimizers_list'] = optimizers_list
 
@@ -263,7 +280,8 @@ def dm_control(env, default_seed=True):
         gamma = 0.9,
         train_episodes=1000, 
         test_episodes=10, 
-        save_interval=100
+        save_interval=100,
+        update_itr=10,
     )
 
     return alg_params, learn_params

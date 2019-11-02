@@ -128,7 +128,7 @@ class Worker(object):
 
 
     def work(self, globalAC):
-        global COORD, GLOBAL_RUNNING_R, GLOBAL_EP, OPT_A, OPT_C, t0
+        global COORD, GLOBAL_RUNNING_R, GLOBAL_EP, OPT_A, OPT_C, t0, SAVE_INTERVAL
         total_step = 1
         buffer_s, buffer_a, buffer_r = [], [], []
         while not COORD.should_stop() and GLOBAL_EP < self.MAX_GLOBAL_EP:
@@ -179,24 +179,37 @@ class Worker(object):
                 s = s_
                 total_step += 1
                 epi_step += 1
+                if GLOBAL_EP%SAVE_INTERVAL==0 and GLOBAL_EP>0:
+                    globalAC.save_ckpt()
+
                 if done or epi_step>=self.max_steps:
                     if len(GLOBAL_RUNNING_R) == 0:  # record running episode reward
                         GLOBAL_RUNNING_R.append(ep_r)
                     else:  # moving average
                         GLOBAL_RUNNING_R.append(0.95 * GLOBAL_RUNNING_R[-1] + 0.05 * ep_r)
 
+
                     print('{}, Episode: {}/{}  | Episode Reward: {:.4f}  | Running Time: {:.4f}'\
                     .format(self.name, GLOBAL_EP, self.MAX_GLOBAL_EP, ep_r, time.time()-t0 ))
                     GLOBAL_EP += 1
                     break
 
+
 class A3C():
-    def __init__(self, net_list, optimizers_list):
+    def __init__(self, net_list, optimizers_list, entropy_beta=0.005):
+        '''
+        parameters
+        ----------
+        entropy_beta: factor for entropy boosted exploration
+        '''
         self.net_list = net_list
         self.optimizers_list = optimizers_list
+        self.GLOBAL_AC = ACNet(self.net_list[0], 'global', entropy_beta)  # we only need its params
+        self.entropy_beta = entropy_beta
+
 
     def learn(self, env, train_episodes=1000, render=False, test_episodes=10, max_steps=150, n_workers=1, update_itr=10,
-        gamma=0.99, entropy_beta=0.005 , actor_lr=5e-5, critic_lr=1e-4, save_interval=500, mode='train'):
+        gamma=0.99 , save_interval=500, mode='train'):
 
         '''
         parameters
@@ -208,14 +221,12 @@ class A3C():
         n_workers: manually set number of workers
         update_itr: update global policy after several episodes
         gamma: reward discount factor
-        entropy_beta: factor for entropy boosted exploration
-        actor_lr: learning rate for actor
-        critic_lr: learning rate for critic
         save_interval: timesteps for saving the weights and plotting the results
         mode: train or test
 
         '''
-        global COORD, GLOBAL_RUNNING_R, GLOBAL_EP, OPT_A, OPT_C, t0
+        global COORD, GLOBAL_RUNNING_R, GLOBAL_EP, OPT_A, OPT_C, t0, SAVE_INTERVAL
+        SAVE_INTERVAL=save_interval
         COORD = tf.train.Coordinator()
         GLOBAL_RUNNING_R = []
         GLOBAL_EP = 0  # will increase during training, stop training when it >= MAX_GLOBAL_EP
@@ -226,31 +237,30 @@ class A3C():
             t0 = time.time()
             with tf.device("/cpu:0"):
                 [OPT_A, OPT_C] = self.optimizers_list
-                OPT_A = tf.optimizers.RMSprop(actor_lr, name='RMSPropA')
-                OPT_C = tf.optimizers.RMSprop(critic_lr, name='RMSPropC')
 
-                GLOBAL_AC = ACNet(self.net_list[0], 'global', entropy_beta)  # we only need its params
                 workers = []
                 # Create worker
                 for i in range(N_WORKERS):
                     i_name = 'Worker_%i' % i  # worker name
-                    workers.append(Worker(env[i], self.net_list[i+1], i_name, GLOBAL_AC, train_episodes, max_steps, gamma, update_itr, entropy_beta, render))
+                    workers.append(Worker(env[i], self.net_list[i+1], i_name, self.GLOBAL_AC, train_episodes, max_steps, gamma, update_itr, self.entropy_beta, render))
 
             # start TF threading
             worker_threads = []
             for worker in workers:
                 # t = threading.Thread(target=worker.work)
-                job = lambda: worker.work(GLOBAL_AC)
+                job = lambda: worker.work(self.GLOBAL_AC)
                 t = threading.Thread(target=job)
                 t.start()
                 worker_threads.append(t)
+
             COORD.join(worker_threads)
 
-            GLOBAL_AC.save_ckpt()
+            self.GLOBAL_AC.save_ckpt()
 
         elif mode=='test':
             # ============================= EVALUATION =============================
-            GLOBAL_AC.load_ckpt()
+            self.GLOBAL_AC.load_ckpt()
+            env = env[0]  # only need one env for test
             frame_idx=0
             for eps in range(test_episodes):
                 s = env.reset()
@@ -259,8 +269,10 @@ class A3C():
                     env.render()
                     frame_idx+=1
                     s = s.astype('float32')  # double to float
-                    a = GLOBAL_AC.get_action(s)
+                    a = self.GLOBAL_AC.get_action(s)
                     s, r, d, _ = env.step(a)
+                    if render:
+                        env.render()
                     rall += r
                     if d:
                         print("reward", rall)
