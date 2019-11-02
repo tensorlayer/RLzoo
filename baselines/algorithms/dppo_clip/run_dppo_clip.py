@@ -6,8 +6,9 @@ from algorithms.dppo_clip.dppo_clip import DPPO_CLIP
 from common.value_networks import *
 from common.policy_networks import *
 
+n_workers = 4
 ''' load environment '''
-env = gym.make('Pendulum-v0').unwrapped
+env = [gym.make('Pendulum-v0').unwrapped for i in range(n_workers)]
 
 # reproducible
 seed = 1
@@ -17,9 +18,10 @@ set_seed(seed)
 name = 'DPPO_CLIP'
 hidden_dim = 100
 num_hidden_layer = 1
-critic = ValueNetwork(env.observation_space, [hidden_dim] * num_hidden_layer, name=name + '_value')
+critic = ValueNetwork(env[0].observation_space, [hidden_dim] * num_hidden_layer, name=name + '_value')
 
-actor = StochasticPolicyNetwork(env.observation_space, env.action_space, [hidden_dim] * num_hidden_layer,
+actor = StochasticPolicyNetwork(env[0].observation_space, env[0].action_space,
+                                [hidden_dim] * num_hidden_layer,
                                 trainable=True,
                                 name=name + '_policy')
 net_list = critic, actor
@@ -38,7 +40,7 @@ epsilon: clip parameter
 '''
 
 model.learn(env, train_episodes=200, max_steps=200, save_interval=10, gamma=0.9,
-            mode='train', render=False, batch_size=32, a_update_steps=10, c_update_steps=10, n_worker=4)
+            mode='train', render=False, batch_size=32, a_update_steps=10, c_update_steps=10, n_workers=n_workers)
 
 '''
 full list of parameters for training
