@@ -217,14 +217,20 @@ class DPPO_CLIP(object):
         """
         t0 = time.time()
         global GLOBAL_PPO, UPDATE_EVENT, ROLLING_EVENT, GLOBAL_UPDATE_COUNTER, GLOBAL_EP, GLOBAL_RUNNING_R, COORD, QUEUE
-        global GAME, EP_LEN, MIN_BATCH_SIZE, GAMMA, EP_MAX, RENDER
-        GAME, EP_LEN, MIN_BATCH_SIZE, GAMMA, EP_MAX, RENDER = env, max_steps, batch_size, gamma, train_episodes, render
+        global EP_LEN, MIN_BATCH_SIZE, GAMMA, EP_MAX, RENDER
+        EP_LEN, MIN_BATCH_SIZE, GAMMA, EP_MAX, RENDER = max_steps, batch_size, gamma, train_episodes, render
         GLOBAL_PPO = self
         if mode == 'train':  # train
+            if isinstance(env, list):  # judge if multiple envs are passed in for parallel computing
+                assert len(env) == n_workers
+            else:
+                assert n_workers == 1
+                env = env,
+
             UPDATE_EVENT, ROLLING_EVENT = threading.Event(), threading.Event()
             UPDATE_EVENT.clear()  # not update now
             ROLLING_EVENT.set()  # start to roll out
-            workers = [Worker(wid=i) for i in range(n_workers)]
+            workers = [Worker(wid=i, env=env[i]) for i in range(n_workers)]
 
             GLOBAL_UPDATE_COUNTER, GLOBAL_EP = 0, 0
             GLOBAL_RUNNING_R = []
@@ -244,6 +250,10 @@ class DPPO_CLIP(object):
 
         # test
         elif mode == 'test':
+            if isinstance(env, list):  # judge if multiple envs are passed in for parallel computing
+                env = env[0]
+            else:
+                env = env
             self.load_ckpt()
             for eps in range(test_episodes):
                 ep_rs_sum = 0
@@ -269,9 +279,9 @@ class Worker(object):
     Worker class for distributional running
     """
 
-    def __init__(self, wid):
+    def __init__(self, wid, env):
         self.wid = wid
-        self.env = gym.make(GAME.spec.id).unwrapped
+        self.env = env
         # self.env.seed(wid * 100 + RANDOMSEED)
         global GLOBAL_PPO
         self.ppo = GLOBAL_PPO
@@ -303,17 +313,18 @@ class Worker(object):
                 ep_r += r
 
                 GLOBAL_UPDATE_COUNTER += 1  # count to minimum batch size, no need to wait other workers
-                if t == EP_LEN - 1 or GLOBAL_UPDATE_COUNTER >= MIN_BATCH_SIZE:
+                if t == EP_LEN - 1 or GLOBAL_UPDATE_COUNTER >= MIN_BATCH_SIZE or done:
                     try:
                         v_s_ = self.ppo.get_v(s_)
                     except:
-                        v_s_ = self.ppo.get_v(s_[newaxis, :]) # for raw-pixel input
+                        v_s_ = self.ppo.get_v(s_[np.newaxis, :])  # for raw-pixel input
                     discounted_r = []  # compute discounted reward
                     for r in buffer_r[::-1]:
                         v_s_ = r + GAMMA * v_s_
                         discounted_r.append(v_s_)
                     discounted_r.reverse()
-                    bs = buffer_s if len(buffer_s[0].shape)>1 else np.vstack(buffer_s) # no vstack for raw-pixel input
+                    bs = buffer_s if len(buffer_s[0].shape) > 1 else np.vstack(
+                        buffer_s)  # no vstack for raw-pixel input
                     ba, br = np.vstack(buffer_a), np.array(discounted_r)[:, np.newaxis]
                     buffer_s, buffer_a, buffer_r = [], [], []
                     QUEUE.put((bs, ba, br))  # put data in the queue
@@ -324,6 +335,8 @@ class Worker(object):
                     if GLOBAL_EP >= EP_MAX:  # stop training
                         COORD.request_stop()
                         break
+                if done:
+                    break
 
             GLOBAL_RUNNING_R.append(ep_r)
             GLOBAL_EP += 1
