@@ -103,6 +103,9 @@ def _make_env(env_id, env_type, seed, reward_shaping, frame_stack, **kwargs):
         env = gym.make(env_id)
         env = FlattenDictWrapper(env, ['observation', 'desired_goal'])
         env = Monitor(env, info_keywords=('is_success',))
+    elif env_type == 'dm_control':
+        import dm2gym
+        env = gym.make('dm2gym:'+env_id)  
     elif env_type == 'rlbench':
         from common.build_rlbench_env import RLBenchEnv
         env  = RLBenchEnv(env_id)

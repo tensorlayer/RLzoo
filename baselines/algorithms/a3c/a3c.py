@@ -164,10 +164,11 @@ class Worker(object):
                         buffer_v_target.append(v_s_)
 
                     buffer_v_target.reverse()
-
-                    buffer_s, buffer_a, buffer_v_target = (
-                        np.vstack(buffer_s), np.vstack(buffer_a), np.vstack(buffer_v_target)
+                    buffer_s = buffer_s if len(buffer_s[0].shape)>2 else np.vstack(buffer_s)
+                    buffer_a, buffer_v_target = (
+                        np.vstack(buffer_a), np.vstack(buffer_v_target)
                     )
+
                     # update gradients on global network
                     self.AC.update_global(buffer_s, buffer_a, buffer_v_target.astype('float32'), globalAC)
                     buffer_s, buffer_a, buffer_r = [], [], []
@@ -178,7 +179,7 @@ class Worker(object):
                 s = s_
                 total_step += 1
                 epi_step += 1
-                if done:
+                if done or epi_step>=self.max_steps:
                     if len(GLOBAL_RUNNING_R) == 0:  # record running episode reward
                         GLOBAL_RUNNING_R.append(ep_r)
                     else:  # moving average
@@ -194,7 +195,7 @@ class A3C():
         self.net_list = net_list
         self.optimizers_list = optimizers_list
 
-    def learn(self, env, train_episodes=1000, render=False, test_episodes=10, max_steps=150, number_workers=1, update_itr=10,
+    def learn(self, env, train_episodes=1000, render=False, test_episodes=10, max_steps=150, n_workers=1, update_itr=10,
         gamma=0.99, entropy_beta=0.005 , actor_lr=5e-5, critic_lr=1e-4, save_interval=500, mode='train'):
 
         '''
@@ -204,7 +205,7 @@ class A3C():
         train_episodes:  total number of episodes for training
         test_episodes:  total number of episodes for testing
         max_steps:  maximum number of steps for one episode
-        number_workers: manually set number of workers
+        n_workers: manually set number of workers
         update_itr: update global policy after several episodes
         gamma: reward discount factor
         entropy_beta: factor for entropy boosted exploration
@@ -218,7 +219,7 @@ class A3C():
         COORD = tf.train.Coordinator()
         GLOBAL_RUNNING_R = []
         GLOBAL_EP = 0  # will increase during training, stop training when it >= MAX_GLOBAL_EP
-        N_WORKERS = number_workers if number_workers>0 else multiprocessing.cpu_count()
+        N_WORKERS = n_workers if n_workers>0 else multiprocessing.cpu_count()
 
         if mode=='train':
             # ============================= TRAINING ===============================
@@ -244,12 +245,6 @@ class A3C():
                 t.start()
                 worker_threads.append(t)
             COORD.join(worker_threads)
-            # import matplotlib.pyplot as plt
-            # plt.plot(GLOBAL_RUNNING_R)
-            # plt.xlabel('episode')
-            # plt.ylabel('global running reward')
-            # plt.savefig('a3c.png')
-            # plt.show()
 
             GLOBAL_AC.save_ckpt()
 

@@ -58,7 +58,7 @@ alpha_lr: learning rate of the variable alpha
 env_list=[]
 for i in range(num_workers):
     env_list.append(gym.make(env_id).unwrapped)
-model.learn(env_list, train_episodes=100, test_episodes=1000, max_steps=150, number_workers=num_workers, update_itr=10,
+model.learn(env_list, train_episodes=100, test_episodes=1000, max_steps=150, n_workers=num_workers, update_itr=10,
         gamma=0.99, entropy_beta=0.005 , actor_lr=5e-5, critic_lr=1e-4, save_interval=500, mode='train')
 ''' 
 full list of parameters for training

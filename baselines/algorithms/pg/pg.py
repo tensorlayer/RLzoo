@@ -91,7 +91,10 @@ class PG:
         # print(discounted_ep_rs_norm)
 
         with tf.GradientTape() as tape:
-            self.model(np.vstack(s))
+            try:
+                self.model(np.vstack(s))
+            except:
+                self.model(s)  # no stack for raw-pixel atari
             neg_log_prob = self.model.policy_dist.neglogp(a)
             loss = tf.reduce_mean(neg_log_prob * discounted_ep_rs_norm)  # reward guided loss
 

@@ -731,15 +731,6 @@ all_env_list={
     'Zaxxon-ramNoFrameskip-v0',
     'Zaxxon-ramNoFrameskip-v4'],  
 
-    # Box2D
-    'box2d':[     
-        'BipedalWalker-v2',
-        'BipedalWalkerHardcore-v2',
-        'CarRacing-v0',
-        'LunarLander-v2',
-        'LunarLanderContinuous-v2'
-    ],    
-
     # Classic control
     'classic_control':[      
         'Acrobot-v1',
@@ -749,6 +740,15 @@ all_env_list={
         'MountainCarContinuous-v0',
         'Pendulum-v0'
     ] ,
+    
+    # Box2D
+    'box2d':[     
+        'BipedalWalker-v2',
+        'BipedalWalkerHardcore-v2',
+        'CarRacing-v0',
+        'LunarLander-v2',
+        'LunarLanderContinuous-v2'
+    ],    
 
     # MuJoCo
     'mujoco':[
@@ -778,20 +778,22 @@ all_env_list={
 
     ## Deepmind Control Suite  (need check!)
     'dm_control':[
-        'acrobot', 
-        'ballincup', 
-        'cartpole', 
-        'cheetah', 
-        'finger', 
-        'fish', 
-        'hopper', 
-        'humanoid', 
-        'manipulator', 
-        'pendulum', 
-        'pointmass', 
-        'reacher', 
-        'swimmer', 
-        'walker'
+        'AcrobotSparse-v0', 
+        'BallincupCatch-v0', 
+        'CartpoleSwingup-v0', 
+        'FingerTurn-v0', 
+        'FishSwim-v0', 
+        'CheetahRun-v0',
+        'HopperHop-v0', 
+        'HumanoidStand-v0', 
+        'HumanoidWalk-v0', 
+        'HumanoidRun-v0', 
+        'ManipulatorBringball-v0', 
+        'PendulumSwingup-v0', 
+        'Pointmass-v0', 
+        'ReacherHard-v0', 
+        'Swimmer-v0', 
+        'WalkerRun-v0'
     ],      
 
     ## RLBench
