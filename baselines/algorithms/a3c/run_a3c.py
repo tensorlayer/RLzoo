@@ -39,19 +39,13 @@ a_optimizer = tf.optimizers.RMSprop(actor_lr)
 c_optimizer = tf.optimizers.RMSprop(critic_lr)
 optimizers_list= [a_optimizer, c_optimizer]
 
-model=A3C(net_list2, optimizers_list)
+model=A3C(net_list2, optimizers_list, entropy_beta=0.005)
 ''' 
 full list of arguments for the algorithm
 ----------------------------------------
 net_list: a list of networks (value and policy) used in the algorithm, from common functions or customization
 optimizers_list: a list of optimizers for all networks and differentiable variables
-state_dim: dimension of state for the environment
-action_dim: dimension of action for the environment
-replay_buffer_capacity: the size of buffer for storing explored samples
-action_range: value of each action in [-action_range, action_range]
-soft_q_lr: learning rate of the Q network
-policy_lr: learning rate of the policy network
-alpha_lr: learning rate of the variable alpha
+entropy_beta: factor for entropy boosted exploration
 '''
 
 
@@ -59,7 +53,7 @@ env_list=[]
 for i in range(num_workers):
     env_list.append(gym.make(env_id).unwrapped)
 model.learn(env_list, train_episodes=100, test_episodes=1000, max_steps=150, n_workers=num_workers, update_itr=10,
-        gamma=0.99, entropy_beta=0.005 , actor_lr=5e-5, critic_lr=1e-4, save_interval=500, mode='train')
+        gamma=0.99, save_interval=500, mode='train')
 ''' 
 full list of parameters for training
 ---------------------------------------
@@ -70,9 +64,6 @@ max_steps:  maximum number of steps for one episode
 number_workers: manually set number of workers
 update_itr: update global policy after several episodes
 gamma: reward discount factor
-entropy_beta: factor for entropy boosted exploration
-actor_lr: learning rate for actor
-critic_lr: learning rate for critic
 save_interval: timesteps for saving the weights and plotting the results
 mode: train or test
 '''
