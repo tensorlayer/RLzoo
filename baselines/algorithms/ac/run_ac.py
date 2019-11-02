@@ -44,7 +44,7 @@ gamma: discounted factor of reward
 action_range: scale of action values
 '''
 
-model.learn(env, train_episodes=500, test_episodes=100, max_steps=200,
+model.learn(env, train_episodes=500,  max_steps=200,
             save_interval=50, mode='train', render=False)
 ''' 
 full list of parameters for training
@@ -57,11 +57,4 @@ save_interval: time steps for saving the weights and plotting the results
 mode: 'train' or 'test'
 render:  if true, visualize the environment
 '''
-
-obs = env.reset()
-for i in range(100):
-    action = model.get_action(obs)
-    obs, rewards, dones, info = env.step(action)
-    env.render()
-
-env.close()
+model.learn(env, test_episodes=100, max_steps=200,  mode='test', render=True)

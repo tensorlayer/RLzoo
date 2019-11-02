@@ -38,8 +38,8 @@ Currently the repository is still in development, and there may be some envrionm
 |**Actor-Critic**||
 |Actor-Critic (AC)| [Actor-critic algorithms. Konda er al. 2000.](https://papers.nips.cc/paper/1786-actor-critic-algorithms.pdf)|
 | Asynchronous Advantage Actor-Critic (A3C)| [Asynchronous methods for deep reinforcement learning. Mnih et al. 2016.](https://arxiv.org/pdf/1602.01783.pdf) |
-| DDPG| [Continuous Control With Deep Reinforcement Learning, Lillicrap et al. 2016](https://arxiv.org/pdf/1509.02971.pdf) |
-|TD3|[Addressing function approximation error in actor-critic methods. Fujimoto et al. 2018.](https://arxiv.org/pdf/1802.09477.pdf)|
+| Deep Deterministic Policy Gradient (DDPG) | [Continuous Control With Deep Reinforcement Learning, Lillicrap et al. 2016](https://arxiv.org/pdf/1509.02971.pdf) |
+|Twin Delayed DDPG (TD3)|[Addressing function approximation error in actor-critic methods. Fujimoto et al. 2018.](https://arxiv.org/pdf/1802.09477.pdf)|
 |Soft Actor-Critic (SAC)|[Soft actor-critic algorithms and applications. Haarnoja et al. 2018.](https://arxiv.org/abs/1812.05905)|
 
 ### Environments:
@@ -123,14 +123,20 @@ RL zoo with **implicit configurations** means the configurations for learning ar
 #### Common Interface:
 
 ```python
-EnvName = 'Pendulum-v0'  # chose environment
-EnvType = ['classic_control', 'atari', 'box2d', 'mujoco', 'dm_control'][0]  # select environment type
-
-env = build_env(EnvName, EnvType)  # build environment with wrappers
-alg_params, learn_params = call_default_params(env, EnvType, 'TD3')  # call default parameters for the algorithm and learning process
-alg = TD3(**alg_params) # instantiate the algorithm
-alg.learn(env=env, train_episodes=1000, test_episodes=1000, 
-        save_interval=100, mode='train', render=False, **learn_params)  # start the learning process
+# chose environment
+EnvName = 'Pendulum-v0'  
+# select corresponding environment type
+EnvType = ['classic_control', 'atari', 'box2d', 'mujoco', 'dm_control', 'rlbench'][0] 
+# build environment with wrappers
+env = build_env(EnvName, EnvType)  
+# call default parameters for the algorithm and learning process
+alg_params, learn_params = call_default_params(env, EnvType, 'TD3')  
+# instantiate the algorithm
+alg = TD3(**alg_params) 
+# start the training process
+alg.learn(env=env, mode='train', render=False, **learn_params)  
+# test after training 
+alg.learn(env=env, mode='test', render=True, **learn_params)  
 ```
 
 #### To Run:
@@ -148,7 +154,6 @@ RL zoo with **explicit configurations** means the configurations for learning, i
 ```python
 ''' load environment '''
 env = gym.make('CartPole-v0').unwrapped
-# env = DummyVecEnv([lambda: env])  # The algorithms require a vectorized/wrapped environment to run
 state_shape = env.observation_space.shape
 action_shape = (env.action_space.n,)
 
@@ -157,28 +162,31 @@ num_hidden_layer = 4 #number of hidden layers for the networks
 hidden_dim = 64 # dimension of hidden layers for the networks
 with tf.name_scope('AC'):
         with tf.name_scope('Critic'):
+            	# choose the critic network, can be replaced with customized network
                 critic = MlpValueNetwork(state_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
         with tf.name_scope('Actor'):
+            	# choose the actor network, can be replaced with customized network
                 actor = DeterministicPolicyNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
-net_list = [actor, critic]
+net_list = [actor, critic] # list of the networks
 
 ''' choose optimizers '''
 a_lr, c_lr = 1e-3, 1e-3  # a_lr: learning rate of the actor; c_lr: learning rate of the critic
 a_optimizer = tf.optimizers.Adam(a_lr)
 c_optimizer = tf.optimizers.Adam(c_lr)
-optimizers_list=[a_optimizer, c_optimizer]
+optimizers_list=[a_optimizer, c_optimizer]  # list of optimizers
 
+# intialize the algorithm model, with algorithm parameters passed in
 model=AC(net_list, optimizers_list, state_dim=state_shape[0], action_dim=action_shape[0])
 ''' 
 full list of arguments for the algorithm
 ----------------------------------------
 net_list: a list of networks (value and policy) used in the algorithm, from common functions or customization
 optimizers_list: a list of optimizers for all networks and differentiable variables
-state_dim: dimension of state for the environment
-action_dim: dimension of action for the environment
 gamma: discounted factor of reward
+action_range: scale of action values
 '''
 
+# start the training process, with learning parameters passed in
 model.learn(env, train_episodes=100, test_episodes=1000, max_steps=1000,
         seed=2, save_interval=100, mode='train', render=False)
 ''' 
@@ -188,20 +196,14 @@ env: learning environment
 train_episodes:  total number of episodes for training
 test_episodes:  total number of episodes for testing
 max_steps:  maximum number of steps for one episode
-seed: random seed
-save_interval: timesteps for saving the weights and plotting the results
+save_interval: time steps for saving the weights and plotting the results
 mode: 'train' or 'test'
 render:  if true, visualize the environment
 '''
 
+# test after training
+model.learn(env, test_episodes=100, max_steps=200,  mode='test', render=True)
 
-obs = env.reset()
-for i in range(100):
-    action = model.get_action(obs)
-    obs, rewards, dones, info = env.step(action)
-    env.render()
-
-env.close()
 ```
 
 #### To Run:
