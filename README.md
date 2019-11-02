@@ -1,10 +1,7 @@
 # Reinforcement Learning Algorithms Zoo
-RLzoo is a collection of most practical reinforcement learning algorithms, frameworks and applications. It is implemented with Tensorflow 2.0
-and API of neural network layers in TensorLayer 2, to provide a hands-on fast-developing approach for reinforcement learning practices. It supports
-basic toy-tests like [OpenAI Gym](https://gym.openai.com/) and [DeepMind Control Suite](https://github.com/deepmind/dm_control) with very simple configurations.
-Moreover, RLzoo supports robot learning benchmark environment [RLBench](https://github.com/stepjam/RLBench) based on  [Vrep](http://www.coppeliarobotics.com/)/[Pyrep](https://github.com/stepjam/PyRep) simulator. Other large-scale distributed training framework for more realistic scenarios with [Unity 3D](https://github.com/Unity-Technologies/ml-agents), 
+RLzoo is a collection of most practical reinforcement learning algorithms, frameworks and applications. It is implemented with Tensorflow 2.0 and API of neural network layers in TensorLayer 2, to provide a hands-on fast-developing approach for reinforcement learning practices. It supports basic toy-tests like [OpenAI Gym](https://gym.openai.com/) and [DeepMind Control Suite](https://github.com/deepmind/dm_control) with very simple configurations. Moreover, RLzoo supports robot learning benchmark environment [RLBench](https://github.com/stepjam/RLBench) based on  [Vrep](http://www.coppeliarobotics.com/)/[Pyrep](https://github.com/stepjam/PyRep) simulator. Other large-scale distributed training framework for more realistic scenarios with [Unity 3D](https://github.com/Unity-Technologies/ml-agents), 
 [Mujoco](http://www.mujoco.org/), [Bullet Physics](https://github.com/bulletphysics/bullet3), etc, will be supported in the future.
-
+- [Status](#status)
 - [Contents](#contents)
   - [Algorithms](#algorithms)
   - [Environments](#environments)
@@ -16,7 +13,7 @@ Moreover, RLzoo supports robot learning benchmark environment [RLBench](https://
 
 Please note that this repository using RL algorithms with **high-level API**. So if you want to get familiar with each algorithm more quickly, please look at our **[RL tutorials](https://github.com/tensorlayer/tensorlayer/tree/master/examples/reinforcement_learning)** where each algorithm is implemented individually in a more straightforward manner.
 
-## Status: Work-in-Progress:
+## Status: Work-in-Progress
 Currently the repository is still in development, and there may be some envrionments incompatible with our algorithms. If you find any problems or have any suggestions, feel free to contact with us!
 
 ## Contents:
@@ -79,12 +76,23 @@ Currently the repository is still in development, and there may be some envrionm
 * A dictionary of all different environments is stored in `./baselines/env_list.py`
 
 ## Descriptions:
-
+| Algorithms                 | Action Space        | Policy        | Update     | Envs                                                         |
+| -------------------------- | ------------------- | ------------- | ---------- | ------------------------------------------------------------ |
+| DQN (double, dueling, PER) | Discrete Only       | --            | Off-policy | Atari, Classic Control                                       |
+| AC                         | Discrete/Continuous | Stochastic    | On-policy  | All                                                          |
+| PG                         | Discrete/Continuous | Stochastic    | On-policy  | All                                                          |
+| DDPG                       | Continuous          | Deterministic | Off-policy | Classic Control, Box2D, Mujoco, Robotics, DeepMind Control, RLBench |
+| TD3                        | Continuous          | Deterministic | Off-policy | Classic Control, Box2D, Mujoco, Robotics, DeepMind Control, RLBench |
+| SAC                        | Continuous          | Stochastic    | Off-policy | Classic Control, Box2D, Mujoco, Robotics, DeepMind Control, RLBench |
+| A3C                        | Discrete/Continuous | Stochastic    | On-policy  | Atari, Classic Control, Box2D, Mujoco, Robotics, DeepMind Control |
+| PPO                        | Discrete/Continuous | Stochastic    | On-policy  | All                                                          |
+| DPPO                       | Discrete/Continuous | Stochastic    | On-policy  | Atari, Classic Control, Box2D, Mujoco, Robotics, DeepMind Control |
+| TRPO                       | Discrete/Continuous | Stochastic    | On-policy  | All                                                          |
 
 
 ## Prerequisites:
 
-* python 3.5
+* python >=3.5 (python 3.6 is needed if using dm_control)
 * tensorflow >= 2.0.0 or tensorflow-gpu >= 2.0.0a0
 * tensorlayer >= 2.0.1
 * tensorflow-probability
