@@ -1,0 +1,276 @@
+# Examples
+
+## Descriptions of Algorithms and Environments in RLZoo
+
+| Algorithms                 | Action Space        | Policy        | Update     | Envs                                                         |
+| -------------------------- | ------------------- | ------------- | ---------- | ------------------------------------------------------------ |
+| DQN (double, dueling, PER) | Discrete Only       | --            | Off-policy | Atari, Classic Control                                       |
+| AC                         | Discrete/Continuous | Stochastic    | On-policy  | All                                                          |
+| PG                         | Discrete/Continuous | Stochastic    | On-policy  | All                                                          |
+| DDPG                       | Continuous          | Deterministic | Off-policy | Classic Control, Box2D, Mujoco, Robotics, DeepMind Control, RLBench |
+| TD3                        | Continuous          | Deterministic | Off-policy | Classic Control, Box2D, Mujoco, Robotics, DeepMind Control, RLBench |
+| SAC                        | Continuous          | Stochastic    | Off-policy | Classic Control, Box2D, Mujoco, Robotics, DeepMind Control, RLBench |
+| A3C                        | Discrete/Continuous | Stochastic    | On-policy  | Atari, Classic Control, Box2D, Mujoco, Robotics, DeepMind Control |
+| PPO                        | Discrete/Continuous | Stochastic    | On-policy  | All                                                          |
+| DPPO                       | Discrete/Continuous | Stochastic    | On-policy  | Atari, Classic Control, Box2D, Mujoco, Robotics, DeepMind Control |
+| TRPO                       | Discrete/Continuous | Stochastic    | On-policy  | All                                                          |
+
+
+
+## 1. Deep Q-Network (DQN)
+
+```python
+EnvName = 'PongNoFrameskip-v4'
+EnvType = 'atari'
+# EnvName = 'CartPole-v1'
+# EnvType = 'classic_control'  # the name of env needs to match the type of env
+
+env = build_env(EnvName, EnvType)
+alg_params, learn_params = call_default_params(env, EnvType, 'DQN')
+alg = DQN(**alg_params)
+alg.learn(env=env, mode='train', **learn_params)
+alg.learn(env=env, mode='test', render=True, **learn_params)
+
+```
+
+## 2. Actor-Critic (AC)
+
+```python
+EnvName = 'PongNoFrameskip-v4'
+EnvType = 'atari'
+
+# EnvName = 'Pendulum-v0'
+# EnvType = 'classic_control'
+
+# EnvName = 'BipedalWalker-v2'
+# EnvType = 'box2d'
+
+# EnvName = 'Ant-v2'
+# EnvType = 'mujoco'
+
+# EnvName = 'FetchPush-v1'
+# EnvType = 'robotics'
+
+# EnvName = 'FishSwim-v0'
+# EnvType = 'dm_control'
+
+# EnvName = 'ReachTarget'
+# EnvType = 'rlbench'
+
+env = build_env(EnvName, EnvType)
+alg_params, learn_params = call_default_params(env, EnvType, 'AC')
+alg = AC(**alg_params)
+alg.learn(env=env, mode='train', render=False, **learn_params)
+alg.learn(env=env, mode='test', render=True, **learn_params)
+
+```
+
+## 3. Policy Gradient (PG)
+
+```python
+EnvName = 'PongNoFrameskip-v4'
+EnvType = 'atari'
+
+# EnvName = 'CartPole-v0'
+# EnvType = 'classic_control'
+
+# EnvName = 'BipedalWalker-v2'
+# EnvType = 'box2d'
+
+# EnvName = 'Ant-v2'
+# EnvType = 'mujoco'
+
+# EnvName = 'FetchPush-v1'
+# EnvType = 'robotics'
+
+# EnvName = 'FishSwim-v0'
+# EnvType = 'dm_control'
+
+# EnvName = 'ReachTarget'
+# EnvType = 'rlbench'
+
+env = build_env(EnvName, EnvType)
+alg_params, learn_params = call_default_params(env, EnvType, 'PG')
+alg = PG(**alg_params)
+alg.learn(env=env, mode='train', render=False, **learn_params)
+alg.learn(env=env, mode='test', render=True, **learn_params)
+```
+
+## 4. Deep Deterministic Policy Gradient (DDPG)
+
+```python
+EnvName = 'Pendulum-v0'  # only continuous action
+EnvType = 'classic_control'
+
+# EnvName = 'BipedalWalker-v2'
+# EnvType = 'box2d'
+
+# EnvName = 'Ant-v2'
+# EnvType = 'mujoco'
+
+# EnvName = 'FetchPush-v1'
+# EnvType = 'robotics'
+
+# EnvName = 'FishSwim-v0'
+# EnvType = 'dm_control'
+
+# EnvName = 'ReachTarget'
+# EnvType = 'rlbench'
+
+env = build_env(EnvName, EnvType)
+alg_params, learn_params = call_default_params(env, EnvType, 'DDPG')
+alg = DDPG(**alg_params)
+alg.learn(env=env, mode='train', render=False, **learn_params)
+alg.learn(env=env, mode='test', render=True, **learn_params)
+
+```
+
+
+
+## 5. Twin Delayed DDPG (TD3)
+
+```python
+EnvName = 'Pendulum-v0'  # only continuous action
+EnvType = 'classic_control'
+
+# EnvName = 'BipedalWalker-v2'
+# EnvType = 'box2d'
+
+# EnvName = 'Ant-v2'
+# EnvType = 'mujoco'
+
+# EnvName = 'FetchPush-v1'
+# EnvType = 'robotics'
+
+# EnvName = 'FishSwim-v0'
+# EnvType = 'dm_control'
+
+# EnvName = 'ReachTarget'
+# EnvType = 'rlbench'
+
+env = build_env(EnvName, EnvType)
+alg_params, learn_params = call_default_params(env, EnvType, 'TD3')
+alg = TD3(**alg_params)
+alg.learn(env=env, mode='train', render=False, **learn_params)
+alg.learn(env=env, mode='test', render=True, **learn_params)
+```
+
+## 6. Soft Actor-Critic (SAC)
+
+```python
+EnvName = 'Pendulum-v0'  # only continuous action
+EnvType = 'classic_control'
+
+# EnvName = 'BipedalWalker-v2'
+# EnvType = 'box2d'
+
+# EnvName = 'Ant-v2'
+# EnvType = 'mujoco'
+
+# EnvName = 'FetchPush-v1'
+# EnvType = 'robotics'
+
+# EnvName = 'FishSwim-v0'
+# EnvType = 'dm_control'
+
+# EnvName = 'ReachTarget'
+# EnvType = 'rlbench'
+
+env = build_env(EnvName, EnvType)
+alg_params, learn_params = call_default_params(env, EnvType, 'SAC')
+alg = SAC(**alg_params)
+alg.learn(env=env, mode='train', render=False, **learn_params)
+alg.learn(env=env, mode='test', render=True, **learn_params)
+```
+
+## 7. Asynchronous Advantage Actor-Critic (A3C)
+
+```python
+EnvName = 'PongNoFrameskip-v4'
+EnvType = 'atari'
+
+# EnvName = 'Pendulum-v0'  # only continuous action
+# EnvType = 'classic_control'
+
+# EnvName = 'BipedalWalker-v2'
+# EnvType = 'box2d'
+
+# EnvName = 'Ant-v2'
+# EnvType = 'mujoco'
+
+# EnvName = 'FetchPush-v1'
+# EnvType = 'robotics'
+
+# EnvName = 'FishSwim-v0'
+# EnvType = 'dm_control'
+
+number_workers = 2  # needs to specify number of asynchronous workers here! 
+env = build_env(EnvName, EnvType, nenv=number_workers)
+alg_params, learn_params = call_default_params(env, EnvType, 'A3C')
+alg = A3C(**alg_params)
+alg.learn(env=env,  mode='train', n_workers=number_workers, render=False, **learn_params)
+alg.learn(env=env,  mode='test', render=True, **learn_params)
+```
+
+## 8. Proximal Policy Optimization (PPO)
+
+```python
+EnvName = 'PongNoFrameskip-v4'
+EnvType = 'atari'
+
+# EnvName = 'Pendulum-v0'
+# EnvType = 'classic_control'
+
+# EnvName = 'BipedalWalker-v2'
+# EnvType = 'box2d'
+
+# EnvName = 'Ant-v2'
+# EnvType = 'mujoco'
+
+# EnvName = 'FetchPush-v1'
+# EnvType = 'robotics'
+
+# EnvName = 'FishSwim-v0'
+# EnvType = 'dm_control'
+
+# EnvName = 'ReachTarget'
+# EnvType = 'rlbench'
+
+env = build_env(EnvName, EnvType)
+alg_params, learn_params = call_default_params(env, EnvType, 'PPO')
+alg = PPO(method='clip', **alg_params) # specify 'clip' or 'penalty' method for PPO
+alg.learn(env=env,  mode='train', render=False, **learn_params)
+alg.learn(env=env,  mode='test', render=False, **learn_params)
+```
+
+## 9. Distributed Proximal Policy Optimization (DPPO)
+
+```python
+EnvName = 'PongNoFrameskip-v4'
+EnvType = 'atari'
+
+# EnvName = 'Pendulum-v0'
+# EnvType = 'classic_control'
+
+# EnvName = 'BipedalWalker-v2'
+# EnvType = 'box2d'
+
+# EnvName = 'Ant-v2'
+# EnvType = 'mujoco'
+
+# EnvName = 'FetchPush-v1'
+# EnvType = 'robotics'
+
+# EnvName = 'FishSwim-v0'
+# EnvType = 'dm_control'
+
+# EnvName = 'ReachTarget'
+# EnvType = 'rlbench'
+
+env = build_env(EnvName, EnvType)
+alg_params, learn_params = call_default_params(env, EnvType, 'PPO')
+alg = PPO(method='clip', **alg_params) # specify 'clip' or 'penalty' method for PPO
+alg.learn(env=env,  mode='train', render=False, **learn_params)
+alg.learn(env=env,  mode='test', render=False, **learn_params)
+```
+

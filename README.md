@@ -2,12 +2,13 @@
 RLzoo is a collection of most practical reinforcement learning algorithms, frameworks and applications. It is implemented with Tensorflow 2.0
 and API of neural network layers in TensorLayer 2, to provide a hands-on fast-developing approach for reinforcement learning practices. It supports
 basic toy-tests like [OpenAI Gym](https://gym.openai.com/) and [DeepMind Control Suite](https://github.com/deepmind/dm_control) with very simple configurations.
-Moreover, RLzoo supports large-scale distributed training framework for more realistic scenarios with [Unity 3D](https://github.com/Unity-Technologies/ml-agents), 
-[Mujoco](http://www.mujoco.org/), [Bullet Physics](https://github.com/bulletphysics/bullet3), and robotic learning tasks with [Vrep](http://www.coppeliarobotics.com/)/[Pyrep](https://github.com/stepjam/PyRep), etc.
+Moreover, RLzoo supports robot learning benchmark environment [RLBench](https://github.com/stepjam/RLBench) based on  [Vrep](http://www.coppeliarobotics.com/)/[Pyrep](https://github.com/stepjam/PyRep) simulator. Other large-scale distributed training framework for more realistic scenarios with [Unity 3D](https://github.com/Unity-Technologies/ml-agents), 
+[Mujoco](http://www.mujoco.org/), [Bullet Physics](https://github.com/bulletphysics/bullet3), etc, will be supported in the future.
 
 - [Contents](#contents)
   - [Algorithms](#algorithms)
   - [Environments](#environments)
+  - [Descriptions](#descriptions)
 - [Prerequisites](#prerequisites)
 - [Usage](#usage)
 - [Troubleshooting](#troubleshooting)
@@ -23,7 +24,7 @@ Currently the repository is still in development, and there may be some envrionm
 
 | Algorithms      | Action Space | Tutorial Env   | Papers |
 | --------------- | ------------ | -------------- | -------|
-|**value-based**||||
+|**Value-based**||||
 | Q-learning      | Discrete     | FrozenLake     | [Technical note: Q-learning. Watkins et al. 1992](http://www.gatsby.ucl.ac.uk/~dayan/papers/cjch.pdf)|
 | Deep Q-Network (DQN)| Discrete     | FrozenLake     | [Human-level control through deep reinforcement learning, Mnih et al. 2015.](https://www.nature.com/articles/nature14236/) |
 | Prioritized Experience Replay | Discrete     | Pong, CartPole | [Schaul et al. Prioritized experience replay. Schaul et al. 2015.](https://arxiv.org/abs/1511.05952) |
@@ -32,12 +33,12 @@ Currently the repository is still in development, and there may be some envrionm
 |Retrace|Discrete     | Pong, CartPole |[Safe and efficient off-policy reinforcement learning. Munos et al. 2016: ](https://arxiv.org/pdf/1606.02647.pdf)|
 |Noisy DQN|Discrete     | Pong, CartPole |[Noisy networks for exploration. Fortunato et al. 2017.](https://arxiv.org/pdf/1706.10295.pdf)|
 | Distributed DQN (C51)| Discrete     | Pong, CartPole | [A distributional perspective on reinforcement learning. Bellemare et al. 2017.](https://arxiv.org/pdf/1707.06887.pdf) |
-|**policy-based**||||
+|**Policy-based**||||
 |REINFORCE(PG) |Discrete/Continuous|CartPole | [Reinforcement learning: An introduction. Sutton et al. 2011.](https://www.cambridge.org/core/journals/robotica/article/robot-learning-edited-by-jonathan-h-connell-and-sridhar-mahadevan-kluwer-boston-19931997-xii240-pp-isbn-0792393651-hardback-21800-guilders-12000-8995/737FD21CA908246DF17779E9C20B6DF6)|
 | Trust Region Policy Optimization (TRPO)| Discrete/Continuous | Pendulum | [Abbeel et al. Trust region policy optimization. Schulman et al.2015.](https://arxiv.org/pdf/1502.05477.pdf) |
 | Proximal Policy Optimization (PPO) |Discrete/Continuous |Pendulum| [Proximal policy optimization algorithms. Schulman et al. 2017.](https://arxiv.org/abs/1707.06347) |
 |Distributed Proximal Policy Optimization (DPPO)|Discrete/Continuous |Pendulum|[Emergence of locomotion behaviours in rich environments. Heess et al. 2017.](https://arxiv.org/abs/1707.02286)|
-|**actor-critic**||||
+|**Actor-Critic**||||
 |Actor-Critic (AC)|Discrete/Continuous|CartPole| [Actor-critic algorithms. Konda er al. 2000.](https://papers.nips.cc/paper/1786-actor-critic-algorithms.pdf)|
 | Asynchronous Advantage Actor-Critic (A3C)| Discrete/Continuous | BipedalWalker| [Asynchronous methods for deep reinforcement learning. Mnih et al. 2016.](https://arxiv.org/pdf/1602.01783.pdf) |
 | DDPG|Continuous |Pendulum| [Continuous Control With Deep Reinforcement Learning, Lillicrap et al. 2016](https://arxiv.org/pdf/1509.02971.pdf) |
@@ -46,19 +47,40 @@ Currently the repository is still in development, and there may be some envrionm
 
 ### Environments:
 
-*  [**OpenAI Gym**](https://gym.openai.com/): full list of environments is [here](https://gym.openai.com/envs/#classic_control); list of environments with types of spaces for Atari, Box2D and Classic Control is [here](https://github.com/openai/gym/wiki/Table-of-environments).
+* [**OpenAI Gym**](https://gym.openai.com/):  
+
     * Atari
     * Box2D
     * Classic control
     * MuJoCo
     * Robotics
-*  [**DeepMind Control Suite**](https://github.com/deepmind/dm_control) 
-*  [**RLBench**](https://github.com/stepjam/RLBench): full list of environments is [here](https://github.com/stepjam/RLBench/blob/master/rlbench/tasks/__init__.py). Installation of Vrep->PyRep->RLBench follows [here](http://www.coppeliarobotics.com/downloads.html)->[here](https://github.com/stepjam/PyRep)->[here](https://github.com/stepjam/RLBench).
 
-** Make sure the name of environment matches the type of environment. The types of environments include: 'atari', 'box2d', 'classic_control', 'mujoco', 'robotics', 'dm_control', 'rlbench'.
+    Full list of environments is [here](https://gym.openai.com/envs/#classic_control).
 
-** When using the RLBench environments, please add the path of your local rlbench repository to python: 
-```export PYTHONPATH=PATH_TO_YOUR_LOCAL_RLBENCH_REPO```
+    List of environments with types of spaces for Atari, Box2D and Classic Control is [here](https://github.com/openai/gym/wiki/Table-of-environments).
+
+* [**DeepMind Control Suite**](https://github.com/deepmind/dm_control):
+
+    The [dm2gym](https://github.com/zuoxingdong/dm2gym) is needed for registering environments in DeepMind Control Suite as Gym environments.
+
+* [**RLBench**](https://github.com/stepjam/RLBench): 
+
+    Full list of environments is [here](https://github.com/stepjam/RLBench/blob/master/rlbench/tasks/__init__.py). 
+
+    Installation of Vrep->PyRep->RLBench follows [here](http://www.coppeliarobotics.com/downloads.html)->[here](https://github.com/stepjam/PyRep)->[here](https://github.com/stepjam/RLBench).
+
+**Note**:
+
+* Make sure the name of environment matches the type of environment in the main script. The types of environments include: 'atari', 'box2d', 'classic_control', 'mujoco', 'robotics', 'dm_control', 'rlbench'.
+* When using the DeepMind Control Suite, install the [dm2gym](https://github.com/zuoxingdong/dm2gym) package with: `pip install dm2gym`
+
+* When using the RLBench environments, please add the path of your local rlbench repository to python: 
+  ```export PYTHONPATH=PATH_TO_YOUR_LOCAL_RLBENCH_REPO```
+* A dictionary of all different environments is stored in `./baselines/env_list.py`
+
+## Descriptions:
+
+
 
 ## Prerequisites:
 
@@ -67,6 +89,7 @@ Currently the repository is still in development, and there may be some envrionm
 * tensorlayer >= 2.0.1
 * tensorflow-probability
 * tf-nightly-2.0-preview
+* [Mujoco 2.0](http://www.mujoco.org/), [dm_control](https://github.com/deepmind/dm_control), [dm2gym](https://github.com/zuoxingdong/dm2gym) (if using DeepMind Control Suite environments)
 * Vrep, PyRep, RLBench (if using RLBench environments, follows [here](http://www.coppeliarobotics.com/downloads.html), [here](https://github.com/stepjam/PyRep) and [here](https://github.com/stepjam/RLBench))
 
 Run the following line in the root file to install all required packages:
@@ -80,6 +103,8 @@ Choose whatever environments with whatever RL algorithms supported in RLzoo, and
 ```
 python run_rlzoo.py
 ```
+The main script `run_rlzoo.py` follows (almost) the same structure for all algorithms on all environments, see the [**full list of examples**](./examples.md).
+
 **General Descriptions:**
 RLzoo provides at least two types of interfaces for running the learning algorithms, with (1) implicit configurations or (2) explicit configurations. Both of them start learning program through running a python script, instead of running a long command line with all configurations shortened to be arguments of it (e.g. in Openai Baseline). Our approaches are found to be more interpretable, flexible and convenient to apply in practice. According to the level of explicitness of learning configurations, we provided two different ways of setting learning configurations in python scripts: the first one with implicit configurations uses a `default.py` script to record all configurations for each algorithm, while the second one with explicit configurations exposes all configurations to the running scripts. Both of them can run any RL algorithms on any environments supported in our repository with a simple command line.
 
@@ -190,7 +215,7 @@ python algorithms/ac/run_ac.py
 
 ```
 @misc{Reinforcement Learning Algorithms Zoo,
-  author = {Zihan Ding, Yanhua Huang, Tianyang Yu, Hongming Zhang, Hao Dong},
+  author = {Zihan Ding, Tianyang Yu, Yanhua Huang, Hongming Zhang, Hao Dong},
   title = {RLzoo},
   year = {2019},
   publisher = {GitHub},
