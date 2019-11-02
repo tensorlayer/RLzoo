@@ -230,16 +230,23 @@ class PPO_PENALTY(object):
 
                     # update ppo
                     if (t + 1) % batch_size == 0 or t == max_steps - 1:
-                        v_s_ = self.get_v(s_)
+                        try:
+                            v_s_ = self.get_v(s_)
+                        except:
+                            v_s_ = self.get_v(s_[np.newaxis, :])   # for raw-pixel input
                         discounted_r = []
                         for r in buffer_r[::-1]:
                             v_s_ = r + gamma * v_s_
                             discounted_r.append(v_s_)
                         discounted_r.reverse()
 
-                        bs, ba, br = np.vstack(buffer_s), np.vstack(buffer_a), np.array(discounted_r)[:, np.newaxis]
+                        bs = buffer_s if len(buffer_s[0].shape)>1 else np.vstack(buffer_s) # no vstack for raw-pixel input
+                        ba, br = np.vstack(buffer_a), np.array(discounted_r)[:, np.newaxis]
                         buffer_s, buffer_a, buffer_r = [], [], []
                         self.update(bs, ba, br, a_update_steps, c_update_steps)
+
+                    if done:
+                        break
 
                 print(
                     'Episode: {}/{}  | Episode Reward: {:.4f}  | Running Time: {:.4f}'.format(

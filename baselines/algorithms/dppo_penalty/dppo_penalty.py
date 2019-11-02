@@ -211,7 +211,7 @@ class DPPO_PENALTY(object):
         load_model(self.critic, 'critic', self.name, )
 
     def learn(self, env, train_episodes=200, test_episodes=100, max_steps=200, save_interval=10, gamma=0.9,
-              mode='train', render=False, batch_size=32, a_update_steps=10, c_update_steps=10, n_worker=4):
+              mode='train', render=False, batch_size=32, a_update_steps=10, c_update_steps=10, n_workers=4):
         """
         learn function
         :param env: learning environment
@@ -225,7 +225,7 @@ class DPPO_PENALTY(object):
         :param batch_size: update batch size
         :param a_update_steps: actor update iteration steps
         :param c_update_steps: critic update iteration steps
-        :param n_worker: number of workers
+        :param n_workers: number of workers
         :return: None
         """
         t0 = time.time()
@@ -237,7 +237,7 @@ class DPPO_PENALTY(object):
             UPDATE_EVENT, ROLLING_EVENT = threading.Event(), threading.Event()
             UPDATE_EVENT.clear()  # not update now
             ROLLING_EVENT.set()  # start to roll out
-            workers = [Worker(wid=i) for i in range(n_worker)]
+            workers = [Worker(wid=i) for i in range(n_workers)]
 
             GLOBAL_UPDATE_COUNTER, GLOBAL_EP = 0, 0
             GLOBAL_RUNNING_R = []
@@ -317,15 +317,18 @@ class Worker(object):
 
                 GLOBAL_UPDATE_COUNTER += 1  # count to minimum batch size, no need to wait other workers
                 if t == EP_LEN - 1 or GLOBAL_UPDATE_COUNTER >= MIN_BATCH_SIZE:
-                    v_s_ = self.ppo.get_v(s_)
+                    try:
+                        v_s_ = self.ppo.get_v(s_)
+                    except:
+                        v_s_ = self.ppo.get_v(s_[newaxis, :]) # for raw-pixel input
                     discounted_r = []  # compute discounted reward
                     for r in buffer_r[::-1]:
                         v_s_ = r + GAMMA * v_s_
                         discounted_r.append(v_s_)
                     discounted_r.reverse()
 
-                    bs, ba, br = np.vstack(buffer_s), np.vstack(buffer_a), np.array(discounted_r)[:, np.newaxis]
-                    buffer_s, buffer_a, buffer_r = [], [], []
+                    bs = buffer_s if len(buffer_s[0].shape)>1 else np.vstack(buffer_s) # no vstack for raw-pixel input
+                    ba, br = np.vstack(buffer_a), np.array(discounted_r)[:, np.newaxis]                    buffer_s, buffer_a, buffer_r = [], [], []
                     QUEUE.put((bs, ba, br))  # put data in the queue
                     if GLOBAL_UPDATE_COUNTER >= MIN_BATCH_SIZE:
                         ROLLING_EVENT.clear()  # stop collecting data

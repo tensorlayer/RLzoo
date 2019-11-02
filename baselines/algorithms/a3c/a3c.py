@@ -164,7 +164,7 @@ class Worker(object):
                         buffer_v_target.append(v_s_)
 
                     buffer_v_target.reverse()
-                    buffer_s = buffer_s if len(buffer_s[0].shape)>2 else np.vstack(buffer_s)
+                    buffer_s = buffer_s if len(buffer_s[0].shape)>1 else np.vstack(buffer_s)  # no vstack for raw-pixel input
                     buffer_a, buffer_v_target = (
                         np.vstack(buffer_a), np.vstack(buffer_v_target)
                     )
