@@ -11,4 +11,4 @@ from algorithms.ppo_clip.ppo_clip import PPO_CLIP
 from algorithms.dppo.dppo import DPPO
 from algorithms.dppo_penalty.dppo_penalty import DPPO_PENALTY
 from algorithms.dppo_clip.dppo_clip import DPPO_CLIP
-# from algorithms.trpo.trpo import TRPO
+from algorithms.trpo.trpo import TRPO
