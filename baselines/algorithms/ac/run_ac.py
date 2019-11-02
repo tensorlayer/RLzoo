@@ -41,6 +41,7 @@ full list of arguments for the algorithm
 net_list: a list of networks (value and policy) used in the algorithm, from common functions or customization
 optimizers_list: a list of optimizers for all networks and differentiable variables
 gamma: discounted factor of reward
+action_range: scale of action values
 '''
 
 model.learn(env, train_episodes=500, test_episodes=100, max_steps=200,

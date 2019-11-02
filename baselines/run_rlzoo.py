@@ -2,8 +2,8 @@ from common.env_wrappers import *
 from common.utils import *
 from algorithms import *
 
-# EnvName = 'PongNoFrameskip-v4'
-# EnvType = 'atari'
+EnvName = 'PongNoFrameskip-v4'
+EnvType = 'atari'
 
 # EnvName = 'Pendulum-v0' 
 # EnvType = 'classic_control'
@@ -23,11 +23,11 @@ from algorithms import *
 # EnvName = 'ReachTarget'
 # EnvType = 'rlbench'
 
-# env = build_env(EnvName, EnvType)
-# alg_params, learn_params = call_default_params(env, EnvType, 'DPPO')
-# alg = DPPO(method='clip', **alg_params) # specify 'clip' or 'penalty' method for different version of PPO
-# alg.learn(env=env,  mode='train', render=False, **learn_params)
-# alg.learn(env=env,  mode='test', render=False, **learn_params)
+env = build_env(EnvName, EnvType)
+alg_params, learn_params = call_default_params(env, EnvType, 'DPPO')
+alg = DPPO(method='penalty', **alg_params) # specify 'clip' or 'penalty' method for different version of PPO
+alg.learn(env=env,  mode='train', render=False, **learn_params)
+alg.learn(env=env,  mode='test', render=False, **learn_params)
 
 
 # env = build_env(EnvName, EnvType)

@@ -38,8 +38,6 @@ full list of arguments for the algorithm
 ----------------------------------------
 net_list: a list of networks (value and policy) used in the algorithm, from common functions or customization
 optimizers_list: a list of optimizers for all networks and differentiable variables
-state_dim: dimension of state for the environment
-action_dim: dimension of action for the environment
 '''
 
 model.learn(env, train_episodes=200, max_steps=200, save_interval=100, mode='train', render=False, gamma=0.95)
