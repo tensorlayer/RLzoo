@@ -38,7 +38,7 @@ cg_iters: Number of iterations of conjugate gradient to perform
 delta: KL-divergence limit for TRPO update.
 '''
 
-model.learn(env, mode='train', render=False, train_episodes=200, max_steps=200, save_interval=10,
+model.learn(env, mode='train', render=False, train_episodes=10000, max_steps=200, save_interval=10,
             gamma=0.9, batch_size=32, backtrack_iters=10, backtrack_coeff=0.8, train_critic_iters=80)
 '''
 full list of parameters for training
