@@ -1,5 +1,6 @@
 """Env wrappers
-Note that this file is adapted from `https://pypi.org/project/gym-vec-env` and
+Most common wrappers can be checked from following links for usage: 
+`https://pypi.org/project/gym-vec-env`
 `https://github.com/openai/baselines/blob/master/baselines/common/*wrappers.py`
 """
 from collections import deque
@@ -135,7 +136,7 @@ def _make_vec_env(env_id, env_type, nenv, seed,
 
 
 class DmObsTrans(gym.Wrapper):
-
+    """ Observation process for DeepMind Control Suite environments """
     def __init__(self, env):
         self.env = env
         super(DmObsTrans, self).__init__(env)

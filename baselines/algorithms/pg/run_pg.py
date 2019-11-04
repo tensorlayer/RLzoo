@@ -44,7 +44,6 @@ model.learn(env, train_episodes=200, max_steps=200, save_interval=100, mode='tra
 """
 full list of parameters for training
 ---------------------------------------
-learn function
 env: learning environment
 train_episodes: total number of episodes for training
 test_episodes: total number of episodes for testing
@@ -53,7 +52,6 @@ save_interval: time steps for saving
 mode: train or test
 render: render each step
 gamma: reward decay
-seed: random seed
 """
 
 # test

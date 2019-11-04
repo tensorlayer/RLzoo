@@ -6,11 +6,32 @@ from common.value_networks import *
 from common.policy_networks import *
 from common.utils import set_seed
 
+''' 
+full list of algorithm parameters (alg_params)
+-----------------------------------------------
+net_list: a list of networks (value and policy) used in the algorithm, from common functions or customization
+optimizers_list: a list of optimizers for all networks and differentiable variables
+entropy_beta: factor for entropy boosted exploration
+-----------------------------------------------
+
+full list of learning parameters (learn_params)
+-----------------------------------------------
+train_episodes:  total number of episodes for training
+test_episodes:  total number of episodes for testing
+max_steps:  maximum number of steps for one episode
+n_workers: manually set number of workers
+update_itr: update global policy after several episodes
+gamma: reward discount factor
+save_interval: timesteps for saving the weights and plotting the results
+mode: train or test
+------------------------------------------------
+'''
 
 def atari(env, default_seed=True):
     if default_seed:
-        seed = 2 
-        set_seed(seed) # reproducible
+        assert isinstance(env, list)
+        seed = np.arange(len(env)).tolist()  # a list of seeds for each env
+        set_seed(seed,env) # reproducible
     
     # for multi-threading
     if isinstance(env, list):  # judge if multiple envs are passed in for parallel computing
@@ -50,6 +71,7 @@ def atari(env, default_seed=True):
         test_episodes=10, 
         save_interval=100,
         update_itr=10,
+        n_workers=num_env
     )
 
     return alg_params, learn_params
@@ -57,8 +79,9 @@ def atari(env, default_seed=True):
 
 def classic_control(env, default_seed=True):
     if default_seed:
-        seed = 2 
-        set_seed(seed) # reproducible
+        assert isinstance(env, list)
+        seed = np.arange(len(env)).tolist()  # a list of seeds for each env
+        set_seed(seed,env) # reproducible
     
     # for multi-threading
     if isinstance(env, list):  # judge if multiple envs are passed in for parallel computing
@@ -97,14 +120,16 @@ def classic_control(env, default_seed=True):
         test_episodes=10, 
         save_interval=100,
         update_itr=10,
+        n_workers=num_env
     )
 
     return alg_params, learn_params
 
 def box2d(env, default_seed=True):
     if default_seed:
-        seed = 2 
-        set_seed(seed) # reproducible
+        assert isinstance(env, list)
+        seed = np.arange(len(env)).tolist()  # a list of seeds for each env
+        set_seed(seed,env) # reproducible
     
     # for multi-threading
     if isinstance(env, list):  # judge if multiple envs are passed in for parallel computing
@@ -143,14 +168,16 @@ def box2d(env, default_seed=True):
         test_episodes=10, 
         save_interval=100,
         update_itr=10,
+        n_workers=num_env
     )
 
     return alg_params, learn_params
 
 def mujoco(env, default_seed=True):
     if default_seed:
-        seed = 2 
-        set_seed(seed) # reproducible
+        assert isinstance(env, list)
+        seed = np.arange(len(env)).tolist()  # a list of seeds for each env
+        set_seed(seed,env) # reproducible
     
     # for multi-threading
     if isinstance(env, list):  # judge if multiple envs are passed in for parallel computing
@@ -189,14 +216,16 @@ def mujoco(env, default_seed=True):
         test_episodes=10, 
         save_interval=100,
         update_itr=10,
+        n_workers=num_env
     )
 
     return alg_params, learn_params
 
 def robotics(env, default_seed=True):
     if default_seed:
-        seed = 2 
-        set_seed(seed) # reproducible
+        assert isinstance(env, list)
+        seed = np.arange(len(env)).tolist()  # a list of seeds for each env
+        set_seed(seed,env) # reproducible
     
     # for multi-threading
     if isinstance(env, list):  # judge if multiple envs are passed in for parallel computing
@@ -235,6 +264,8 @@ def robotics(env, default_seed=True):
         test_episodes=10, 
         save_interval=100,
         update_itr=10,
+        n_workers=num_env
+
     )
 
     return alg_params, learn_params
@@ -242,8 +273,9 @@ def robotics(env, default_seed=True):
 
 def dm_control(env, default_seed=True):
     if default_seed:
-        seed = 2 
-        set_seed(seed) # reproducible
+        assert isinstance(env, list)
+        seed = np.arange(len(env)).tolist()  # a list of seeds for each env
+        set_seed(seed,env) # reproducible
     
     # for multi-threading
     if isinstance(env, list):  # judge if multiple envs are passed in for parallel computing
@@ -282,6 +314,8 @@ def dm_control(env, default_seed=True):
         test_episodes=10, 
         save_interval=100,
         update_itr=10,
+        n_workers=num_env
+
     )
 
     return alg_params, learn_params

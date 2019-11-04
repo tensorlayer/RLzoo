@@ -7,6 +7,32 @@ from common.policy_networks import *
 from common.utils import set_seed
 
 
+''' 
+full list of algorithm parameters (alg_params)
+-----------------------------------------------
+net_list: a list of networks (value and policy) used in the algorithm, from common functions or customization
+optimizers_list: a list of optimizers for all networks and differentiable variables
+damping_coeff: Artifact for numerical stability
+cg_iters: Number of iterations of conjugate gradient to perform
+delta: KL-divergence limit for TRPO update.
+-----------------------------------------------
+
+full list of learning parameters (learn_params)
+-----------------------------------------------
+train_episodes: total number of episodes for training
+test_episodes: total number of episodes for testing
+max_steps: maximum number of steps for one episode
+save_interval: time steps for saving
+gamma: reward discount factor
+mode: train or test
+render: render each step
+batch_size: update batch size
+backtrack_iters: Maximum number of steps allowed in the backtracking line search
+backtrack_coeff: How far back to step during backtracking line search
+train_critic_iters: critic update iteration steps
+-----------------------------------------------
+'''
+
 def atari(env, default_seed=True):
 
     if default_seed:

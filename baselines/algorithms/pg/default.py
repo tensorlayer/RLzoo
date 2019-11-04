@@ -5,6 +5,24 @@ from common import math_utils
 from common.policy_networks import *
 from common.utils import set_seed
 
+''' 
+full list of algorithm parameters (alg_params)
+-----------------------------------------------
+net_list: a list of networks (value and policy) used in the algorithm, from common functions or customization
+optimizers_list: a list of optimizers for all networks and differentiable variables
+-----------------------------------------------
+
+full list of learning parameters (learn_params)
+-----------------------------------------------
+train_episodes: total number of episodes for training
+test_episodes: total number of episodes for testing
+max_steps: maximum number of steps for one episode
+save_interval: time steps for saving
+mode: train or test
+render: render each step
+gamma: reward decay
+-----------------------------------------------
+'''
 
 def atari(env, default_seed=True):
     if default_seed:

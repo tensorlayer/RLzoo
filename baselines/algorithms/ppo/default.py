@@ -6,6 +6,31 @@ from common.value_networks import *
 from common.policy_networks import *
 from common.utils import set_seed
 
+''' 
+full list of algorithm parameters (alg_params)
+-----------------------------------------------
+net_list: a list of networks (value and policy) used in the algorithm, from common functions or customization
+optimizers_list: a list of optimizers for all networks and differentiable variables
+epsilon: clip parameter  (for method 'clip')
+kl_target: controls bounds of policy update and adaptive lambda  (for method 'penalty')
+lam:  KL-regularization coefficient   (for method 'penalty')
+-----------------------------------------------
+
+full list of learning parameters (learn_params)
+-----------------------------------------------
+train_episodes: total number of episodes for training
+test_episodes: total number of episodes for testing
+max_steps: maximum number of steps for one episode
+save_interval: time steps for saving
+gamma: reward discount factor
+mode: train or test
+render: render each step
+batch_size: UPDATE batch size
+a_update_steps: actor update iteration steps
+c_update_steps: critic update iteration steps
+-----------------------------------------------
+'''
+
 def atari(env, default_seed=True):
     if default_seed:
         # reproducible

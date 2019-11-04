@@ -61,7 +61,7 @@ env_list: a list of same learning environments
 train_episodes:  total number of episodes for training
 test_episodes:  total number of episodes for testing
 max_steps:  maximum number of steps for one episode
-number_workers: manually set number of workers
+n_workers: manually set number of workers
 update_itr: update global policy after several episodes
 gamma: reward discount factor
 save_interval: timesteps for saving the weights and plotting the results

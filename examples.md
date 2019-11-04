@@ -204,11 +204,11 @@ EnvType = 'atari'
 # EnvName = 'FishSwim-v0'
 # EnvType = 'dm_control'
 
-number_workers = 2  # needs to specify number of asynchronous workers here! 
+number_workers = 2  # need to specify number of parallel workers
 env = build_env(EnvName, EnvType, nenv=number_workers)
 alg_params, learn_params = call_default_params(env, EnvType, 'A3C')
 alg = A3C(**alg_params)
-alg.learn(env=env,  mode='train', n_workers=number_workers, render=False, **learn_params)
+alg.learn(env=env,  mode='train', render=False, **learn_params)
 alg.learn(env=env,  mode='test', render=True, **learn_params)
 ```
 
@@ -267,11 +267,12 @@ EnvType = 'atari'
 # EnvName = 'ReachTarget'
 # EnvType = 'rlbench'
 
-env = build_env(EnvName, EnvType)
-alg_params, learn_params = call_default_params(env, EnvType, 'PPO')
-alg = PPO(method='clip', **alg_params) # specify 'clip' or 'penalty' method for PPO
+number_workers = 2  # need to specify number of parallel workers
+env = build_env(EnvName, EnvType, nenv=number_workers)
+alg_params, learn_params = call_default_params(env, EnvType, 'DPPO')
+alg = DPPO(method='penalty', **alg_params) # specify 'clip' or 'penalty' method for PPO
 alg.learn(env=env,  mode='train', render=False, **learn_params)
-alg.learn(env=env,  mode='test', render=False, **learn_params)
+alg.learn(env=env,  mode='test', render=True, **learn_params)
 ```
 
 ## 10. Trust Region Policy Optimization (TRPO)

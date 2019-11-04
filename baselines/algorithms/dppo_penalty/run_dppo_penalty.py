@@ -57,7 +57,7 @@ mode: train or test
 batch_size: update batch size
 a_update_steps: actor update iteration steps
 c_update_steps: critic update iteration steps
-n_worker: number of workers
+n_workers: number of workers
 :return: None
 '''
 model.learn(env, test_episodes=100, max_steps=200, mode='test', render=True)

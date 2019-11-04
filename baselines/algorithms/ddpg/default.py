@@ -6,6 +6,30 @@ from common.value_networks import *
 from common.policy_networks import *
 from common.utils import set_seed
 
+''' 
+full list of algorithm parameters (alg_params)
+-----------------------------------------------
+net_list: a list of networks (value and policy) used in the algorithm, from common functions or customization
+optimizers_list: a list of optimizers for all networks and differentiable variables
+replay_buffer_size: the size of buffer for storing explored samples
+tau: soft update factor
+-----------------------------------------------
+
+full list of learning parameters (learn_params)
+-----------------------------------------------
+train_episodes: total number of episodes for training
+test_episodes: total number of episodes for testing
+max_steps: maximum number of steps for one episode
+save_interval: time steps for saving
+explore_steps: for random action sampling in the beginning of training
+mode: train or test mode
+render: render each step
+batch_size: update batch size
+gamma: reward decay factor
+noise_scale: range of action noise for exploration
+noise_scale_decay: noise scale decay factor
+-----------------------------------------------
+'''
 
 def classic_control(env, default_seed=True):
     if default_seed:

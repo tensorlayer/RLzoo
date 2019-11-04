@@ -1,6 +1,11 @@
 # Reinforcement Learning Algorithms Zoo
-RLzoo is a collection of most practical reinforcement learning algorithms, frameworks and applications. It is implemented with Tensorflow 2.0 and API of neural network layers in TensorLayer 2, to provide a hands-on fast-developing approach for reinforcement learning practices. It supports basic toy-tests like [OpenAI Gym](https://gym.openai.com/) and [DeepMind Control Suite](https://github.com/deepmind/dm_control) with very simple configurations. Moreover, RLzoo supports robot learning benchmark environment [RLBench](https://github.com/stepjam/RLBench) based on  [Vrep](http://www.coppeliarobotics.com/)/[Pyrep](https://github.com/stepjam/PyRep) simulator. Other large-scale distributed training framework for more realistic scenarios with [Unity 3D](https://github.com/Unity-Technologies/ml-agents), 
+RLzoo is a collection of most practical reinforcement learning algorithms, frameworks and applications. It is implemented with Tensorflow 2.0 and API of neural network layers in TensorLayer 2, to provide a hands-on fast-developing approach for reinforcement learning practices and benchmarks. It supports basic toy-tests like [OpenAI Gym](https://gym.openai.com/) and [DeepMind Control Suite](https://github.com/deepmind/dm_control) with very simple configurations. Moreover, RLzoo supports robot learning benchmark environment [RLBench](https://github.com/stepjam/RLBench) based on  [Vrep](http://www.coppeliarobotics.com/)/[Pyrep](https://github.com/stepjam/PyRep) simulator. Other large-scale distributed training framework for more realistic scenarios with [Unity 3D](https://github.com/Unity-Technologies/ml-agents), 
 [Mujoco](http://www.mujoco.org/), [Bullet Physics](https://github.com/bulletphysics/bullet3), etc, will be supported in the future.
+
+We aim to make it easy to configure for all components within RL, including replacing the networks, optimizers, etc. We also  provide automatically adaptive policies and value functions in the common functions: for the observation space, the vector state or the raw-pixel (image) state are supported automatically according to the shape of the space; for the action space, the discrete action or continuous action are supported automatically according to the shape of the space as well. The deterministic or stochastic property of policy needs to be chosen according to each algorithm. Some environments with raw-pixel based observation (e.g. Atari, RLBench) may be hard to train, be patient and play around with the hyperparameters!
+
+**Table of contents:**
+
 - [Status](#status)
 - [Contents](#contents)
   - [Algorithms](#algorithms)
@@ -13,8 +18,9 @@ RLzoo is a collection of most practical reinforcement learning algorithms, frame
 
 Please note that this repository using RL algorithms with **high-level API**. So if you want to get familiar with each algorithm more quickly, please look at our **[RL tutorials](https://github.com/tensorlayer/tensorlayer/tree/master/examples/reinforcement_learning)** where each algorithm is implemented individually in a more straightforward manner.
 
-## Status: Work-in-Progress
-Currently the repository is still in development, and there may be some envrionments incompatible with our algorithms. If you find any problems or have any suggestions, feel free to contact with us!
+## Status: Release
+We are currently open to any suggestions or pull requests from the community to make RLZoo a better repository. Given the scope of this project, we expect there could be some issues over
+the coming months after initial release. We will keep improving the potential problems and commit when significant changes are made in the future. Current default hyperparameters for each algorithm and each environment may not be optimal, so you can play around with those hyperparameters to achieve best performances. We will release a version with optimal hyperparameters and benchmark results for all algorithms in the future.
 
 ## Contents:
 ### Algorithms:
@@ -217,9 +223,9 @@ python algorithms/ac/run_ac.py
 ## Troubleshooting:
 
 * If you meet the error *'AttributeError: module 'tensorflow' has no attribute 'contrib''* when running the code after installing tensorflow-probability, try:
-`pip install --upgrade tf-nightly-2.0-preview tfp-nightly`
-
+  `pip install --upgrade tf-nightly-2.0-preview tfp-nightly`
 * When trying to use RLBench environments, *'No module named rlbench'* can be caused by no RLBench package installed at your local or a mistake in the python path. You should add `export PYTHONPATH=/home/quantumiracle/research/vrep/PyRep/RLBench` every time you try to run the learning script with RLBench environment or add it to you `~/.bashrc` file once for all.
+* If you meet the error that the Qt platform is not loaded correctly when using DeepMind Control Suite environments, it's probably caused by your Ubuntu system not being version 14.04 or 16.04. Check [here](https://github.com/deepmind/dm_control).
 
 ## Citing:
 
@@ -233,3 +239,4 @@ python algorithms/ac/run_ac.py
   howpublished = {\url{https://github.com/tensorlayer/RLzoo}},
 }
 ```
+

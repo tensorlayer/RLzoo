@@ -112,12 +112,6 @@ def make_env(env_id):
     return env 
 
 
-# def learn(env_id, algorithm, train_episodes, **kwargs):
-#     algorithm = algorithm.lower()
-#     module = get_algorithm_module(algorithm, algorithm)
-#     getattr(module, 'learn')(env_id=env_id, train_episodes=train_episodes, **kwargs)  # call module.learn()
-
-
 def get_algorithm_module(algorithm, submodule):
     """ Get algorithm module in the corresponding folder """
     return import_module('.'.join(['algorithms', algorithm, submodule]))
@@ -132,7 +126,11 @@ def call_default_params(env, envtype, alg, default_seed=True):
 
 def set_seed(seed, env=None):
     """ set random seed for reproduciblity """
-    if env is not None:
+    if isinstance(env, list):
+        for i in range(len(env)):
+            env[i].seed(seed[i])
+        seed = seed[0] # pick one seed for np and tf
+    elif env is not None:
         env.seed(seed)
     np.random.seed(seed)
     tf.random.set_seed(seed)

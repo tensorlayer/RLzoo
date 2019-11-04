@@ -9,6 +9,35 @@ from gym import spaces
 from common.utils import set_seed
 
 
+''' 
+full list of algorithm parameters (alg_params)
+-----------------------------------------------
+net_list: a list of networks (value and policy) used in the algorithm, from common functions or customization
+optimizers_list: a list of optimizers for all networks and differentiable variables
+state_dim: dimension of state for the environment
+action_dim: dimension of action for the environment
+replay_buffer_capacity: the size of buffer for storing explored samples
+action_range: value of each action in [-action_range, action_range]
+-----------------------------------------------
+
+full list of learning parameters (learn_params)
+-----------------------------------------------
+train_episodes:  total number of episodes for training
+test_episodes:  total number of episodes for testing
+max_steps:  maximum number of steps for one episode
+batch_size:  udpate batchsize
+explore_steps:  for random action sampling in the beginning of training
+update_itr: repeated updates for single step
+policy_target_update_interval: delayed update for the policy network and target networks
+reward_scale: value range of reward
+save_interval: timesteps for saving the weights and plotting the results
+mode: 'train'  or 'test'
+AUTO_ENTROPY: automatically udpating variable alpha for entropy
+DETERMINISTIC: stochastic action policy if False, otherwise deterministic
+render: if true, visualize the environment
+-----------------------------------------------
+'''
+
 def classic_control(env, default_seed=True):
     if default_seed:
         seed = 2 

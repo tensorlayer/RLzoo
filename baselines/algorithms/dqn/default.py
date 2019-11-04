@@ -4,6 +4,31 @@ import tensorlayer as tl
 from common import basic_nets
 from common.utils import set_seed
 
+''' 
+full list of algorithm parameters (alg_params)
+-----------------------------------------------
+-----------------------------------------------
+
+full list of learning parameters (learn_params)
+-----------------------------------------------
+double_q (bool): if True double DQN will be used
+dueling (bool): if True dueling value estimation will be used
+exploration_rate (float): fraction of entire training period over
+    which the exploration rate is annealed
+exploration_final_eps (float): final value of random action probability
+batch_size (int): size of a batched sampled from replay buffer for training
+train_freq (int): update the model every `train_freq` steps
+learning_starts (int): how many steps of the model to collect transitions
+                        for before learning starts
+target_network_update_freq (int): update the target network every
+                                    `target_network_update_freq` steps
+buffer_size (int): size of the replay buffer
+prioritized_replay (bool): if True prioritized replay buffer will be used.
+prioritized_alpha (float): alpha parameter for prioritized replay
+prioritized_beta0 (float): beta parameter for prioritized replay
+mode (str): train or test
+-----------------------------------------------
+'''
 
 def atari(env, default_seed=False, **kwargs):
     if default_seed:
