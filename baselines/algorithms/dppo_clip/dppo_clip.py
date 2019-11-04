@@ -65,6 +65,7 @@ class DPPO_CLIP(object):
         assert isinstance(self.actor, StochasticPolicyNetwork)
 
         self.critic_opt, self.actor_opt = optimizers_list
+        self.last_update_epoch = 0
 
     def a_train(self, tfs, tfa, tfadv, oldpi_prob):
         """
@@ -152,8 +153,9 @@ class DPPO_CLIP(object):
                 GLOBAL_UPDATE_COUNTER = 0  # reset counter
                 ROLLING_EVENT.set()  # set roll-out available
 
-                if GLOBAL_EP and not GLOBAL_EP % save_interval:
+                if (not GLOBAL_EP % save_interval) and GLOBAL_EP != self.last_update_epoch:
                     self.save_ckpt()
+                    self.last_update_epoch = GLOBAL_EP
 
     def get_action(self, s):
         """
