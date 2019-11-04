@@ -11,13 +11,13 @@ from common.policy_networks import *
 env = gym.make('Pendulum-v0').unwrapped
 
 # reproducible
-seed = 1
+seed = 5
 set_seed(seed, env)
 
 ''' build networks for the algorithm '''
 name = 'PPO_PENALTY'
 hidden_dim = 100
-num_hidden_layer = 1
+num_hidden_layer = 2
 critic = ValueNetwork(env.observation_space, [hidden_dim] * num_hidden_layer, name=name + '_value')
 
 actor = StochasticPolicyNetwork(env.observation_space, env.action_space, [hidden_dim] * num_hidden_layer,
@@ -25,8 +25,8 @@ actor = StochasticPolicyNetwork(env.observation_space, env.action_space, [hidden
 net_list = critic, actor
 
 ''' create model '''
-actor_lr = 1e-4
-critic_lr = 2e-4
+actor_lr = 1e-3
+critic_lr = 2e-3
 optimizers_list = [tf.optimizers.Adam(critic_lr), tf.optimizers.Adam(actor_lr)]
 
 model = PPO_PENALTY(net_list, optimizers_list,)
