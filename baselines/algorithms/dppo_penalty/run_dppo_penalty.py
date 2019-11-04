@@ -19,7 +19,7 @@ set_seed(seed)
 ''' build networks for the algorithm '''
 name = 'DPPO_PENALTY'
 hidden_dim = 100
-num_hidden_layer = 1
+num_hidden_layer = 2
 critic = ValueNetwork(env[0].observation_space, [hidden_dim] * num_hidden_layer, name=name + '_value')
 
 actor = StochasticPolicyNetwork(env[0].observation_space, env[0].action_space,
@@ -28,8 +28,8 @@ actor = StochasticPolicyNetwork(env[0].observation_space, env[0].action_space,
 net_list = critic, actor
 
 ''' create model '''
-actor_lr = 1e-4
-critic_lr = 2e-4
+actor_lr = 1e-3
+critic_lr = 2e-3
 optimizers_list = [tf.optimizers.Adam(critic_lr), tf.optimizers.Adam(actor_lr)]
 model = DPPO_PENALTY(net_list, optimizers_list)
 '''
