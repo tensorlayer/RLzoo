@@ -64,6 +64,7 @@ class DPPO_PENALTY(object):
 
         self.critic_opt, self.actor_opt = optimizers_list
         self.old_dist = make_dist(self.actor.action_space)
+        self.last_update_epoch = 0
 
     def a_train(self, tfs, tfa, tfadv, oldpi_prob):
         """
@@ -164,8 +165,9 @@ class DPPO_PENALTY(object):
                 GLOBAL_UPDATE_COUNTER = 0  # reset counter
                 ROLLING_EVENT.set()  # set roll-out available
 
-                if GLOBAL_EP and not GLOBAL_EP % save_interval:
+                if (not GLOBAL_EP % save_interval) and GLOBAL_EP != self.last_update_epoch:
                     self.save_ckpt()
+                    self.last_update_epoch = GLOBAL_EP
 
     def get_action(self, s):
         """
@@ -335,7 +337,7 @@ class Worker(object):
                     discounted_r.reverse()
 
                     bs = buffer_s if len(buffer_s[0].shape)>1 else np.vstack(buffer_s) # no vstack for raw-pixel input
-                    ba, br = np.vstack(buffer_a), np.array(discounted_r)[:, np.newaxis]                    
+                    ba, br = np.vstack(buffer_a), np.array(discounted_r)[:, np.newaxis]
                     buffer_s, buffer_a, buffer_r = [], [], []
                     QUEUE.put((bs, ba, br))  # put data in the queue
                     if GLOBAL_UPDATE_COUNTER >= MIN_BATCH_SIZE:
