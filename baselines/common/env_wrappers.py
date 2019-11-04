@@ -50,22 +50,23 @@ def build_env(env_id, env_type, vectorized=False,
     """
     nenv = nenv or cpu_count() // (1 + (platform == 'darwin'))
     stack = env_type == 'atari'
-    if nenv>1:
+    if nenv > 1:
         if vectorized:
             env = _make_vec_env(env_id, env_type, nenv, seed,
                                 reward_shaping, stack, **kwargs)
         else:
-            env=[]
+            env = []
             for _ in range(nenv):
                 single_env = _make_env(env_id, env_type, seed,
-                                reward_shaping, stack, **kwargs)
+                                       reward_shaping, stack, **kwargs)
                 env.append(single_env)  # get env as a list of same single env
 
     else:
         env = _make_env(env_id, env_type, seed,
-                reward_shaping, stack, **kwargs)
+                        reward_shaping, stack, **kwargs)
 
     return env
+
 
 def check_name_in_list(env_id, env_type):
     """ Check if env_id exists in the env_type list """
@@ -104,11 +105,12 @@ def _make_env(env_id, env_type, seed, reward_shaping, frame_stack, **kwargs):
         env = FlattenDictWrapper(env, ['observation', 'desired_goal'])
         env = Monitor(env, info_keywords=('is_success',))
     elif env_type == 'dm_control':
-        import dm2gym
-        env = gym.make('dm2gym:'+env_id)  
+        # import dm2gym
+        env = gym.make('dm2gym:' + env_id, environment_kwargs={'flat_observation': True})
+        env = DmObsTrans(env)
     elif env_type == 'rlbench':
         from common.build_rlbench_env import RLBenchEnv
-        env  = RLBenchEnv(env_id)
+        env = RLBenchEnv(env_id)
     else:
         raise NotImplementedError
 
@@ -132,9 +134,33 @@ def _make_vec_env(env_id, env_type, nenv, seed,
     return env
 
 
+class DmObsTrans(gym.Wrapper):
+
+    def __init__(self, env):
+        self.env = env
+        super(DmObsTrans, self).__init__(env)
+        self.__need_trans = False
+        if isinstance(self.observation_space, gym.spaces.dict.Dict):
+            self.observation_space = self.observation_space['observations']
+            self.__need_trans = True
+
+    def step(self, ac):
+        observation, reward, done, info = self.env.step(ac)
+        if self.__need_trans:
+            observation = observation['observations']
+        return observation, reward, done, info
+
+    def reset(self, **kwargs):
+        observation = self.env.reset(**kwargs)
+        if self.__need_trans:
+            observation = observation['observations']
+        return observation
+
+
 class TimeLimit(gym.Wrapper):
 
     def __init__(self, env, max_episode_steps=None):
+        self.env = env
         super(TimeLimit, self).__init__(env)
         self._max_episode_steps = max_episode_steps
         self._elapsed_steps = 0
@@ -249,7 +275,7 @@ class MaxAndSkipEnv(gym.Wrapper):
         """Return only every `skip`-th frame"""
         super(MaxAndSkipEnv, self).__init__(env)
         # most recent raw observations (for max pooling across time steps)
-        shape = (2, ) + env.observation_space.shape
+        shape = (2,) + env.observation_space.shape
         self._obs_buffer = np.zeros(shape, dtype=np.uint8)
         self._skip = skip
 
@@ -317,7 +343,7 @@ class FrameStack(gym.Wrapper):
         self.k = k
         self.frames = deque([], maxlen=k)
         shp = env.observation_space.shape
-        shape = shp[:-1] + (shp[-1] * k, )
+        shape = shp[:-1] + (shp[-1] * k,)
         self.observation_space = spaces.Box(low=0, high=255, shape=shape, dtype=env.observation_space.dtype)
 
     def reset(self):
@@ -389,7 +415,7 @@ class VecFrameStack(object):
         self.action_space = env.action_space
         self.frames = deque([], maxlen=k)
         shp = env.observation_space.shape
-        shape = shp[:-1] + (shp[-1] * k, )
+        shape = shp[:-1] + (shp[-1] * k,)
         self.observation_space = spaces.Box(low=0, high=255, shape=shape, dtype=env.observation_space.dtype)
 
     def reset(self):
