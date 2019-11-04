@@ -82,7 +82,7 @@ def classic_control(env, default_seed=True):
         optimizers_list = [tf.optimizers.Adam(critic_lr)]
         alg_params['optimizers_list'] = optimizers_list
 
-    learn_params = dict(train_episodes=200,
+    learn_params = dict(train_episodes=10000,
                         test_episodes=100,
                         max_steps=200,
                         save_interval=10,
