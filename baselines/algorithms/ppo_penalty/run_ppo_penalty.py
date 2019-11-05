@@ -39,7 +39,7 @@ kl_target: controls bounds of policy update and adaptive lambda
 lam:  KL-regularization coefficient
 '''
 
-model.learn(env, train_episodes=1000, max_steps=200, save_interval=50, gamma=0.9,
+model.learn(env, train_episodes=1000, max_steps=200, save_interval=10, gamma=0.9,
             mode='train', render=False, batch_size=32, a_update_steps=10, c_update_steps=10)
 
 '''
