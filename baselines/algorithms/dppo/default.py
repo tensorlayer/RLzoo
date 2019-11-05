@@ -102,7 +102,7 @@ def classic_control(env, default_seed=True):
     )
 
     if alg_params.get('net_list') is None:
-        num_hidden_layer = 2  # number of hidden layers for the networks
+        num_hidden_layer = 1  # number of hidden layers for the networks
         hidden_dim = 100  # dimension of hidden layers for the networks
         with tf.name_scope('DPPO'):
             with tf.name_scope('V_Net'):
@@ -115,8 +115,8 @@ def classic_control(env, default_seed=True):
         alg_params['net_list'] = net_list
 
     if alg_params.get('optimizers_list') is None:
-        actor_lr = 1e-3
-        critic_lr = 2e-3
+        actor_lr = 1e-4
+        critic_lr = 2e-4
         optimizers_list = [tf.optimizers.Adam(critic_lr), tf.optimizers.Adam(actor_lr)]
         alg_params['optimizers_list'] = optimizers_list
 
@@ -153,7 +153,7 @@ def box2d(env, default_seed=True):
     )
 
     if alg_params.get('net_list') is None:
-        num_hidden_layer = 2  # number of hidden layers for the networks
+        num_hidden_layer = 1  # number of hidden layers for the networks
         hidden_dim = 100  # dimension of hidden layers for the networks
         with tf.name_scope('DPPO'):
             with tf.name_scope('V_Net'):
@@ -166,8 +166,8 @@ def box2d(env, default_seed=True):
         alg_params['net_list'] = net_list
 
     if alg_params.get('optimizers_list') is None:
-        actor_lr = 1e-3
-        critic_lr = 2e-3
+        actor_lr = 1e-4
+        critic_lr = 2e-4
         optimizers_list = [tf.optimizers.Adam(critic_lr), tf.optimizers.Adam(actor_lr)]
         alg_params['optimizers_list'] = optimizers_list
 
@@ -203,7 +203,7 @@ def mujoco(env, default_seed=True):
     )
 
     if alg_params.get('net_list') is None:
-        num_hidden_layer = 2  # number of hidden layers for the networks
+        num_hidden_layer = 1  # number of hidden layers for the networks
         hidden_dim = 100  # dimension of hidden layers for the networks
         with tf.name_scope('DPPO'):
             with tf.name_scope('V_Net'):
@@ -216,8 +216,8 @@ def mujoco(env, default_seed=True):
         alg_params['net_list'] = net_list
 
     if alg_params.get('optimizers_list') is None:
-        actor_lr = 1e-3
-        critic_lr = 2e-3
+        actor_lr = 1e-4
+        critic_lr = 2e-4
         optimizers_list = [tf.optimizers.Adam(critic_lr), tf.optimizers.Adam(actor_lr)]
         alg_params['optimizers_list'] = optimizers_list
 
@@ -253,7 +253,7 @@ def robotics(env, default_seed=True):
     )
 
     if alg_params.get('net_list') is None:
-        num_hidden_layer = 2  # number of hidden layers for the networks
+        num_hidden_layer = 1  # number of hidden layers for the networks
         hidden_dim = 100  # dimension of hidden layers for the networks
         with tf.name_scope('DPPO'):
             with tf.name_scope('V_Net'):
@@ -266,8 +266,8 @@ def robotics(env, default_seed=True):
         alg_params['net_list'] = net_list
 
     if alg_params.get('optimizers_list') is None:
-        actor_lr = 1e-3
-        critic_lr = 2e-3
+        actor_lr = 1e-4
+        critic_lr = 2e-4
         optimizers_list = [tf.optimizers.Adam(critic_lr), tf.optimizers.Adam(actor_lr)]
         alg_params['optimizers_list'] = optimizers_list
 
@@ -303,7 +303,7 @@ def dm_control(env, default_seed=True):
     )
 
     if alg_params.get('net_list') is None:
-        num_hidden_layer = 2  # number of hidden layers for the networks
+        num_hidden_layer = 1  # number of hidden layers for the networks
         hidden_dim = 100  # dimension of hidden layers for the networks
         with tf.name_scope('DPPO'):
             with tf.name_scope('V_Net'):
@@ -316,8 +316,8 @@ def dm_control(env, default_seed=True):
         alg_params['net_list'] = net_list
 
     if alg_params.get('optimizers_list') is None:
-        actor_lr = 1e-3
-        critic_lr = 2e-3
+        actor_lr = 1e-4
+        critic_lr = 2e-4
         optimizers_list = [tf.optimizers.Adam(critic_lr), tf.optimizers.Adam(actor_lr)]
         alg_params['optimizers_list'] = optimizers_list
 
