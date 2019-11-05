@@ -2,6 +2,19 @@
 RLzoo is a collection of most practical reinforcement learning algorithms, frameworks and applications. It is implemented with Tensorflow 2.0 and API of neural network layers in TensorLayer 2, to provide a hands-on fast-developing approach for reinforcement learning practices and benchmarks. It supports basic toy-tests like [OpenAI Gym](https://gym.openai.com/) and [DeepMind Control Suite](https://github.com/deepmind/dm_control) with very simple configurations. Moreover, RLzoo supports robot learning benchmark environment [RLBench](https://github.com/stepjam/RLBench) based on  [Vrep](http://www.coppeliarobotics.com/)/[Pyrep](https://github.com/stepjam/PyRep) simulator. Other large-scale distributed training framework for more realistic scenarios with [Unity 3D](https://github.com/Unity-Technologies/ml-agents), 
 [Mujoco](http://www.mujoco.org/), [Bullet Physics](https://github.com/bulletphysics/bullet3), etc, will be supported in the future.
 
+<!-- <em>Gym: Atari</em>    <em>Gym: Box2D </em>   <em>Gym: Classic Control </em>  <em>Gym: MuJoCo </em>-->
+
+<img src="https://github.com/tensorlayer/RLzoo/blob/master/gif/atari.gif" height=250 width=200 > <img src="https://github.com/tensorlayer/RLzoo/blob/master/gif/box2d.gif" height=250 width=200 > <img src="https://github.com/tensorlayer/RLzoo/blob/master/gif/classic.gif" height=250 width=200 > <img src="https://github.com/tensorlayer/RLzoo/blob/master/gif/mujoco.gif" height=250 width=200 >
+
+<!-- <em>Gym: Robotics</em>    <em>DeepMind Control Suite </em>   <em>Gym: RLBench </em>  -->
+
+<img src="https://github.com/tensorlayer/RLzoo/blob/master/gif/robotics.gif" height=250 width=200 > <img src="https://github.com/tensorlayer/RLzoo/blob/master/gif/dmcontrol.gif" height=250 width=200 > <img src="https://github.com/tensorlayer/RLzoo/blob/master/gif/rlbench.gif" height=250 width=200 > <img src="https://github.com/tensorlayer/tensorlayer/blob/master/img/tl_transparent_logo.png" height=180 width=200 >
+
+
+
+
+
+
 We aim to make it easy to configure for all components within RL, including replacing the networks, optimizers, etc. We also  provide automatically adaptive policies and value functions in the common functions: for the observation space, the vector state or the raw-pixel (image) state are supported automatically according to the shape of the space; for the action space, the discrete action or continuous action are supported automatically according to the shape of the space as well. The deterministic or stochastic property of policy needs to be chosen according to each algorithm. Some environments with raw-pixel based observation (e.g. Atari, RLBench) may be hard to train, be patient and play around with the hyperparameters!
 
 **Table of contents:**
