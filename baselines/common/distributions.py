@@ -130,6 +130,8 @@ class DiagGaussian(Distribution):
         self.mean = None
         self.logstd = None
         self.std = None
+        self.action_mean = None
+        self.action_scale = None
         if mean_logstd is not None:
             self.set_param(mean_logstd)
 
@@ -151,7 +153,7 @@ class DiagGaussian(Distribution):
 
     def sample(self):
         """ Get actions in deterministic or stochastic manner """
-        return self.mean + self.std * np.random.normal(0, 1, np.shape(self.mean))
+        return self.mean, self.std * np.random.normal(0, 1, np.shape(self.mean))
 
     def greedy_sample(self):
         """ Get actions greedily/deterministically """
@@ -162,6 +164,9 @@ class DiagGaussian(Distribution):
 
     @expand_dims
     def neglogp(self, x):
+        # here we reverse the action normalization to make the computation of negative log probability correct
+        x = (x - self.action_mean)/self.action_scale
+
         return 0.5 * tf.reduce_sum(tf.square((x - self.mean) / self.std), axis=-1) \
                  + 0.5 * np.log(2.0 * np.pi) * float(self._ndim) + tf.reduce_sum(self.logstd, axis=-1)
 

@@ -32,6 +32,7 @@ __all__ = (
     'VecFrameStack',  # stack frames in vectorized env
     'Monitor',  # Episode reward and length monitor
     'NormalizedActions',  # normalized action to actual space
+    'DmObsTrans',  # translate observations in dm_control environments
 )
 cv2.ocl.setUseOpenCL(False)
 
@@ -106,7 +107,6 @@ def _make_env(env_id, env_type, seed, reward_shaping, frame_stack, **kwargs):
         env = FlattenDictWrapper(env, ['observation', 'desired_goal'])
         env = Monitor(env, info_keywords=('is_success',))
     elif env_type == 'dm_control':
-        # import dm2gym
         env = gym.make('dm2gym:' + env_id, environment_kwargs={'flat_observation': True})
         env = DmObsTrans(env)
     elif env_type == 'rlbench':

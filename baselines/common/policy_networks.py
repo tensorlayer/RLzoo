@@ -187,7 +187,7 @@ class DeterministicPolicyNetwork(Model):
 
 class StochasticPolicyNetwork(Model):
     def __init__(self, state_space, action_space, hidden_dim_list, w_init=tf.keras.initializers.glorot_normal(),
-                 activation=tf.nn.relu, output_activation=None, log_std_min=-20, log_std_max=2, trainable=True,
+                 activation=tf.nn.relu, output_activation=tf.nn.tanh, log_std_min=-20, log_std_max=2, trainable=True,
                  name=None):
         """ Stochastic continuous/discrete policy network with multiple fully-connected layers 
         
@@ -210,7 +210,12 @@ class StochasticPolicyNetwork(Model):
             self._action_mean = np.mean(action_bounds, 0)
             self._action_scale = action_bounds[1] - self._action_mean
 
-        self.policy_dist = make_dist(self._action_space)  # create action distribution
+            self.policy_dist = make_dist(self._action_space)  # create action distribution
+            self.policy_dist.action_mean = self._action_mean
+            self.policy_dist.action_scale = self._action_scale
+
+        else:
+            self.policy_dist = make_dist(self._action_space)  # create action distribution
 
         self._state_shape = state_space.shape
 
@@ -230,7 +235,7 @@ class StochasticPolicyNetwork(Model):
                 outputs = Dense(n_units=self.policy_dist.ndim, act=output_activation, W_init=w_init)(l)
             elif isinstance(action_space, spaces.Box):
                 mu = Dense(n_units=self.policy_dist.ndim, act=output_activation, W_init=w_init)(l)
-                log_sigma = Dense(n_units=self.policy_dist.ndim, act=output_activation, W_init=w_init)(l)
+                log_sigma = Dense(n_units=self.policy_dist.ndim, act=None, W_init=w_init)(l)
                 log_sigma = tl.layers.Lambda(lambda x: tf.clip_by_value(x, log_std_min, log_std_max))(log_sigma)
                 outputs = [mu, log_sigma]
             else:
@@ -257,7 +262,12 @@ class StochasticPolicyNetwork(Model):
             result = self.policy_dist.sample()
 
         if isinstance(self._action_space, spaces.Box):  # normalize action
-            result = result * self._action_scale + self._action_mean
+            if greedy:
+                result = result * self._action_scale + self._action_mean
+            else:
+                result, explore = result
+                result = result * self._action_scale + self._action_mean + explore
+
             result = tf.clip_by_value(result, self._action_space.low, self._action_space.high)
         return result
 
