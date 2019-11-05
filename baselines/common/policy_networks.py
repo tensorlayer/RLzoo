@@ -205,6 +205,7 @@ class StochasticPolicyNetwork(Model):
         Tips:
             We recommend to use tf.nn.tanh for output_activation, especially for continuous action space,
             to ensure the final action range is exactly the same as declared in action space after action normalization.
+        
         """
         self._state_space, self._action_space = state_space, action_space
 
