@@ -95,6 +95,8 @@ the coming months after initial release. We will keep improving the potential pr
 * A dictionary of all different environments is stored in `./baselines/env_list.py`
 
 ## Descriptions:
+The supported configurations for RL algorithms with corresponding environments in RLzoo are listed in the following table.
+
 | Algorithms                 | Action Space        | Policy        | Update     | Envs                                                         |
 | -------------------------- | ------------------- | ------------- | ---------- | ------------------------------------------------------------ |
 | DQN (double, dueling, PER) | Discrete Only       | --            | Off-policy | Atari, Classic Control                                       |
