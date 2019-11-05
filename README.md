@@ -113,7 +113,7 @@ Run the following line in the root file to install all required packages:
 ## Usage:
 
 ### 0. Quick Start
-Choose whatever environments with whatever RL algorithms supported in RLzoo, and enjoy the game by running:
+Choose whatever environments with whatever RL algorithms supported in RLzoo, and enjoy the game by running (`./baselines/`):
 ```
 python run_rlzoo.py
 ```
