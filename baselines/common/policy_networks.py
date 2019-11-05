@@ -202,7 +202,7 @@ class StochasticPolicyNetwork(Model):
             log_std_max (float): upper bound of standard deviation of action
             trainable (bool): set training and evaluation mode
 
-        tips:
+        Tips:
             We recommend to use tf.nn.tanh for output_activation, especially for continuous action space,
             to ensure the final action range is exactly the same as declared in action space after action normalization.
         """
