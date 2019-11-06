@@ -4,11 +4,11 @@ RLzoo is a collection of most practical reinforcement learning algorithms, frame
 
 <!-- <em>Gym: Atari</em>    <em>Gym: Box2D </em>   <em>Gym: Classic Control </em>  <em>Gym: MuJoCo </em>-->
 
-<img src="https://github.com/tensorlayer/RLzoo/blob/master/gif/atari.gif" height=250 width=200 > <img src="https://github.com/tensorlayer/RLzoo/blob/master/gif/box2d.gif" height=250 width=200 > <img src="https://github.com/tensorlayer/RLzoo/blob/master/gif/classic.gif" height=250 width=200 > <img src="https://github.com/tensorlayer/RLzoo/blob/master/gif/mujoco.gif" height=250 width=200 >
+<img src="https://github.com/tensorlayer/RLzoo/blob/master/gif/atari.gif" height=250 width=210 > <img src="https://github.com/tensorlayer/RLzoo/blob/master/gif/box2d.gif" height=250 width=210 > <img src="https://github.com/tensorlayer/RLzoo/blob/master/gif/classic.gif" height=250 width=210 > <img src="https://github.com/tensorlayer/RLzoo/blob/master/gif/mujoco.gif" height=250 width=210 >
 
 <!-- <em>Gym: Robotics</em>    <em>DeepMind Control Suite </em>   <em>Gym: RLBench </em>  -->
 
-<img src="https://github.com/tensorlayer/RLzoo/blob/master/gif/robotics.gif" height=250 width=200 > <img src="https://github.com/tensorlayer/RLzoo/blob/master/gif/dmcontrol.gif" height=250 width=200 > <img src="https://github.com/tensorlayer/RLzoo/blob/master/gif/rlbench.gif" height=250 width=200 > <img src="https://github.com/tensorlayer/tensorlayer/blob/master/img/tl_transparent_logo.png" height=180 width=200 >
+<img src="https://github.com/tensorlayer/RLzoo/blob/master/gif/robotics.gif" height=250 width=210 > <img src="https://github.com/tensorlayer/RLzoo/blob/master/gif/dmcontrol.gif" height=250 width=210 > <img src="https://github.com/tensorlayer/RLzoo/blob/master/gif/rlbench.gif" height=250 width=210 > <img src="https://github.com/tensorlayer/tensorlayer/blob/master/img/tl_transparent_logo.png" height=180 width=210 >
 
 
 
