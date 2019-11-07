@@ -144,10 +144,13 @@ RL zoo with **implicit configurations** means the configurations for learning ar
 #### Common Interface:
 
 ```python
+from common.env_wrappers import build_env
+from common.utils import call_default_params
+from algorithms import TD3
 # chose environment
 EnvName = 'Pendulum-v0'  
 # select corresponding environment type
-EnvType = ['classic_control', 'atari', 'box2d', 'mujoco', 'dm_control', 'rlbench'][0] 
+EnvType = ['classic_control', 'atari', 'box2d', 'mujoco', 'robotics', 'dm_control', 'rlbench'][0] 
 # build environment with wrappers
 env = build_env(EnvName, EnvType)  
 # call default parameters for the algorithm and learning process
@@ -173,10 +176,19 @@ RL zoo with **explicit configurations** means the configurations for learning, i
 #### A Quick Example:
 
 ```python
+import gym
+from common.utils import make_env, set_seed
+from algorithms.ac.ac import AC
+from common.value_networks import ValueNetwork
+from common.policy_networks import StochasticPolicyNetwork
+
 ''' load environment '''
 env = gym.make('CartPole-v0').unwrapped
-state_shape = env.observation_space.shape
-action_shape = (env.action_space.n,)
+obs_space = env.observation_space
+act_space = env.action_space
+# reproducible
+seed = 2
+set_seed(seed, env)
 
 ''' build networks for the algorithm '''
 num_hidden_layer = 4 #number of hidden layers for the networks
@@ -184,20 +196,20 @@ hidden_dim = 64 # dimension of hidden layers for the networks
 with tf.name_scope('AC'):
         with tf.name_scope('Critic'):
             	# choose the critic network, can be replaced with customized network
-                critic = MlpValueNetwork(state_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
+                critic = ValueNetwork(obs_space, hidden_dim_list=num_hidden_layer * [hidden_dim])
         with tf.name_scope('Actor'):
             	# choose the actor network, can be replaced with customized network
-                actor = DeterministicPolicyNetwork(state_shape, action_shape, hidden_dim_list=num_hidden_layer*[hidden_dim])
+                actor = StochasticPolicyNetwork(obs_space, act_space, hidden_dim_list=num_hidden_layer * [hidden_dim], output_activation=tf.nn.tanh)
 net_list = [actor, critic] # list of the networks
 
 ''' choose optimizers '''
-a_lr, c_lr = 1e-3, 1e-3  # a_lr: learning rate of the actor; c_lr: learning rate of the critic
+a_lr, c_lr = 1e-4, 1e-2  # a_lr: learning rate of the actor; c_lr: learning rate of the critic
 a_optimizer = tf.optimizers.Adam(a_lr)
 c_optimizer = tf.optimizers.Adam(c_lr)
 optimizers_list=[a_optimizer, c_optimizer]  # list of optimizers
 
 # intialize the algorithm model, with algorithm parameters passed in
-model=AC(net_list, optimizers_list, state_dim=state_shape[0], action_dim=action_shape[0])
+model = AC(net_list, optimizers_list)
 ''' 
 full list of arguments for the algorithm
 ----------------------------------------
@@ -208,8 +220,8 @@ action_range: scale of action values
 '''
 
 # start the training process, with learning parameters passed in
-model.learn(env, train_episodes=100, test_episodes=1000, max_steps=1000,
-        seed=2, save_interval=100, mode='train', render=False)
+model.learn(env, train_episodes=500,  max_steps=200,
+            save_interval=50, mode='train', render=False)
 ''' 
 full list of parameters for training
 ---------------------------------------
@@ -224,7 +236,6 @@ render:  if true, visualize the environment
 
 # test after training
 model.learn(env, test_episodes=100, max_steps=200,  mode='test', render=True)
-
 ```
 
 #### To Run:
