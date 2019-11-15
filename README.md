@@ -29,6 +29,7 @@ We aim to make it easy to configure for all components within RL, including repl
 - [Prerequisites](#prerequisites)
 - [Usage](#usage)
 - [Troubleshooting](#troubleshooting)
+- [Credits](#credits)
 - [Citing](#citing)
 
 Please note that this repository using RL algorithms with **high-level API**. So if you want to get familiar with each algorithm more quickly, please look at our **[RL tutorials](https://github.com/tensorlayer/tensorlayer/tree/master/examples/reinforcement_learning)** where each algorithm is implemented individually in a more straightforward manner.
@@ -254,6 +255,16 @@ python algorithms/ac/run_ac.py
   `pip install --upgrade tf-nightly-2.0-preview tfp-nightly`
 * When trying to use RLBench environments, *'No module named rlbench'* can be caused by no RLBench package installed at your local or a mistake in the python path. You should add `export PYTHONPATH=/home/quantumiracle/research/vrep/PyRep/RLBench` every time you try to run the learning script with RLBench environment or add it to you `~/.bashrc` file once for all.
 * If you meet the error that the Qt platform is not loaded correctly when using DeepMind Control Suite environments, it's probably caused by your Ubuntu system not being version 14.04 or 16.04. Check [here](https://github.com/deepmind/dm_control).
+
+## Credits:
+Our contributors include:
+
+[Zihan Ding](https://github.com/quantumiracle?tab=repositories),
+[Tianyang Yu](https://github.com/Tokarev-TT-33),
+[Yanhua Huang](https://github.com/Officium),
+[Hongming Zhang](https://github.com/initial-h),
+[Hao Dong](https://github.com/zsdonghao)
+
 
 ## Citing:
 
