@@ -25,6 +25,7 @@ We aim to make it easy to configure for all components within RL, including repl
   - [Environments](#environments)
   - [Descriptions](#descriptions)
 - [Prerequisites](#prerequisites)
+- [Installation](#installation)
 - [Usage](#usage)
 - [Troubleshooting](#troubleshooting)
 - [Citing](#citing)
@@ -92,7 +93,7 @@ the coming months after initial release. We will keep improving the potential pr
 
 * When using the RLBench environments, please add the path of your local rlbench repository to python: 
   ```export PYTHONPATH=PATH_TO_YOUR_LOCAL_RLBENCH_REPO```
-* A dictionary of all different environments is stored in `./baselines/env_list.py`
+* A dictionary of all different environments is stored in `./rlzoo/common/env_list.py`
 
 ## Descriptions:
 The supported configurations for RL algorithms with corresponding environments in RLzoo are listed in the following table.
@@ -121,15 +122,21 @@ The supported configurations for RL algorithms with corresponding environments i
 * [Mujoco 2.0](http://www.mujoco.org/), [dm_control](https://github.com/deepmind/dm_control), [dm2gym](https://github.com/zuoxingdong/dm2gym) (if using DeepMind Control Suite environments)
 * Vrep, PyRep, RLBench (if using RLBench environments, follows [here](http://www.coppeliarobotics.com/downloads.html), [here](https://github.com/stepjam/PyRep) and [here](https://github.com/stepjam/RLBench))
 
-Run the following line in the root file to install all required packages:
+## Installation:
 
-`pip install -r requirements.txt`
+To install RLzoo package with key requirements:
+
+```
+pip install rlzoo
+```
 
 ## Usage:
 
 ### 0. Quick Start
-Choose whatever environments with whatever RL algorithms supported in RLzoo, and enjoy the game by running (`./baselines/`):
-```
+Choose whatever environments with whatever RL algorithms supported in RLzoo, and enjoy the game by running following example in the root file of installed package:
+```python
+# in the root folder of rlzoo package
+cd rlzoo
 python run_rlzoo.py
 ```
 The main script `run_rlzoo.py` follows (almost) the same structure for all algorithms on all environments, see the [**full list of examples**](./examples.md).
@@ -139,14 +146,16 @@ RLzoo provides at least two types of interfaces for running the learning algorit
 
 ### 1. Implicit Configurations
 
-RL zoo with **implicit configurations** means the configurations for learning are not explicitly contained in the main script for running (i.e. `run_rlzoo.py`), but in the `default.py` file in each algorithm folder (for example, `baselines/algorithms/sac/default.py` is the default parameters configuration for SAC algorithm). All configurations include (1) parameter values for the algorithm and learning process, (2) the network structures, (3) the optimizers, etc, are divided into configurations for the algorithm (stored in `alg_params`) and configurations for the learning process (stored in `learn_params`). Whenever you want to change the configurations for the algorithm or learning process, you can either go to the folder of each algorithm and modify parameters in `default.py`, or change the values in `alg_params` (a dictionary of configurations for the algorithm) and `learn_params` (a dictionary of configurations for the learning process) in `run_rlzoo.py` according to the keys. 
+RLzoo with **implicit configurations** means the configurations for learning are not explicitly contained in the main script for running (i.e. `run_rlzoo.py`), but in the `default.py` file in each algorithm folder (for example, `rlzoo/algorithms/sac/default.py` is the default parameters configuration for SAC algorithm). All configurations include (1) parameter values for the algorithm and learning process, (2) the network structures, (3) the optimizers, etc, are divided into configurations for the algorithm (stored in `alg_params`) and configurations for the learning process (stored in `learn_params`). Whenever you want to change the configurations for the algorithm or learning process, you can either go to the folder of each algorithm and modify parameters in `default.py`, or change the values in `alg_params` (a dictionary of configurations for the algorithm) and `learn_params` (a dictionary of configurations for the learning process) in `run_rlzoo.py` according to the keys. 
 
 #### Common Interface:
 
 ```python
-from common.env_wrappers import build_env
-from common.utils import call_default_params
-from algorithms import TD3
+from rlzoo.common.env_wrappers import build_env
+from rlzoo.common.utils import call_default_params
+from rlzoo.algorithms import *
+# choose algorithm
+AlgName = 'TD3'
 # chose environment
 EnvName = 'Pendulum-v0'  
 # select corresponding environment type
@@ -154,9 +163,9 @@ EnvType = ['classic_control', 'atari', 'box2d', 'mujoco', 'robotics', 'dm_contro
 # build environment with wrappers
 env = build_env(EnvName, EnvType)  
 # call default parameters for the algorithm and learning process
-alg_params, learn_params = call_default_params(env, EnvType, 'TD3')  
+alg_params, learn_params = call_default_params(env, EnvType, AlgName)  
 # instantiate the algorithm
-alg = TD3(**alg_params) 
+alg = eval(AlgName+'(**alg_params)')
 # start the training process
 alg.learn(env=env, mode='train', render=False, **learn_params)  
 # test after training 
@@ -165,22 +174,24 @@ alg.learn(env=env, mode='test', render=True, **learn_params)
 
 #### To Run:
 
-```
+```python
+# in the root folder of rlzoo package
+cd rlzoo
 python run_rlzoo.py
 ```
 
 ### 2. Explicit Configurations
 
-RL zoo with **explicit configurations** means the configurations for learning, including parameter values for the algorithm and the learning process, the network structures used in the algorithms and the optimizers etc, are explicitly displayed in the main script for running. And the main scripts are under the folder of each algorithm, for example, `./baselines/algorithms/sac/run_sac.py` can be called with `python algorithms/sac/run_sac.py` from the root file `./baselines/` to run the learning process same as in above implicit configurations.
+RLzoo with **explicit configurations** means the configurations for learning, including parameter values for the algorithm and the learning process, the network structures used in the algorithms and the optimizers etc, are explicitly displayed in the main script for running. And the main scripts for demonstration are under the folder of each algorithm, for example, `./rlzoo/algorithms/sac/run_sac.py` can be called with `python algorithms/sac/run_sac.py` from the file `./rlzoo` to run the learning process same as in above implicit configurations.
 
 #### A Quick Example:
 
 ```python
 import gym
-from common.utils import make_env, set_seed
-from algorithms.ac.ac import AC
-from common.value_networks import ValueNetwork
-from common.policy_networks import StochasticPolicyNetwork
+from rlzoo.common.utils import make_env, set_seed
+from rlzoo.algorithms import AC
+from rlzoo.common.value_networks import ValueNetwork
+from rlzoo.common.policy_networks import StochasticPolicyNetwork
 
 ''' load environment '''
 env = gym.make('CartPole-v0').unwrapped
@@ -240,8 +251,12 @@ model.learn(env, test_episodes=100, max_steps=200,  mode='test', render=True)
 
 #### To Run:
 
+In the package folder, we provides examples with explicit configurations for each algorithm. 
+
 ```python
-python algorithms/*ALGORITHM_NAME*/run_*ALGORITHM_NAME*.py 
+# in the root folder of rlzoo package
+cd rlzoo
+python algorithms/<ALGORITHM_NAME>/run_<ALGORITHM_NAME>.py 
 # for example: run actor-critic
 python algorithms/ac/run_ac.py
 ```

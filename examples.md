@@ -20,14 +20,15 @@
 ## 1. Deep Q-Network (DQN)
 
 ```python
+AlgName = 'DQN'
 EnvName = 'PongNoFrameskip-v4'
 EnvType = 'atari'
 # EnvName = 'CartPole-v1'
 # EnvType = 'classic_control'  # the name of env needs to match the type of env
 
 env = build_env(EnvName, EnvType)
-alg_params, learn_params = call_default_params(env, EnvType, 'DQN')
-alg = DQN(**alg_params)
+alg_params, learn_params = call_default_params(env, EnvType, AlgName)
+alg = eval(AlgName+'(**alg_params)')
 alg.learn(env=env, mode='train', **learn_params)
 alg.learn(env=env, mode='test', render=True, **learn_params)
 
@@ -36,6 +37,7 @@ alg.learn(env=env, mode='test', render=True, **learn_params)
 ## 2. Actor-Critic (AC)
 
 ```python
+AlgName = 'AC'
 EnvName = 'PongNoFrameskip-v4'
 EnvType = 'atari'
 
@@ -58,8 +60,8 @@ EnvType = 'atari'
 # EnvType = 'rlbench'
 
 env = build_env(EnvName, EnvType)
-alg_params, learn_params = call_default_params(env, EnvType, 'AC')
-alg = AC(**alg_params)
+alg_params, learn_params = call_default_params(env, EnvType, AlgName)
+alg = eval(AlgName+'(**alg_params)')
 alg.learn(env=env, mode='train', render=False, **learn_params)
 alg.learn(env=env, mode='test', render=True, **learn_params)
 
@@ -68,6 +70,7 @@ alg.learn(env=env, mode='test', render=True, **learn_params)
 ## 3. Policy Gradient (PG)
 
 ```python
+AlgName = 'PG'
 EnvName = 'PongNoFrameskip-v4'
 EnvType = 'atari'
 
@@ -90,8 +93,8 @@ EnvType = 'atari'
 # EnvType = 'rlbench'
 
 env = build_env(EnvName, EnvType)
-alg_params, learn_params = call_default_params(env, EnvType, 'PG')
-alg = PG(**alg_params)
+alg_params, learn_params = call_default_params(env, EnvType, AlgName)
+alg = eval(AlgName+'(**alg_params)')
 alg.learn(env=env, mode='train', render=False, **learn_params)
 alg.learn(env=env, mode='test', render=True, **learn_params)
 ```
@@ -99,6 +102,7 @@ alg.learn(env=env, mode='test', render=True, **learn_params)
 ## 4. Deep Deterministic Policy Gradient (DDPG)
 
 ```python
+AlgName = 'DDPG'
 EnvName = 'Pendulum-v0'  # only continuous action
 EnvType = 'classic_control'
 
@@ -118,8 +122,8 @@ EnvType = 'classic_control'
 # EnvType = 'rlbench'
 
 env = build_env(EnvName, EnvType)
-alg_params, learn_params = call_default_params(env, EnvType, 'DDPG')
-alg = DDPG(**alg_params)
+alg_params, learn_params = call_default_params(env, EnvType, AlgName)
+alg = eval(AlgName+'(**alg_params)')
 alg.learn(env=env, mode='train', render=False, **learn_params)
 alg.learn(env=env, mode='test', render=True, **learn_params)
 
@@ -130,6 +134,7 @@ alg.learn(env=env, mode='test', render=True, **learn_params)
 ## 5. Twin Delayed DDPG (TD3)
 
 ```python
+AlgName = 'TD3'
 EnvName = 'Pendulum-v0'  # only continuous action
 EnvType = 'classic_control'
 
@@ -149,8 +154,8 @@ EnvType = 'classic_control'
 # EnvType = 'rlbench'
 
 env = build_env(EnvName, EnvType)
-alg_params, learn_params = call_default_params(env, EnvType, 'TD3')
-alg = TD3(**alg_params)
+alg_params, learn_params = call_default_params(env, EnvType, AlgName)
+alg = eval(AlgName+'(**alg_params)')
 alg.learn(env=env, mode='train', render=False, **learn_params)
 alg.learn(env=env, mode='test', render=True, **learn_params)
 ```
@@ -158,6 +163,7 @@ alg.learn(env=env, mode='test', render=True, **learn_params)
 ## 6. Soft Actor-Critic (SAC)
 
 ```python
+AlgName = 'SAC'
 EnvName = 'Pendulum-v0'  # only continuous action
 EnvType = 'classic_control'
 
@@ -177,8 +183,8 @@ EnvType = 'classic_control'
 # EnvType = 'rlbench'
 
 env = build_env(EnvName, EnvType)
-alg_params, learn_params = call_default_params(env, EnvType, 'SAC')
-alg = SAC(**alg_params)
+alg_params, learn_params = call_default_params(env, EnvType, AlgName)
+alg = eval(AlgName+'(**alg_params)')
 alg.learn(env=env, mode='train', render=False, **learn_params)
 alg.learn(env=env, mode='test', render=True, **learn_params)
 ```
@@ -186,6 +192,7 @@ alg.learn(env=env, mode='test', render=True, **learn_params)
 ## 7. Asynchronous Advantage Actor-Critic (A3C)
 
 ```python
+AlgName = 'A3C'
 EnvName = 'PongNoFrameskip-v4'
 EnvType = 'atari'
 
@@ -206,8 +213,8 @@ EnvType = 'atari'
 
 number_workers = 2  # need to specify number of parallel workers
 env = build_env(EnvName, EnvType, nenv=number_workers)
-alg_params, learn_params = call_default_params(env, EnvType, 'A3C')
-alg = A3C(**alg_params)
+alg_params, learn_params = call_default_params(env, EnvType, AlgName)
+alg = eval(AlgName+'(**alg_params)')
 alg.learn(env=env,  mode='train', render=False, **learn_params)
 alg.learn(env=env,  mode='test', render=True, **learn_params)
 ```
@@ -278,6 +285,7 @@ alg.learn(env=env,  mode='test', render=True, **learn_params)
 ## 10. Trust Region Policy Optimization (TRPO)
 
 ```python
+AlgName = 'TRPO'
 EnvName = 'PongNoFrameskip-v4'
 EnvType = 'atari'
 
@@ -300,8 +308,8 @@ EnvType = 'atari'
 # EnvType = 'rlbench'
 
 env = build_env(EnvName, EnvType)
-alg_params, learn_params = call_default_params(env, EnvType, 'TRPO')
-alg = TRPO(**alg_params)
+alg_params, learn_params = call_default_params(env, EnvType, AlgName)
+alg = eval(AlgName+'(**alg_params)')
 alg.learn(env=env, mode='train', render=False, **learn_params)
 alg.learn(env=env, mode='test', render=True, **learn_params)
 ```

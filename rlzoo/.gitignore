@@ -1,0 +1,4 @@
+*.pyc
+/img
+/log
+/model
