@@ -137,6 +137,7 @@ pip install rlzoo
 Choose whatever environments with whatever RL algorithms supported in RLzoo, and enjoy the game by running following example in the root file of installed package:
 ```python
 # in the root folder of rlzoo package
+git clone https://github.com/tensorlayer/RLzoo.git
 cd rlzoo
 python run_rlzoo.py
 ```
