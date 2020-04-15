@@ -282,9 +282,9 @@ Our contributors include:
 ## Citing:
 
 ```
-@misc{Reinforcement Learning Algorithms Zoo,
+@misc{RLzoo,
   author = {Zihan Ding, Tianyang Yu, Yanhua Huang, Hongming Zhang, Hao Dong},
-  title = {RLzoo},
+  title = {Reinforcement Learning Algorithms Zoo},
   year = {2019},
   publisher = {GitHub},
   journal = {GitHub repository},
