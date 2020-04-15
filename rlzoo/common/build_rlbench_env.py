@@ -47,7 +47,7 @@ class RLBenchEnv():
         self.state_type = state_type
         self.spec = Spec(task_name)
 
-        self.action_space =  spaces.Box(low=-1.0, high=1.0, shape=(action_mode.action_size,), dtype=np.float32)
+        self.action_space =  spaces.Box(low=-1.0, high=1.0, shape=(self.env.action_size,), dtype=np.float32)
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=state.shape)
 
     def seed(self, seed_value):
