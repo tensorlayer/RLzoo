@@ -23,6 +23,7 @@ EnvType = 'classic_control'
 
 # EnvName = 'ReachTarget'
 # EnvType = 'rlbench'
+# env = build_env(EnvName, EnvType, state_type='vision')
 
 AlgName = 'SAC'
 env = build_env(EnvName, EnvType)
@@ -55,3 +56,5 @@ alg.learn(env=env, mode='test', render=True, **learn_params)
 # alg = eval(AlgName+'(**alg_params)')
 # alg.learn(env=env,  mode='train', render=False, **learn_params)
 # alg.learn(env=env,  mode='test', render=True, **learn_params)
+
+env.close()
