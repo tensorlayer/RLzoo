@@ -4,6 +4,7 @@ import math
 import tensorflow as tf
 import tensorlayer as tl
 from tensorlayer.layers import Dense, Input
+from gym import spaces
 
 
 def MLP(input_dim, hidden_dim_list, w_init=tf.initializers.Orthogonal(0.2),
@@ -19,9 +20,9 @@ def MLP(input_dim, hidden_dim_list, w_init=tf.initializers.Orthogonal(0.2),
         input tensor, output tensor
     """
 
-    l = inputs = Input([None, input_dim], name='input_layer')
+    l = inputs = Input([None, input_dim])
     for i in range(len(hidden_dim_list)):
-        l = Dense(n_units=hidden_dim_list[i], act=activation, W_init=w_init, name='mlp_layer%d' % (i + 1))(l)
+        l = Dense(n_units=hidden_dim_list[i], act=activation, W_init=w_init)(l)
     outputs = l
 
     return inputs, outputs
@@ -76,12 +77,12 @@ def CNN(input_shape, conv_kwargs=None):
                 'W_init': tf.initializers.GlorotUniform()
             }
         ]
-    l = inputs = tl.layers.Input((1,) + input_shape, name='input_layer')
+    l = inputs = tl.layers.Input((1,) + input_shape)
 
     for i, kwargs in enumerate(conv_kwargs):
-        kwargs['name'] = kwargs.get('name', 'cnn_layer{}'.format(i + 1))
+        # kwargs['name'] = kwargs.get('name', 'cnn_layer{}'.format(i + 1))
         l = tl.layers.Conv2d(**kwargs)(l)
-    outputs = tl.layers.Flatten(name='flatten_layer')(l)
+    outputs = tl.layers.Flatten()(l)
 
     return inputs, outputs
 
@@ -125,3 +126,25 @@ def CNNModel(input_shape, conv_kwargs=None):
     no = tl.layers.Flatten(name='Flatten_Layer')(hi)
 
     return tl.models.Model(inputs=ni, outputs=no)
+
+
+def CreateInputLayer(state_space):
+    def CreateSingleInput(single_state_space):
+        single_state_shape = single_state_space.shape
+        # build structure
+        if len(single_state_shape) == 1:
+            l = inputs = Input((None,) + single_state_shape, name='input_layer')
+        else:
+            with tf.name_scope('CNN'):
+                inputs, l = CNN(single_state_shape, conv_kwargs=None)
+        return inputs, l, single_state_shape
+
+    if isinstance(state_space, spaces.Dict):
+        input_dict, layer_dict, shape_dict = dict(), dict(), dict()
+        for k, v in state_space.spaces.items():
+            input_dict[k], layer_dict[k], shape_dict[k] = CreateSingleInput(v)
+        return input_dict, layer_dict, shape_dict
+    if isinstance(state_space, spaces.Space):
+        return CreateSingleInput(state_space)
+    else:
+        raise ValueError('state space error')

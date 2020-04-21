@@ -94,7 +94,6 @@ class TD3():
         generate action with state for calculating gradients;
         eval_noise_scale: as the trick of target policy smoothing, for generating noisy actions.
         '''
-        state = state.astype(np.float32)
         if target:
             action = self.target_policy_net(state)
         else:
@@ -241,7 +240,6 @@ class TD3():
             t0 = time.time()
             for eps in range(train_episodes):
                 state = env.reset()
-                state = state.astype(np.float32)
                 episode_reward = 0
 
                 for step in range(max_steps):
@@ -251,7 +249,6 @@ class TD3():
                         action = self.sample_action()
 
                     next_state, reward, done, _ = env.step(action)
-                    next_state = next_state.astype(np.float32)
                     if render: env.render()
                     done = 1 if done == True else 0
 
@@ -295,13 +292,11 @@ class TD3():
 
             for eps in range(test_episodes):
                 state = env.reset()
-                state = state.astype(np.float32)
                 episode_reward = 0
 
                 for step in range(max_steps):
                     action = self.get_action_greedy(state)
                     next_state, reward, done, _ = env.step(action)
-                    next_state = next_state.astype(np.float32)
                     if render: env.render()
                     done = 1 if done == True else 0
 

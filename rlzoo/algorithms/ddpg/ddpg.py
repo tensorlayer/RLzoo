@@ -217,7 +217,6 @@ class DDPG(object):
                     self.store_transition(s, a, r, s_, done)
                     if len(self.buffer) >= self.replay_buffer_size:
                         self.update(batch_size, gamma)
-
                         noise_scale *= noise_scale_decay
                     s = s_
                     ep_reward += r
@@ -244,7 +243,7 @@ class DDPG(object):
         elif mode == 'test':
             self.load_ckpt(env_name=env.spec.id)
             print('Testing...  | Algorithm: {}  | Environment: {}'.format(self.name, env.spec.id))
-            for eps in range(test_episodes):
+            for eps in range(1, test_episodes+1):
                 ep_rs_sum = 0
                 s = env.reset()
                 for step in range(max_steps):

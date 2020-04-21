@@ -72,7 +72,7 @@ class PPO_PENALTY(object):
         :param tfadv: advantage
         :return:
         """
-        tfs = np.array(tfs, np.float32)
+        tfs = np.array(tfs)
         tfa = np.array(tfa, np.float32)
         tfadv = np.array(tfadv, np.float32)
 
@@ -82,7 +82,7 @@ class PPO_PENALTY(object):
             ratio = pi_prob / (oldpi_prob + EPS)
 
             surr = ratio * tfadv
-            kl = self.old_dist.kl(self.actor.policy_dist.get_param())
+            kl = self.old_dist.kl(self.actor.policy_dist.param)
             # kl = tfp.distributions.kl_divergence(oldpi, pi)
             kl_mean = tf.reduce_mean(kl)
             aloss = -(tf.reduce_mean(surr - self.lam * kl))
@@ -171,7 +171,6 @@ class PPO_PENALTY(object):
         :param s: state
         :return: value
         """
-        s = s.astype(np.float32)
         if s.ndim < 2: s = s[np.newaxis, :]
         return self.critic(s)[0, 0]
 
@@ -230,17 +229,20 @@ class PPO_PENALTY(object):
 
                     # update ppo
                     if (t + 1) % batch_size == 0 or t == max_steps - 1:
-                        try:
-                            v_s_ = self.get_v(s_)
-                        except:
-                            v_s_ = self.get_v(s_[np.newaxis, :])   # for raw-pixel input
+                        if done:
+                            v_s_ = 0
+                        else:
+                            try:
+                                v_s_ = self.get_v(s_)
+                            except:
+                                v_s_ = self.get_v(s_[np.newaxis, :])   # for raw-pixel input
                         discounted_r = []
                         for r in buffer_r[::-1]:
                             v_s_ = r + gamma * v_s_
                             discounted_r.append(v_s_)
                         discounted_r.reverse()
 
-                        bs = buffer_s if len(buffer_s[0].shape)>1 else np.vstack(buffer_s) # no vstack for raw-pixel input
+                        bs = buffer_s
                         ba, br = np.vstack(buffer_a), np.array(discounted_r)[:, np.newaxis]
                         buffer_s, buffer_a, buffer_r = [], [], []
                         self.update(bs, ba, br, a_update_steps, c_update_steps)

@@ -127,7 +127,7 @@ class AC:
             print('Training...  | Algorithm: {}  | Environment: {}'.format(self.name, env.spec.id))
             reward_buffer = []
             for i_episode in range(train_episodes):
-                s = env.reset().astype(np.float32)
+                s = env.reset()
                 ep_rs_sum = 0  # rewards of all steps
 
                 for step in range(max_steps):
@@ -167,13 +167,13 @@ class AC:
             print('Testing...  | Algorithm: {}  | Environment: {}'.format(self.name, env.spec.id))
 
             for i_episode in range(test_episodes):
-                s = env.reset().astype(np.float32)
+                s = env.reset()
                 ep_rs_sum = 0  # rewards of all steps
                 for step in range(max_steps):
                     if render: env.render()
                     a = self.get_action_greedy(s)
                     s_new, r, done, info = env.step(a)
-                    s_new = s_new.astype(np.float32)
+                    s_new = s_new
 
                     ep_rs_sum += r
                     s = s_new

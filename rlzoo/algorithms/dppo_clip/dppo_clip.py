@@ -76,10 +76,6 @@ class DPPO_CLIP(object):
         :param oldpi_prob: old pi probability of a in s
         :return:
         """
-        tfs = np.array(tfs, np.float32)
-        tfa = np.array(tfa, np.float32)
-        tfadv = np.array(tfadv, np.float32)
-
         with tf.GradientTape() as tape:
             _ = self.actor(tfs)
             pi_prob = tf.exp(self.actor.policy_dist.logp(tfa))
@@ -133,8 +129,7 @@ class DPPO_CLIP(object):
                 UPDATE_EVENT.wait()  # wait until get batch of data
                 data = [QUEUE.get() for _ in range(QUEUE.qsize())]  # collect data from all workers
                 s, a, r = zip(*data)
-                s, a, r = np.vstack(s), np.vstack(a), np.vstack(r)
-                s, a, r = np.array(s, np.float32), np.array(a, np.float32), np.array(r, np.float32)
+                s, a, r = np.array(s), np.array(a, np.float32), np.array(r, np.float32)
 
                 adv = self.cal_adv(s, r)
                 # adv = (adv - adv.mean())/(adv.std()+1e-6)     # sometimes helpful
@@ -321,18 +316,20 @@ class Worker(object):
 
                 GLOBAL_UPDATE_COUNTER += 1  # count to minimum batch size, no need to wait other workers
                 if t == EP_LEN - 1 or GLOBAL_UPDATE_COUNTER >= MIN_BATCH_SIZE or done:
-                    try:
-                        v_s_ = self.ppo.get_v(s_)
-                    except:
-                        v_s_ = self.ppo.get_v(s_[np.newaxis, :])  # for raw-pixel input
+                    if done:
+                        v_s_ = 0
+                    else:
+                        try:
+                            v_s_ = self.ppo.get_v(s_)
+                        except:
+                            v_s_ = self.ppo.get_v(s_[np.newaxis, :])  # for raw-pixel input
                     discounted_r = []  # compute discounted reward
                     for r in buffer_r[::-1]:
                         v_s_ = r + GAMMA * v_s_
                         discounted_r.append(v_s_)
                     discounted_r.reverse()
-                    bs = buffer_s if len(buffer_s[0].shape) > 1 else np.vstack(
-                        buffer_s)  # no vstack for raw-pixel input
-                    ba, br = np.vstack(buffer_a), np.array(discounted_r)[:, np.newaxis]
+                    bs = buffer_s
+                    ba, br = buffer_a, np.array(discounted_r)[:, np.newaxis]
                     buffer_s, buffer_a, buffer_r = [], [], []
                     QUEUE.put((bs, ba, br))  # put data in the queue
                     if GLOBAL_UPDATE_COUNTER >= MIN_BATCH_SIZE:

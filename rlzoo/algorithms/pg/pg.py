@@ -59,7 +59,7 @@ class PG:
         :param s: state
         :return: act
         """
-        return self.model(np.array([s], np.float32))[0].numpy()
+        return self.model([s])[0].numpy()
 
     def get_action_greedy(self, s):
         """
@@ -67,7 +67,7 @@ class PG:
         :param s: state
         :return: act
         """
-        return self.model(np.array([s], np.float32), greedy=True).numpy()[0]
+        return self.model([s], greedy=True).numpy()[0]
 
     def store_transition(self, s, a, r):
         """
@@ -77,7 +77,7 @@ class PG:
         :param r: reward
         :return:
         """
-        self.buffer.append([np.array(s, np.float32), np.array(a, np.float32), np.array(r, np.float32)])
+        self.buffer.append([s, np.array(a, np.float32), np.array(r, np.float32)])
 
     def update(self, gamma):
         """
@@ -88,13 +88,9 @@ class PG:
         s, a, r = zip(*self.buffer)
         s, a, r = np.array(s), np.array(a), np.array(r).flatten()
         discounted_ep_rs_norm = self._discount_and_norm_rewards(r, gamma)
-        # print(discounted_ep_rs_norm)
 
         with tf.GradientTape() as tape:
-            try:
-                self.model(np.vstack(s))
-            except:
-                self.model(s)  # no stack for raw-pixel atari
+            self.model(s)
             neg_log_prob = self.model.policy_dist.neglogp(a)
             loss = tf.reduce_mean(neg_log_prob * discounted_ep_rs_norm)  # reward guided loss
 
@@ -118,7 +114,9 @@ class PG:
 
         # normalize episode rewards
         discounted_ep_rs -= np.mean(discounted_ep_rs)
-        discounted_ep_rs /= np.std(discounted_ep_rs)
+        std = np.std(discounted_ep_rs)
+        if std != 0:
+            discounted_ep_rs /= np.std(discounted_ep_rs)
         discounted_ep_rs = discounted_ep_rs[:, np.newaxis]
         return discounted_ep_rs
 
@@ -165,7 +163,6 @@ class PG:
                 for step in range(max_steps):
                     if render:
                         env.render()
-
                     action = self.get_action(observation)
                     observation_, reward, done, info = env.step(action)
                     self.store_transition(observation, action, reward)
@@ -181,7 +178,9 @@ class PG:
                 )
                 reward_buffer.append(ep_rs_sum)
 
+                tt = time.time()
                 self.update(gamma)
+                print('update time', time.time()-tt)
 
                 if i_episode and i_episode % save_interval == 0:
                     self.save_ckpt(env_name=env.spec.id)

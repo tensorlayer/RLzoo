@@ -54,6 +54,7 @@ class Categorical(Distribution):
         """
         self._ndim = ndim
         self._logits = logits
+        self.param = self._logits
 
     @property
     def ndim(self):
@@ -65,6 +66,7 @@ class Categorical(Distribution):
             logits (tensor): logits variables to set
         """
         self._logits = logits
+        self.param = self._logits
 
     def get_param(self):
         return copy.deepcopy(self._logits)
@@ -132,6 +134,7 @@ class DiagGaussian(Distribution):
         self.std = None
         self.action_mean = None
         self.action_scale = None
+        self.param = self.mean, self.logstd
         if mean_logstd is not None:
             self.set_param(mean_logstd)
 
@@ -146,6 +149,7 @@ class DiagGaussian(Distribution):
         """
         self.mean, self.logstd = mean_logstd
         self.std = tf.math.exp(self.logstd)
+        self.param = self.mean, self.logstd
 
     def get_param(self):
         """ Get parameters """

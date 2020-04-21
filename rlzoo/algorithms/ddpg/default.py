@@ -31,7 +31,6 @@ noise_scale_decay: noise scale decay factor
 -----------------------------------------------
 '''
 
-
 def classic_control(env, default_seed=True):
     if default_seed:
         # reproducible
@@ -289,7 +288,7 @@ def rlbench(env, default_seed=True):
         set_seed(seed, env)
 
     alg_params = dict(
-        replay_buffer_size=10000,
+        replay_buffer_size=1000,
         tau=0.01,
     )
 

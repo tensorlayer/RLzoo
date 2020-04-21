@@ -9,6 +9,7 @@ tensorlayer==2.0.1
 import operator
 import os
 import random
+from collections import OrderedDict
 
 import numpy as np
 import copy
@@ -40,29 +41,37 @@ class ValueNetwork(Model):
         """
         self._state_space = state_space
 
-        self._state_shape = state_space.shape
-        if len(self._state_shape) == 1:
-            with tf.name_scope('MLP'):
-                inputs, l = MLP(self._state_shape[0], hidden_dim_list, w_init, activation)
-        else:
-            with tf.name_scope('CNN'):
-                inputs, l = CNN(self._state_shape, conv_kwargs=None)
+        obs_inputs, current_layer, self._state_shape = CreateInputLayer(state_space)
+
+        if isinstance(state_space, spaces.Dict):
+            assert isinstance(obs_inputs, dict)
+            assert isinstance(current_layer, dict)
+            self.input_dict = obs_inputs
+            obs_inputs = list(obs_inputs.values())
+            current_layer = tl.layers.Concat(-1)(list(current_layer.values()))
+
+        with tf.name_scope('MLP'):
+            for i, dim in enumerate(hidden_dim_list):
+                current_layer = Dense(n_units=dim, act=activation, W_init=w_init, name='hidden_layer%d' % (i + 1))(current_layer)
 
         with tf.name_scope('Output'):
-            outputs = Dense(n_units=1, act=output_activation, W_init=w_init)(l)
+            outputs = Dense(n_units=1, act=output_activation, W_init=w_init)(current_layer)
 
-        super().__init__(inputs=inputs, outputs=outputs, name=name)
+        super().__init__(inputs=obs_inputs, outputs=outputs, name=name)
         if trainable:
             self.train()
         else:
             self.eval()
 
     def __call__(self, states, *args, **kwargs):
-        if np.shape(states)[1:] != self.state_shape:
-            raise ValueError(
-                'Input state shape error. Shape can be {} but your shape is {}'.format((None,) + self.state_shape,
-                                                                                       np.shape(states)))
-        states = np.array(states, dtype=np.float32)
+        if isinstance(self._state_space, spaces.Dict):
+            states = np.array(states).transpose([1, 0]).tolist()
+        else:
+            if np.shape(states)[1:] != self.state_shape:
+                raise ValueError(
+                    'Input state shape error. Shape can be {} but your shape is {}'.format((None,) + self.state_shape,
+                                                                                           np.shape(states)))
+            states = np.array(states, dtype=np.float32)
         return super().__call__(states, *args, **kwargs)
 
     @property
@@ -138,13 +147,22 @@ class QNetwork(Model):
         else:
             raise NotImplementedError
 
-        if len(self._state_shape) == 1:
-            obs_inputs = current_layer = Input((None,) + self._state_shape, name='Obs_Input_Layer')
-        elif len(self._state_shape) > 1:
-            with tf.name_scope('QNet_CNN'):
-                obs_inputs, current_layer = CNN(self._state_shape)
-        else:
-            raise ValueError("State Shape Not Accepted!")
+        obs_inputs, current_layer, self._state_shape = CreateInputLayer(state_space)
+
+        if isinstance(state_space, spaces.Dict):
+            assert isinstance(obs_inputs, dict)
+            assert isinstance(current_layer, dict)
+            self.input_dict = obs_inputs
+            obs_inputs = list(obs_inputs.values())
+            current_layer = tl.layers.Concat(-1)(list(current_layer.values()))
+
+        # if len(self._state_shape) == 1:
+        #     obs_inputs = current_layer = Input((None,) + self._state_shape, name='Obs_Input_Layer')
+        # elif len(self._state_shape) > 1:
+        #     with tf.name_scope('QNet_CNN'):
+        #         obs_inputs, current_layer = CNN(self._state_shape)
+        # else:
+        #     raise ValueError("State Shape Not Accepted!")
 
         if isinstance(self._action_space, spaces.Box):
             current_layer = tl.layers.Concat(-1)([current_layer, act_inputs])
@@ -159,7 +177,8 @@ class QNetwork(Model):
                 current_layer = Dense(n_units=self._action_shape[0], act=output_activation, W_init=w_init)(
                     current_layer)
 
-                act_one_hot = tl.layers.OneHot(depth=self._action_shape[0], axis=1)(act_inputs)  # discrete action choice to one-hot vector
+                act_one_hot = tl.layers.OneHot(depth=self._action_shape[0], axis=1)(
+                    act_inputs)  # discrete action choice to one-hot vector
                 outputs = tl.layers.Lambda(
                     lambda x: tf.reduce_sum(tf.reduce_prod(x, axis=0), axis=1))((current_layer, act_one_hot))
             elif isinstance(self._action_space, spaces.Box):
@@ -167,8 +186,11 @@ class QNetwork(Model):
             else:
                 raise ValueError("State Shape Not Accepted!")
 
-        super().__init__(inputs=[obs_inputs, act_inputs], outputs=outputs, name=name)
-
+        if isinstance(state_space, spaces.Dict):
+            super().__init__(inputs=obs_inputs + [act_inputs], outputs=outputs, name=name)
+        else:
+            super().__init__(inputs=[obs_inputs, act_inputs], outputs=outputs, name=name)
+        print('value network created')
         if trainable:
             self.train()
         else:
@@ -176,27 +198,35 @@ class QNetwork(Model):
 
     def __call__(self, states_actions, *args, **kwargs):
         states, actions = states_actions
-        if np.shape(states)[1:] != self.state_shape:
-            raise ValueError(
-                'Input state shape error. Shape can be {} but your shape is {}'.format((None,) + self.state_shape,
-                                                                                       np.shape(states)))
-        if len(states) != len(actions):
-            raise ValueError(
-                'Length of states and actions not match. States length is {} but actions length is {}'.format(
-                    len(states),
-                    len(actions)))
 
-        if isinstance(self._action_space, spaces.Discrete) and np.any(actions % 1):
-            raise ValueError('Input float actions in discrete action space')
+        if isinstance(self._state_space, spaces.Dict):
+            states = np.array(states).transpose([1, 0]).tolist()
+        else:
+            if np.shape(states)[1:] != self.state_shape:
+                raise ValueError(
+                    'Input state shape error. Shape can be {} but your shape is {}'.format((None,) + self.state_shape,
+                                                                                           np.shape(states)))
+            if len(states) != len(actions):
+                raise ValueError(
+                    'Length of states and actions not match. States length is {} but actions length is {}'.format(
+                        len(states),
+                        len(actions)))
 
-        states = np.array(states, dtype=np.float32)
+            if isinstance(self._action_space, spaces.Discrete) and np.any(actions % 1):
+                raise ValueError('Input float actions in discrete action space')
+            states = np.array(states, dtype=np.float32)
+
         # if isinstance(self._action_space, spaces.Discrete) and type(actions) == tf.int32:
         if isinstance(self._action_space, spaces.Discrete):
             actions = tf.convert_to_tensor(actions, dtype=tf.int32)
         # elif isinstance(self._action_space, spaces.Box) and type(actions) == tf.float32:
         elif isinstance(self._action_space, spaces.Box):
             actions = tf.convert_to_tensor(actions, dtype=tf.float32)
-        return super().__call__([states, actions], *args, **kwargs)
+
+        if isinstance(self._state_space, spaces.Dict):
+            return super().__call__(states + [actions], *args, **kwargs)
+        else:
+            return super().__call__([states, actions], *args, **kwargs)
 
     @property
     def state_space(self):
@@ -213,4 +243,3 @@ class QNetwork(Model):
     @property
     def action_shape(self):
         return copy.deepcopy(self._action_shape)
-
