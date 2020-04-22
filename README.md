@@ -52,7 +52,7 @@ the coming months after initial release. We will keep improving the potential pr
 |Noisy DQN|[Noisy networks for exploration. Fortunato et al. 2017.](https://arxiv.org/pdf/1706.10295.pdf)|
 | Distributed DQN (C51)| [A distributional perspective on reinforcement learning. Bellemare et al. 2017.](https://arxiv.org/pdf/1707.06887.pdf) |
 |**Policy-based**||
-|REINFORCE(PG) | [Reinforcement learning: An introduction. Sutton et al. 2011.](https://www.cambridge.org/core/journals/robotica/article/robot-learning-edited-by-jonathan-h-connell-and-sridhar-mahadevan-kluwer-boston-19931997-xii240-pp-isbn-0792393651-hardback-21800-guilders-12000-8995/737FD21CA908246DF17779E9C20B6DF6)|
+|REINFORCE(PG) | [Simple statistical gradient-following algorithms for connectionist reinforcement learning. Ronald J. Williams  1992.](https://link.springer.com/article/10.1007/BF00992696)|
 | Trust Region Policy Optimization (TRPO)| [Abbeel et al. Trust region policy optimization. Schulman et al.2015.](https://arxiv.org/pdf/1502.05477.pdf) |
 | Proximal Policy Optimization (PPO) | [Proximal policy optimization algorithms. Schulman et al. 2017.](https://arxiv.org/abs/1707.06347) |
 |Distributed Proximal Policy Optimization (DPPO)|[Emergence of locomotion behaviours in rich environments. Heess et al. 2017.](https://arxiv.org/abs/1707.02286)|
