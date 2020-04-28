@@ -106,7 +106,7 @@ class Border:
         frame = widgets.Box(children=element_list, layout=box_layout)
 
         if description is not None:
-            caption = widgets.HTML(value=f"<font size={size}>{description}", )
+            caption = widgets.HTML(value="<font size={"+str(size)+"}>{"+description+"}", )
             children = [caption, frame]
         else:
             children = [frame]
