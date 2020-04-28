@@ -24,7 +24,7 @@ class EnvironmentSelector:
         env_list = all_env_list
         al = list(env_list.keys())
         description = 'Environment Selector'
-        caption = widgets.HTML(value=f"<font size={4}>{description}", )
+        caption = widgets.HTML(value="<font size={4}>{"+description+"}", )
 
         text_0 = widgets.Label("Choose your environment")
 
@@ -146,7 +146,7 @@ class EnvInfoViewer:
             tips = 'The action space is continuous.'
 
         description = 'Environment Informations'
-        caption = widgets.HTML(value=f"<font size={4}>{description}", )
+        caption = widgets.HTML(value="<font size={4}>{"+description+"}", )
 
         a00, a01 = widgets.Label('Environment name:'), widgets.Label(env.spec.id)
         a10, a11 = widgets.Label('Observation space:'), env_obs.frame
@@ -185,7 +185,7 @@ all_alg_dict = {'discrete_action_space': ['AC', 'DQN', 'PG', 'PPO', 'TRPO'],
 class AlgorithmSelector:
     def __init__(self, env):
         description = 'Algorithm Selector'
-        caption = widgets.HTML(value=f"<font size={4}>{description}", )
+        caption = widgets.HTML(value="<font size={4}>{"+description+"}", )
         info = 'Supported algorithms are shown below'
         if isinstance(env, list):
             #             info = 'Distributed algorithms are shown below'
@@ -232,7 +232,7 @@ class AlgoInfoViewer:
 
         # ---------------- alg_params --------------- #
         description = 'Algorithm Parameters'
-        alg_caption = widgets.HTML(value=f"<font size={4}>{description}", )
+        alg_caption = widgets.HTML(value="<font size={4}>{"+description+"}", )
         net_label = widgets.Label('Network information:')
         show_net = lambda net: widgets.VBox([widgets.Label(str(layer)) for layer in net.all_layers])
         net_info = widgets.VBox([widgets.VBox([widgets.Label(str(net.__class__.__name__)),
@@ -266,7 +266,7 @@ class AlgoInfoViewer:
         del alg_params['optimizers_list']
 
         description = 'Algorithm Parameters'
-        caption = widgets.HTML(value=f"<font size={4}>{description}", )
+        caption = widgets.HTML(value="<font size={4}>{"+description+"}", )
         stu_frame = widgets.GridBox(children=[net_label, net_info, opt_label, opt_info],
                                     layout=Layout(grid_template_areas='''
                                            "net_label net_info"
@@ -303,7 +303,7 @@ class AlgoInfoViewer:
 
         # ----------------- learn_params ---------------- #
         description = 'Learn Parameters'
-        learn_caption = widgets.HTML(value=f"<font size={4}>{description}", )
+        learn_caption = widgets.HTML(value="<font size={4}>{"+description+"}", )
 
         learn_sel_dict = dict()
         sk = sorted(learn_params.keys())
