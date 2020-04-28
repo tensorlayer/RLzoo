@@ -178,9 +178,7 @@ class PG:
                 )
                 reward_buffer.append(ep_rs_sum)
 
-                tt = time.time()
                 self.update(gamma)
-                print('update time', time.time()-tt)
 
                 if i_episode and i_episode % save_interval == 0:
                     self.save_ckpt(env_name=env.spec.id)
