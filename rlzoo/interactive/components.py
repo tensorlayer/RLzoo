@@ -22,9 +22,10 @@ all_env_list = OrderedDict(sorted(all_env_list.items()))
 class EnvironmentSelector:
     def __init__(self):
         env_list = all_env_list
-        al = list(env_list.keys())
+        # al = list(env_list.keys())
+        al = ['atari', 'classic_control', 'box2d', 'mujoco', 'robotics', 'dm_control', 'rlbench']
         description = 'Environment Selector'
-        caption = widgets.HTML(value="<font size={4}>{"+description+"}", )
+        caption = widgets.HTML(value="<font size=4><B>"+description+"</B>")
 
         text_0 = widgets.Label("Choose your environment")
 
@@ -72,8 +73,6 @@ class EnvironmentSelector:
 
         select_box = widgets.HBox([env_select_box, env_setting_box],
                                   layout=Layout(justify_content='Center'))
-        i = InfoDisplay('Environment name:', 'None'),
-        grid = GridspecLayout(4, 2)
         self.frame = widgets.VBox([caption, select_box], layout=widgets.Layout(align_items='center', ))
 
         #         self.frame = widgets.VBox([select_box, widgets.Box([self.create_button],
@@ -87,9 +86,12 @@ class EnvironmentSelector:
             if self.env_type.value == 'rlbench':
                 self.env_state.options = ['state', 'vision']
                 self.env_state.value = 'state'
+                self.env_num.value = 1
+                self.env_num.disabled = True
             else:
                 self.env_state.options = ['default']
                 self.env_state.value = 'default'
+                self.env_num.disabled = False
 
         #         def create_env(c):  # todo the program will be blocked if rlbench env is created here
         #             if self.env_type.value == 'rlbench':
@@ -145,8 +147,8 @@ class EnvInfoViewer:
         elif isinstance(env.action_space, gym.spaces.Box):
             tips = 'The action space is continuous.'
 
-        description = 'Environment Informations'
-        caption = widgets.HTML(value="<font size={4}>{"+description+"}", )
+        description = 'Environment Information'
+        caption = widgets.HTML(value="<font size=4><B>"+description+"</B>")
 
         a00, a01 = widgets.Label('Environment name:'), widgets.Label(env.spec.id)
         a10, a11 = widgets.Label('Observation space:'), env_obs.frame
@@ -155,7 +157,6 @@ class EnvInfoViewer:
         if tips is None:
             # use GirdBox instead of GridspecLayout to ensure each row has a different height
             info = widgets.GridBox(children=[a00, a01, a10, a11, a20, a21],
-                                   #                                    layout=Layout(grid_template_columns="repeat(2, 200px)"))
                                    layout=Layout(grid_template_areas='''
                                                "a00 a01"
                                                "a10 a11"
@@ -165,7 +166,6 @@ class EnvInfoViewer:
             t0 = widgets.Label('Tips:')
             t1 = widgets.Label(tips)
             info = widgets.GridBox(children=[a00, a01, a10, a11, a20, a21, t0, t1],
-                                   #                                    layout=Layout(grid_template_columns="repeat(2, 200px)"))
                                    layout=Layout(grid_template_areas='''
                                                "a00 a01"
                                                "a10 a11"
@@ -185,17 +185,20 @@ all_alg_dict = {'discrete_action_space': ['AC', 'DQN', 'PG', 'PPO', 'TRPO'],
 class AlgorithmSelector:
     def __init__(self, env):
         description = 'Algorithm Selector'
-        caption = widgets.HTML(value="<font size={4}>{"+description+"}", )
+        caption = widgets.HTML(value="<font size=4><B>"+description+"</B>")
         info = 'Supported algorithms are shown below'
         if isinstance(env, list):
             #             info = 'Distributed algorithms are shown below'
             table = all_alg_dict['multi_env']
+            self.env_id = env[0].spec.id
         elif isinstance(env.action_space, gym.spaces.Discrete):
             #             info = 'Algorithms which support discrete action space are shown below'
             table = all_alg_dict['discrete_action_space']
+            self.env_id = env.spec.id
         elif isinstance(env.action_space, gym.spaces.Box):
             #             info = 'Algorithms which support continuous action space are shown below'
             table = all_alg_dict['continuous_action_space']
+            self.env_id = env.spec.id
         else:
             raise ValueError('Unsupported environment')
 
@@ -227,12 +230,12 @@ def TransInput(value):
 
 
 class AlgoInfoViewer:
-    def __init__(self, org_alg_params, org_learn_params):
+    def __init__(self, alg_selector, org_alg_params, org_learn_params):
         alg_params, learn_params = copy.deepcopy(org_alg_params), copy.deepcopy(org_learn_params)
 
         # ---------------- alg_params --------------- #
         description = 'Algorithm Parameters'
-        alg_caption = widgets.HTML(value="<font size={4}>{"+description+"}", )
+        alg_caption = widgets.HTML(value="<font size=4><B>"+description+"</B>")
         net_label = widgets.Label('Network information:')
         show_net = lambda net: widgets.VBox([widgets.Label(str(layer)) for layer in net.all_layers])
         net_info = widgets.VBox([widgets.VBox([widgets.Label(str(net.__class__.__name__)),
@@ -265,8 +268,6 @@ class AlgoInfoViewer:
         self._optimizers_list = alg_params['optimizers_list']
         del alg_params['optimizers_list']
 
-        description = 'Algorithm Parameters'
-        caption = widgets.HTML(value="<font size={4}>{"+description+"}", )
         stu_frame = widgets.GridBox(children=[net_label, net_info, opt_label, opt_info],
                                     layout=Layout(grid_template_areas='''
                                            "net_label net_info"
@@ -275,35 +276,33 @@ class AlgoInfoViewer:
 
         alg_sel_dict = dict()
         sk = sorted(alg_params.keys())
-        n = len(sk)
-        if n > 0:
-            alg_param_sel = widgets.GridspecLayout(n, 2)
-            b = 0
-            if 'method' in sk:
-                module = widgets.RadioButtons(options=['penalty', 'clip'], disabled=False)
-                alg_param_sel[0, 0], alg_param_sel[0, 1] = widgets.Label('method'), module
-                alg_sel_dict['method'] = module
-                sk.remove('method')
-                b += 1
+        n = len(sk)+1
+        alg_param_sel = widgets.GridspecLayout(n, 2)
+        b = 0
+        if 'method' in sk:
+            module = widgets.RadioButtons(options=['penalty', 'clip'], disabled=False)
+            alg_param_sel[0, 0], alg_param_sel[0, 1] = widgets.Label('method'), module
+            alg_sel_dict['method'] = module
+            sk.remove('method')
+            b += 1
 
-            for i, k in enumerate(sk):
-                module = TransInput(alg_params[k])
-                alg_sel_dict[k] = module
-                alg_param_sel[i + b, 0], alg_param_sel[i + b, 1] = widgets.Label(k), module
-            alg_param_box = widgets.VBox([alg_caption, stu_frame, alg_param_sel],
-                                         #                                      layout=Layout(align_items='center',)
-                                         )
-        else:
-            alg_param_box = widgets.VBox([alg_caption, stu_frame],
-                                         #                                      layout=Layout(align_items='center',)
-                                         )
+        for i, k in enumerate(sk):
+            module = TransInput(alg_params[k])
+            alg_sel_dict[k] = module
+            alg_param_sel[i + b, 0], alg_param_sel[i + b, 1] = widgets.Label(k), module
+
+        alg_param_box = widgets.VBox([alg_caption, stu_frame, alg_param_sel],)
+        name = alg_selector.value + '-' + alg_selector.env_id
+        path = os.path.join('.', 'model', name)
+        alg_param_sel[n - 1, 0] = widgets.Label('model save path')
+        alg_param_sel[n - 1, 1] = widgets.Label(path)
 
         self.alg_sel_dict = alg_sel_dict
         # ================== alg_params ================= #
 
         # ----------------- learn_params ---------------- #
         description = 'Learn Parameters'
-        learn_caption = widgets.HTML(value="<font size={4}>{"+description+"}", )
+        learn_caption = widgets.HTML(value="<font size=4><B>"+description+"</B>")
 
         learn_sel_dict = dict()
         sk = sorted(learn_params.keys())
