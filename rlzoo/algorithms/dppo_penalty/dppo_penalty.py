@@ -133,6 +133,7 @@ class DPPO_PENALTY(object):
                 UPDATE_EVENT.wait()  # wait until get batch of data
                 data = [QUEUE.get() for _ in range(QUEUE.qsize())]  # collect data from all workers
                 s, a, r = zip(*data)
+                s, a, r = np.vstack(s), np.vstack(a), np.vstack(r)
                 s, a, r = np.array(s), np.array(a, np.float32), np.array(r, np.float32)
 
                 adv = self.cal_adv(s, r)
