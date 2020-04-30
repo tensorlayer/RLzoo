@@ -1,4 +1,5 @@
 # Reinforcement Learning Algorithms Zoo
+[![Documentation Status](https://readthedocs.org/projects/rlzoo/badge/?version=latest)](https://rlzoo.readthedocs.io/en/latest/?badge=latest)
 [![Supported TF Version](https://img.shields.io/badge/TensorFlow-2.0.0%2B-brightgreen.svg)](https://github.com/tensorflow/tensorflow/releases)
 [![Downloads](http://pepy.tech/badge/rlzoo)](http://pepy.tech/project/rlzoo)
 
