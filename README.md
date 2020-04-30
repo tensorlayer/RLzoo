@@ -3,15 +3,6 @@
 [![Downloads](http://pepy.tech/badge/rlzoo)](http://pepy.tech/project/rlzoo)
 
 
-<br/>
-<a href="https://deepreinforcementlearningbook.org" target="\_blank">
-	<div align="center">
-		<img src="http://deep-reinforcement-learning-book.github.io/assets/images/cover_v1.png" width="25%"/>
-	</div>
-<!-- 	<div align="center"><caption>Slack Invitation Link</caption></div> -->
-</a>
-<br/>
-
 RLzoo is a collection of most practical reinforcement learning algorithms, frameworks and applications. It is implemented with Tensorflow 2.0 and API of neural network layers in TensorLayer 2, to provide a hands-on fast-developing approach for reinforcement learning practices and benchmarks. It supports basic toy-tests like [OpenAI Gym](https://gym.openai.com/) and [DeepMind Control Suite](https://github.com/deepmind/dm_control) with very simple configurations. Moreover, RLzoo supports robot learning benchmark environment [RLBench](https://github.com/stepjam/RLBench) based on  [Vrep](http://www.coppeliarobotics.com/)/[Pyrep](https://github.com/stepjam/PyRep) simulator. Other large-scale distributed training framework for more realistic scenarios with [Unity 3D](https://github.com/Unity-Technologies/ml-agents), 
 [Mujoco](http://www.mujoco.org/), [Bullet Physics](https://github.com/bulletphysics/bullet3), etc, will be supported in the future. A [Springer textbook](https://deepreinforcementlearningbook.org) is also provided, you can get the free PDF if your institute has Springer license.
 
@@ -282,6 +273,19 @@ python algorithms/ac/run_ac.py
   `pip install --upgrade tf-nightly-2.0-preview tfp-nightly`
 * When trying to use RLBench environments, *'No module named rlbench'* can be caused by no RLBench package installed at your local or a mistake in the python path. You should add `export PYTHONPATH=/home/quantumiracle/research/vrep/PyRep/RLBench` every time you try to run the learning script with RLBench environment or add it to you `~/.bashrc` file once for all.
 * If you meet the error that the Qt platform is not loaded correctly when using DeepMind Control Suite environments, it's probably caused by your Ubuntu system not being version 14.04 or 16.04. Check [here](https://github.com/deepmind/dm_control).
+
+## Book
+
+<br/>
+<a href="https://deepreinforcementlearningbook.org" target="\_blank">
+	<div align="center">
+		<img src="http://deep-reinforcement-learning-book.github.io/assets/images/cover_v1.png" width="25%"/>
+	</div>
+<!-- 	<div align="center"><caption>Slack Invitation Link</caption></div> -->
+</a>
+<br/>
+
+A [Springer textbook](https://deepreinforcementlearningbook.org) is also provided, you can get the free PDF if your institute has Springer license.
 
 ## Credits:
 Our contributors include:
