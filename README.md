@@ -160,19 +160,19 @@ RLzoo with **implicit configurations** means the configurations for learning are
 from rlzoo.common.env_wrappers import build_env
 from rlzoo.common.utils import call_default_params
 from rlzoo.algorithms import *
-# choose algorithm
+# choose an algorithm
 AlgName = 'TD3'
-# chose environment
+# chose an environment
 EnvName = 'Pendulum-v0'  
-# select corresponding environment type
+# select a corresponding environment type
 EnvType = ['classic_control', 'atari', 'box2d', 'mujoco', 'robotics', 'dm_control', 'rlbench'][0] 
-# build environment with wrappers
+# build an environment with wrappers
 env = build_env(EnvName, EnvType)  
 # call default parameters for the algorithm and learning process
 alg_params, learn_params = call_default_params(env, EnvType, AlgName)  
 # instantiate the algorithm
 alg = eval(AlgName+'(**alg_params)')
-# start the training process
+# start the training
 alg.learn(env=env, mode='train', render=False, **learn_params)  
 # test after training 
 alg.learn(env=env, mode='test', render=True, **learn_params)  
