@@ -45,8 +45,8 @@ RLzoo is a collection of the most practical reinforcement learning algorithms, f
    :maxdepth: 1
    :caption: Other Resources
 
-   other/drlbook
-   other/rl_tutorial
+   other/drl_book
+   other/drl_tutorial
 
 Contributing
 ==================
