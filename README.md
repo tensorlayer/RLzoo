@@ -25,9 +25,6 @@ RLzoo is a collection of the most practical reinforcement learning algorithms, f
 
 
 
-
-
-
 We aim to make it easy to configure for all components within RL, including replacing the networks, optimizers, etc. We also  provide automatically adaptive policies and value functions in the common functions: for the observation space, the vector state or the raw-pixel (image) state are supported automatically according to the shape of the space; for the action space, the discrete action or continuous action are supported automatically according to the shape of the space as well. The deterministic or stochastic property of policy needs to be chosen according to each algorithm. Some environments with raw-pixel based observation (e.g. Atari, RLBench) may be hard to train, be patient and play around with the hyperparameters!
 
 **Table of contents:**
@@ -50,8 +47,8 @@ Please note that this repository using RL algorithms with **high-level API**. So
 We are currently open to any suggestions or pull requests from the community to make RLzoo a better repository. Given the scope of this project, we expect there could be some issues over
 the coming months after initial release. We will keep improving the potential problems and commit when significant changes are made in the future. Current default hyperparameters for each algorithm and each environment may not be optimal, so you can play around with those hyperparameters to achieve best performances. We will release a version with optimal hyperparameters and benchmark results for all algorithms in the future.
 
-## Contents:
-### Algorithms:
+## Contents
+### Algorithms
 
 | Algorithms      | Papers |
 | --------------- | -------|
@@ -76,7 +73,7 @@ the coming months after initial release. We will keep improving the potential pr
 |Twin Delayed DDPG (TD3)|[Addressing function approximation error in actor-critic methods. Fujimoto et al. 2018.](https://arxiv.org/pdf/1802.09477.pdf)|
 |Soft Actor-Critic (SAC)|[Soft actor-critic algorithms and applications. Haarnoja et al. 2018.](https://arxiv.org/abs/1812.05905)|
 
-### Environments:
+### Environments
 
 * [**OpenAI Gym**](https://gym.openai.com/):  
 
@@ -126,7 +123,7 @@ The supported configurations for RL algorithms with corresponding environments i
 | TRPO                       | Discrete/Continuous | Stochastic    | On-policy  | All                                                          |
 
 
-## Prerequisites:
+## Prerequisites
 
 * python >=3.5 (python 3.6 is needed if using dm_control)
 * tensorflow >= 2.0.0 or tensorflow-gpu >= 2.0.0a0
@@ -136,7 +133,7 @@ The supported configurations for RL algorithms with corresponding environments i
 * [Mujoco 2.0](http://www.mujoco.org/), [dm_control](https://github.com/deepmind/dm_control), [dm2gym](https://github.com/zuoxingdong/dm2gym) (if using DeepMind Control Suite environments)
 * Vrep, PyRep, RLBench (if using RLBench environments, follows [here](http://www.coppeliarobotics.com/downloads.html), [here](https://github.com/stepjam/PyRep) and [here](https://github.com/stepjam/RLBench))
 
-## Installation:
+## Installation
 
 To install RLzoo package with key requirements:
 
@@ -144,7 +141,9 @@ To install RLzoo package with key requirements:
 pip install rlzoo
 ```
 
-## Usage:
+## Usage
+
+For usage, please check our [online documentation](https://rlzoo.readthedocs.io).
 
 ### 0. Quick Start
 Choose whatever environments with whatever RL algorithms supported in RLzoo, and enjoy the game by running following example in the root file of installed package:
@@ -187,7 +186,6 @@ alg.learn(env=env, mode='train', render=False, **learn_params)
 alg.learn(env=env, mode='test', render=True, **learn_params)  
 ```
 
-#### To Run:
 
 ```python
 # in the root folder of rlzoo package
@@ -199,7 +197,7 @@ python run_rlzoo.py
 
 RLzoo with **explicit configurations** means the configurations for learning, including parameter values for the algorithm and the learning process, the network structures used in the algorithms and the optimizers etc, are explicitly displayed in the main script for running. And the main scripts for demonstration are under the folder of each algorithm, for example, `./rlzoo/algorithms/sac/run_sac.py` can be called with `python algorithms/sac/run_sac.py` from the file `./rlzoo` to run the learning process same as in above implicit configurations.
 
-#### A Quick Example:
+#### A Quick Example
 
 ```python
 import gym
@@ -264,8 +262,6 @@ render:  if true, visualize the environment
 model.learn(env, test_episodes=100, max_steps=200,  mode='test', render=True)
 ```
 
-#### To Run:
-
 In the package folder, we provides examples with explicit configurations for each algorithm. 
 
 ```python
@@ -276,15 +272,15 @@ python algorithms/<ALGORITHM_NAME>/run_<ALGORITHM_NAME>.py
 python algorithms/ac/run_ac.py
 ```
 
-## Troubleshooting:
+## Troubleshooting
 
 * If you meet the error *'AttributeError: module 'tensorflow' has no attribute 'contrib''* when running the code after installing tensorflow-probability, try:
   `pip install --upgrade tf-nightly-2.0-preview tfp-nightly`
 * When trying to use RLBench environments, *'No module named rlbench'* can be caused by no RLBench package installed at your local or a mistake in the python path. You should add `export PYTHONPATH=/home/quantumiracle/research/vrep/PyRep/RLBench` every time you try to run the learning script with RLBench environment or add it to you `~/.bashrc` file once for all.
 * If you meet the error that the Qt platform is not loaded correctly when using DeepMind Control Suite environments, it's probably caused by your Ubuntu system not being version 14.04 or 16.04. Check [here](https://github.com/deepmind/dm_control).
 
-## Credits:
-Our contributors include:
+## Credits
+Our core contributors include:
 
 [Zihan Ding](https://github.com/quantumiracle?tab=repositories),
 [Tianyang Yu](https://github.com/Tokarev-TT-33),
@@ -292,7 +288,7 @@ Our contributors include:
 [Hongming Zhang](https://github.com/initial-h),
 [Hao Dong](https://github.com/zsdonghao)
 
-## Citing:
+## Citing
 
 ```
 @misc{RLzoo,
@@ -304,6 +300,16 @@ Our contributors include:
   howpublished = {\url{https://github.com/tensorlayer/RLzoo}},
 }
 ```
+
+## Other Resources
+<br/>
+<a href="https://deepreinforcementlearningbook.org" target="\_blank">
+	<div align="center">
+		<img src="http://deep-reinforcement-learning-book.github.io/assets/images/cover_v1.png" width="20%"/>
+	</div>
+<!-- 	<div align="center"><caption>Slack Invitation Link</caption></div> -->
+</a>
+<br/>
 
 <br/>
 <a href="https://deepreinforcementlearningbook.org" target="\_blank">
