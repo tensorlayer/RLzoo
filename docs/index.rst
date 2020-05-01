@@ -69,9 +69,11 @@ Other Resources
     
 .. image:: http://deep-reinforcement-learning-book.github.io/assets/images/cover_v1.png
   :width: 30 %
+  :align: center
   :target: https://deepreinforcementlearningbook.org
 .. image:: http://download.broadview.com.cn/ScreenShow/180371146440fada4ad2
   :width: 30 %
+  :align: center
   :target: http://www.broadview.com.cn/book/5059
 
 .. image:: img/logo.png
