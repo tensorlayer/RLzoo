@@ -6,8 +6,6 @@
 Reinforcement Learning Zoo for Simple Usage
 ============================================
 
-
-
 .. image:: img/logo.png
   :width: 50 %
   :align: center
