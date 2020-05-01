@@ -29,7 +29,11 @@ Open ``./run_rlzoo.py``:
 
 Run the example:
 
+<<<<<<< HEAD
 .. code-block:: python
+=======
+.. code-block:: bash
+>>>>>>> 9a1810d76a2ce9202797b376d0ee919296330cc8
    :linenos:
 
    python run_rlzoo.py
