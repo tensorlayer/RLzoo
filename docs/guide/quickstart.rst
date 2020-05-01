@@ -3,7 +3,7 @@ Quick Start
 
 Open ``./run_rlzoo.py``:
 
-.. code-block:: html
+.. code-block:: python
    :linenos:
 
     from rlzoo.common.env_wrappers import build_env
@@ -29,7 +29,7 @@ Open ``./run_rlzoo.py``:
 
 Run the example:
 
-.. code-block:: html
+.. code-block:: python
    :linenos:
 
    python run_rlzoo.py
