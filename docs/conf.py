@@ -33,8 +33,11 @@ release = '0.0.1'
 extensions = ['recommonmark'
 ]
 
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
+source_suffix = ['.rst', '.md']
+master_doc = 'index'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.

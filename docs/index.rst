@@ -15,6 +15,9 @@ Welcome to RLzoo's documentation!
 Indices and tables
 ==================
 
+User Guide
+==================
+
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
