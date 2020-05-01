@@ -1,4 +1,4 @@
-RL Tutorial
+DRL Tutorial
 =================================
 
 
