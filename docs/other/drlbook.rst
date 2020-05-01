@@ -32,3 +32,11 @@ Authors
 - Tianyang Yu - Nanchang University
 - Huaqing Zhang - Google
 - Ruitong Huang - Borealis AI
+
+
+.. image:: https://deep-generative-models.github.io/files/web/water-bottom-min.png
+  :width: 100 %
+  :align: center
+  :target: https://github.com/tensorlayer/tensorlayer/edit/master/examples/reinforcement_learning
+  
+  
