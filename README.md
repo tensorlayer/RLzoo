@@ -15,7 +15,7 @@
 RLzoo is a collection of the most practical reinforcement learning algorithms, frameworks and applications. It is implemented with Tensorflow 2.0 and API of neural network layers in TensorLayer 2, to provide a hands-on fast-developing approach for reinforcement learning practices and benchmarks. It supports basic toy-tests like [OpenAI Gym](https://gym.openai.com/) and [DeepMind Control Suite](https://github.com/deepmind/dm_control) with very simple configurations. Moreover, RLzoo supports robot learning benchmark environment [RLBench](https://github.com/stepjam/RLBench) based on  [Vrep](http://www.coppeliarobotics.com/)/[Pyrep](https://github.com/stepjam/PyRep) simulator. Other large-scale distributed training framework for more realistic scenarios with [Unity 3D](https://github.com/Unity-Technologies/ml-agents), 
 [Mujoco](http://www.mujoco.org/), [Bullet Physics](https://github.com/bulletphysics/bullet3), etc, will be supported in the future. A [Springer textbook](https://deepreinforcementlearningbook.org) is also provided, you can get the free PDF if your institute has Springer license.
 
-Different from RLzoo for simple usage with **high-level APIs**, we also have a RL tutorial that aims to make the reinforcement learning tutorial simple, transparent and straight-forward with **low-level APIs**, as this would not only benefits new learners of reinforcement learning, but also provide convenience for senior researchers to testify their new ideas quickly.
+Different from RLzoo for simple usage with **high-level APIs**, we also have a [RL tutorial](https://github.com/tensorlayer/tensorlayer/tree/master/examples/reinforcement_learning) that aims to make the reinforcement learning tutorial simple, transparent and straight-forward with **low-level APIs**, as this would not only benefits new learners of reinforcement learning, but also provide convenience for senior researchers to testify their new ideas quickly.
 
 <!-- <em>Gym: Atari</em>    <em>Gym: Box2D </em>   <em>Gym: Classic Control </em>  <em>Gym: MuJoCo </em>-->
 
@@ -43,7 +43,6 @@ We aim to make it easy to configure for all components within RL, including repl
 - [Credits](#credits)
 - [Citing](#citing)
 
-Please note that this repository using RL algorithms with **high-level API**. So if you want to get familiar with each algorithm more quickly, please look at our **[RL tutorials](https://github.com/tensorlayer/tensorlayer/tree/master/examples/reinforcement_learning)** where each algorithm is implemented individually in a more straightforward manner.
 
 ## Status: Release
 We are currently open to any suggestions or pull requests from the community to make RLzoo a better repository. Given the scope of this project, we expect there could be some issues over
