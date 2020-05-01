@@ -1,5 +1,5 @@
-Deep Reinforcement Learning Book
-=================================
+DRL Book
+==========
 
 .. image:: http://deep-reinforcement-learning-book.github.io/assets/images/cover_v1.png
   :width: 30 %
