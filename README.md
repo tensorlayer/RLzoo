@@ -305,3 +305,11 @@ Our contributors include:
 }
 ```
 
+<br/>
+<a href="https://deepreinforcementlearningbook.org" target="\_blank">
+	<div align="center">
+		<img src="docs/img/logo.png" width="80%"/>
+	</div>
+<!-- 	<div align="center"><caption>Slack Invitation Link</caption></div> -->
+</a>
+<br/>
