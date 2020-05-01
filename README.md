@@ -151,7 +151,7 @@ Choose whatever environments with whatever RL algorithms supported in RLzoo, and
 ```python
 # in the root folder of rlzoo package
 git clone https://github.com/tensorlayer/RLzoo.git
-cd rlzoo
+cd RLzoo
 python run_rlzoo.py
 ```
 The main script `run_rlzoo.py` follows (almost) the same structure for all algorithms on all environments, see the [**full list of examples**](./examples.md).
