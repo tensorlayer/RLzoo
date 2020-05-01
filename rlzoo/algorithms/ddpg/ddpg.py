@@ -4,19 +4,16 @@ Deep Deterministic Policy Gradient (DDPG)
 An algorithm concurrently learns a Q-function and a policy.
 It uses off-policy data and the Bellman equation to learn the Q-function,
 and uses the Q-function to learn the policy.
-
 Reference
 ---------
 Deterministic Policy Gradient Algorithms, Silver et al. 2014
 Continuous Control With Deep Reinforcement Learning, Lillicrap et al. 2016
 MorvanZhou's tutorial page: https://morvanzhou.github.io/tutorials/
-
 Prerequisites
 -------------
 tensorflow >=2.0.0a0
 tensorflow-probability 0.6.0
 tensorlayer >=2.0.0
-
 """
 
 import time
@@ -78,6 +75,7 @@ class DDPG(object):
     def ema_update(self):
         """
         Soft updating by exponential smoothing
+        
         :return: None
         """
         paras = self.actor.trainable_weights + self.critic.trainable_weights
@@ -93,7 +91,9 @@ class DDPG(object):
     def get_action(self, s, noise_scale):
         """
         Choose action with exploration
+
         :param s: state
+
         :return: action
         """
         a = self.actor([s])[0].numpy()*self.action_range
@@ -108,7 +108,9 @@ class DDPG(object):
     def get_action_greedy(self, s):
         """
         Choose action
+
         :param s: state
+
         :return: action
         """
         return self.actor([s])[0].numpy()*self.action_range
@@ -116,8 +118,10 @@ class DDPG(object):
     def update(self, batch_size, gamma):
         """
         Update parameters
+
         :param batch_size: update batch size
         :param gamma: reward decay factor
+
         :return:
         """
         bs, ba, br, bs_, bd = self.buffer.sample(batch_size)
@@ -143,10 +147,12 @@ class DDPG(object):
     def store_transition(self, s, a, r, s_, d):
         """
         Store data in data buffer
+
         :param s: state
         :param a: act
         :param r: reward
         :param s_: next state
+
         :return: None
         """
         d = 1 if d else 0
@@ -156,6 +162,7 @@ class DDPG(object):
     def save_ckpt(self, env_name):
         """
         save trained weights
+
         :return: None
         """
         save_model(self.actor, 'model_policy_net', self.name, env_name)
@@ -166,6 +173,7 @@ class DDPG(object):
     def load_ckpt(self, env_name):
         """
         load trained weights
+
         :return: None
         """
         load_model(self.actor, 'model_policy_net', self.name, env_name)
@@ -177,6 +185,7 @@ class DDPG(object):
               mode='train', render=False, batch_size=32, gamma=0.9, noise_scale=1., noise_scale_decay=0.995):
         """
         learn function
+
         :param env: learning environment
         :param train_episodes: total number of episodes for training
         :param test_episodes: total number of episodes for testing
@@ -189,6 +198,7 @@ class DDPG(object):
         :param gamma: reward decay factor
         :param noise_scale: range of action noise for exploration
         :param noise_scale_decay: noise scale decay factor
+
         :return: None
         """
 

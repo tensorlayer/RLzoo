@@ -198,7 +198,7 @@ class A3C():
         '''
         parameters
         ----------
-        entropy_beta: factor for entropy boosted exploration
+        :param entropy_beta: factor for entropy boosted exploration
         '''
         self.net_list = net_list
         self.optimizers_list = optimizers_list
@@ -212,16 +212,16 @@ class A3C():
         '''
         parameters
         -----------
-        env: a list of same learning environments
-        train_episodes:  total number of episodes for training
-        test_episodes:  total number of episodes for testing
-        max_steps:  maximum number of steps for one episode
-        render: render or not
-        n_workers: manually set number of workers
-        update_itr: update global policy after several episodes
-        gamma: reward discount factor
-        save_interval: timesteps for saving the weights and plotting the results
-        mode: train or test
+        :param env: a list of same learning environments
+        :param train_episodes:  total number of episodes for training
+        :param test_episodes:  total number of episodes for testing
+        :param max_steps:  maximum number of steps for one episode
+        :param render: render or not
+        :param n_workers: manually set number of workers
+        :param update_itr: update global policy after several episodes
+        :param gamma: reward discount factor
+        :param save_interval: timesteps for saving the weights and plotting the results
+        :param mode: train or test
 
         '''
         global COORD, GLOBAL_RUNNING_R, GLOBAL_EP, OPT_A, OPT_C, t0, SAVE_INTERVAL

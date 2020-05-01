@@ -70,10 +70,12 @@ class DPPO_CLIP(object):
     def a_train(self, tfs, tfa, tfadv, oldpi_prob):
         """
         Update policy network
+
         :param tfs: state
         :param tfa: act
         :param tfadv: advantage
         :param oldpi_prob: old pi probability of a in s
+
         :return:
         """
         tfs = np.array(tfs, np.float32)
@@ -94,8 +96,10 @@ class DPPO_CLIP(object):
     def c_train(self, tfdc_r, s):
         """
         Update actor network
+
         :param tfdc_r: cumulative reward
         :param s: state
+
         :return: None
         """
         tfdc_r = np.array(tfdc_r, dtype=np.float32)
@@ -109,8 +113,10 @@ class DPPO_CLIP(object):
     def cal_adv(self, tfs, tfdc_r):
         """
         Calculate advantage
+
         :param tfs: state
         :param tfdc_r: cumulative reward
+
         :return: advantage
         """
         tfdc_r = np.array(tfdc_r, dtype=np.float32)
@@ -120,11 +126,12 @@ class DPPO_CLIP(object):
     def update(self, a_update_steps, c_update_steps, save_interval, env):
         """
         Update
+
         :param a_update_steps: actor update steps
         :param c_update_steps: critic update steps
         :param save_interval: save interval
         :param env: environment
-        :return: None
+
         :return: None
         """
         global GLOBAL_UPDATE_COUNTER
@@ -163,7 +170,9 @@ class DPPO_CLIP(object):
     def get_action(self, s):
         """
         Choose action
+
         :param s: state
+
         :return: clipped act
         """
         return self.actor([s])[0].numpy()
@@ -171,7 +180,9 @@ class DPPO_CLIP(object):
     def get_action_greedy(self, s):
         """
         Choose action
+
         :param s: state
+
         :return: clipped act
         """
         return self.actor([s], greedy=True)[0].numpy()
@@ -179,7 +190,9 @@ class DPPO_CLIP(object):
     def get_v(self, s):
         """
         Compute value
+
         :param s: state
+
         :return: value
         """
         s = s.astype(np.float32)
@@ -189,6 +202,7 @@ class DPPO_CLIP(object):
     def save_ckpt(self, env_name):
         """
         save trained weights
+
         :return: None
         """
         save_model(self.actor, 'actor', self.name, env_name)
@@ -197,6 +211,7 @@ class DPPO_CLIP(object):
     def load_ckpt(self, env_name):
         """
         load trained weights
+
         :return: None
         """
         load_model(self.actor, 'actor', self.name, env_name)
@@ -206,6 +221,7 @@ class DPPO_CLIP(object):
               mode='train', render=False, batch_size=32, a_update_steps=10, c_update_steps=10, n_workers=4):
         """
         learn function
+
         :param env: learning environment
         :param train_episodes: total number of episodes for training
         :param test_episodes: total number of episodes for testing
@@ -218,6 +234,7 @@ class DPPO_CLIP(object):
         :param a_update_steps: actor update iteration steps
         :param c_update_steps: critic update iteration steps
         :param n_workers: number of workers
+
         :return: None
         """
         t0 = time.time()
@@ -296,6 +313,7 @@ class Worker(object):
     def work(self):
         """
         Define a worker
+        
         :return: None
         """
         t0 = time.time()
@@ -354,3 +372,4 @@ class Worker(object):
                     time.time() - t0
                 )
             )
+

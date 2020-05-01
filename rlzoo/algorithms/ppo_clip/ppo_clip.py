@@ -64,11 +64,13 @@ class PPO_CLIP(object):
     def a_train(self, tfs, tfa, tfadv, oldpi_prob):
         """
         Update policy network
+
         :param tfs: state
         :param tfa: act
         :param tfadv: advantage
-        :param oldpi_prob:
-        :return:
+        :param oldpi_prob: old policy distribution
+
+        :return: None
         """
         tfs = np.array(tfs, np.float32)
         tfa = np.array(tfa, np.float32)
@@ -88,8 +90,10 @@ class PPO_CLIP(object):
     def c_train(self, tfdc_r, s):
         """
         Update actor network
+
         :param tfdc_r: cumulative reward
         :param s: state
+
         :return: None
         """
         tfdc_r = np.array(tfdc_r, dtype=np.float32)
@@ -103,8 +107,10 @@ class PPO_CLIP(object):
     def cal_adv(self, tfs, tfdc_r):
         """
         Calculate advantage
+
         :param tfs: state
         :param tfdc_r: cumulative reward
+
         :return: advantage
         """
         tfdc_r = np.array(tfdc_r, dtype=np.float32)
@@ -114,9 +120,11 @@ class PPO_CLIP(object):
     def update(self, s, a, r, a_update_steps, c_update_steps):
         """
         Update parameter with the constraint of KL divergent
+
         :param s: state
         :param a: act
         :param r: reward
+
         :return: None
         """
         adv = self.cal_adv(s, r)
@@ -137,7 +145,9 @@ class PPO_CLIP(object):
     def get_action(self, s):
         """
         Choose action
+
         :param s: state
+
         :return: clipped act
         """
         return self.actor([s])[0].numpy()
@@ -153,7 +163,9 @@ class PPO_CLIP(object):
     def get_v(self, s):
         """
         Compute value
+
         :param s: state
+
         :return: value
         """
         s = s.astype(np.float32)
@@ -164,6 +176,7 @@ class PPO_CLIP(object):
     def save_ckpt(self, env_name):
         """
         save trained weights
+
         :return: None
         """
         save_model(self.actor, 'actor', self.name, env_name)
@@ -172,6 +185,7 @@ class PPO_CLIP(object):
     def load_ckpt(self, env_name):
         """
         load trained weights
+
         :return: None
         """
         load_model(self.actor, 'actor', self.name, env_name)
@@ -181,6 +195,7 @@ class PPO_CLIP(object):
               gamma=0.9, mode='train', render=False, batch_size=32, a_update_steps=10, c_update_steps=10):
         """
         learn function
+
         :param env: learning environment
         :param train_episodes: total number of episodes for training
         :param test_episodes: total number of episodes for testing
@@ -192,6 +207,7 @@ class PPO_CLIP(object):
         :param batch_size: udpate batchsize
         :param a_update_steps: actor update iteration steps
         :param c_update_steps: critic update iteration steps
+        
         :return: None
         """
 

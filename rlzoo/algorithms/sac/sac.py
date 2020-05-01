@@ -186,21 +186,19 @@ class SAC():
               update_itr=3, policy_target_update_interval=3, reward_scale=1., save_interval=20, \
               mode='train', AUTO_ENTROPY=True, render=False):
         '''
-        parameters
-        ----------
-        env: learning environment
-        train_episodes:  total number of episodes for training
-        test_episodes:  total number of episodes for testing
-        max_steps:  maximum number of steps for one episode
-        batch_size:  udpate batchsize
-        explore_steps:  for random action sampling in the beginning of training
-        update_itr: repeated updates for single step
-        policy_target_update_interval: delayed update for the policy network and target networks
-        reward_scale: value range of reward
-        save_interval: timesteps for saving the weights and plotting the results
-        mode: 'train' or 'test'
-        AUTO_ENTROPY: automatically updating variable alpha for entropy
-        render: if true, visualize the environment
+        :param env: learning environment
+        :param train_episodes:  total number of episodes for training
+        :param test_episodes:  total number of episodes for testing
+        :param max_steps:  maximum number of steps for one episode
+        :param batch_size:  udpate batchsize
+        :param explore_steps:  for random action sampling in the beginning of training
+        :param update_itr: repeated updates for single step
+        :param policy_target_update_interval: delayed update for the policy network and target networks
+        :param reward_scale: value range of reward
+        :param save_interval: timesteps for saving the weights and plotting the results
+        :param mode: 'train' or 'test'
+        :param AUTO_ENTROPY: automatically updating variable alpha for entropy
+        :param render: if true, visualize the environment
         '''
 
         # training loop

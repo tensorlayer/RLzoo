@@ -56,7 +56,9 @@ class PG:
     def get_action(self, s):
         """
         choose action with probabilities.
+
         :param s: state
+
         :return: act
         """
         return self.model(np.array([s], np.float32))[0].numpy()
@@ -64,7 +66,9 @@ class PG:
     def get_action_greedy(self, s):
         """
         choose action with greedy policy
+
         :param s: state
+
         :return: act
         """
         return self.model(np.array([s], np.float32), greedy=True).numpy()[0]
@@ -72,9 +76,11 @@ class PG:
     def store_transition(self, s, a, r):
         """
         store data in memory buffer
+
         :param s: state
         :param a: act
         :param r: reward
+
         :return:
         """
         self.buffer.append([np.array(s, np.float32), np.array(a, np.float32), np.array(r, np.float32)])
@@ -82,6 +88,7 @@ class PG:
     def update(self, gamma):
         """
         update policy parameters via stochastic gradient ascent
+
         :return: None
         """
         # discount and normalize episode reward
@@ -107,6 +114,7 @@ class PG:
     def _discount_and_norm_rewards(self, reward_list, gamma):
         """
         compute discount_and_norm_rewards
+
         :return: discount_and_norm_rewards
         """
         # discount episode rewards
@@ -125,6 +133,7 @@ class PG:
     def save_ckpt(self, env_name):
         """
         save trained weights
+
         :return: None
         """
         save_model(self.model, 'model_policy', self.name, env_name)
@@ -132,6 +141,7 @@ class PG:
     def load_ckpt(self, env_name):
         """
         load trained weights
+
         :return: None
         """
         load_model(self.model, 'model_policy', self.name, env_name)
@@ -139,8 +149,6 @@ class PG:
     def learn(self, env, train_episodes=200, test_episodes=100, max_steps=200, save_interval=100,
               mode='train', render=False, gamma=0.95):
         """
-        parameters
-        ----------
         :param env: learning environment
         :param train_episodes: total number of episodes for training
         :param test_episodes: total number of episodes for testing
@@ -149,6 +157,7 @@ class PG:
         :param mode: train or test
         :param render: render each step
         :param gamma: reward decay
+        
         :return: None
         """
 

@@ -92,7 +92,8 @@ class TD3():
     def evaluate(self, state, eval_noise_scale, target=False):
         ''' 
         generate action with state for calculating gradients;
-        eval_noise_scale: as the trick of target policy smoothing, for generating noisy actions.
+
+        :param eval_noise_scale: as the trick of target policy smoothing, for generating noisy actions.
         '''
         state = state.astype(np.float32)
         if target:
@@ -215,21 +216,19 @@ class TD3():
               reward_scale=1., save_interval=10, explore_noise_scale=1.0, eval_noise_scale=0.5, mode='train',
               render=False):
         '''
-        parameters
-        ----------
-        env: learning environment
-        train_episodes:  total number of episodes for training
-        test_episodes:  total number of episodes for testing
-        max_steps:  maximum number of steps for one episode
-        batch_size:  udpate batchsize
-        explore_steps:  for random action sampling in the beginning of training
-        update_itr: repeated updates for single step
-        reward_scale: value range of reward
-        save_interval: timesteps for saving the weights and plotting the results
-        explore_noise_scale: range of action noise for exploration
-        eval_noise_scale: range of action noise for evaluation of action value
-        mode: 'train' or 'test'
-        render: if true, visualize the environment
+        :param env: learning environment
+        :param train_episodes:  total number of episodes for training
+        :param test_episodes:  total number of episodes for testing
+        :param max_steps:  maximum number of steps for one episode
+        :param batch_size:  udpate batchsize
+        :param explore_steps:  for random action sampling in the beginning of training
+        :param update_itr: repeated updates for single step
+        :param reward_scale: value range of reward
+        :param save_interval: timesteps for saving the weights and plotting the results
+        :param explore_noise_scale: range of action noise for exploration
+        :param eval_noise_scale: range of action noise for evaluation of action value
+        :param mode: 'train' or 'test'
+        :param render: if true, visualize the environment
 
         '''
 

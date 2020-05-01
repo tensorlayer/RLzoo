@@ -8,14 +8,43 @@ Welcome to RLzoo's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: User Guide
+
+   guide/installation
+   guide/quickstart
+
+.. toctree::
+   :maxdepth: 1
+   :caption: RL Algorithms
+
+   algorithms/dqn
+   algorithms/pg
+   algorithms/ac
+   algorithms/a3c
+   algorithms/ddpg
+   algorithms/td3
+   algorithms/sac
+   algorithms/trpo
+   algorithms/ppo
+   algorithms/dppo
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Common
+
+   common/common
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Other Resources
+
+   other/drlbook
 
 
-
-Indices and tables
+Contributing
 ==================
 
-User Guide
+Citation
 ==================
 
 * :ref:`genindex`

@@ -81,7 +81,9 @@ class TRPO:
     def flat_concat(xs):
         """
         flat concat input
+
         :param xs: a list of tensor
+
         :return: flat tensor
         """
         return tf.concat([tf.reshape(x, (-1,)) for x in xs], axis=0)
@@ -90,8 +92,10 @@ class TRPO:
     def assign_params_from_flat(x, params):
         """
         assign params from flat input
+
         :param x:
         :param params:
+
         :return: group
         """
         flat_size = lambda p: int(np.prod(p.shape.as_list()))  # the 'int' is important for scalars
@@ -102,7 +106,9 @@ class TRPO:
     def get_action(self, s):
         """
         Choose action
+
         :param s: state
+
         :return: clipped act
         """
         return self.actor([s])[0].numpy()
@@ -110,7 +116,9 @@ class TRPO:
     def get_action_greedy(self, s):
         """
         Choose action
+
         :param s: state
+
         :return: clipped act
         """
         return self.actor([s], greedy=True)[0].numpy()
@@ -118,8 +126,10 @@ class TRPO:
     def cal_adv(self, tfs, tfdc_r):
         """
         Calculate advantage
+
         :param tfs: state
         :param tfdc_r: cumulative reward
+
         :return: advantage
         """
         tfdc_r = np.array(tfdc_r, dtype=np.float32)
@@ -129,7 +139,9 @@ class TRPO:
     def get_v(self, s):
         """
         Compute value
+
         :param s: state
+
         :return: value
         """
         s = s.astype(np.float32)
@@ -140,8 +152,10 @@ class TRPO:
     def c_train(self, tfdc_r, s):
         """
         Update actor network
+
         :param tfdc_r: cumulative reward
         :param s: state
+
         :return: None
         """
         tfdc_r = np.array(tfdc_r, dtype=np.float32)
@@ -155,6 +169,7 @@ class TRPO:
     def save_ckpt(self, env_name):
         """
         save trained weights
+
         :return: None
         """
         save_model(self.actor, 'actor', self.name, env_name)
@@ -163,6 +178,7 @@ class TRPO:
     def load_ckpt(self, env_name):
         """
         load trained weights
+
         :return: None
         """
         load_model(self.actor, 'actor', self.name, env_name)
@@ -172,7 +188,9 @@ class TRPO:
     def pi_loss(self, inputs):
         """
         calculate pi loss
+
         :param inputs: a list of x_ph, a_ph, adv_ph, ret_ph, logp_old_ph and other inputs
+
         :return: pi loss
         """
         x_ph, a_ph, adv_ph, ret_ph, logp_old_ph, *info_values = inputs
@@ -186,7 +204,9 @@ class TRPO:
     def gradient(self, inputs):
         """
         pi gradients
+
         :param inputs: a list of x_ph, a_ph, adv_ph, ret_ph, logp_old_ph and other inputs
+
         :return: gradient
         """
         pi_params = self.actor.trainable_weights
@@ -200,6 +220,7 @@ class TRPO:
     def get_pi_params(self):
         """
         get actor trainable parameters
+
         :return: flat actor trainable parameters
         """
         pi_params = self.actor.trainable_weights
@@ -208,7 +229,9 @@ class TRPO:
     def set_pi_params(self, v_ph):
         """
         set actor trainable parameters
+
         :param v_ph: inputs
+
         :return: None
         """
         pi_params = self.actor.trainable_weights
@@ -295,7 +318,8 @@ class TRPO:
     def update(self, bs, ba, br, train_critic_iters, backtrack_iters, backtrack_coeff):
         """
         update trpo
-        :return:
+
+        :return: None
         """
         adv = self.cal_adv(bs, br)
         _ = self.actor(bs)
@@ -315,6 +339,7 @@ class TRPO:
               train_critic_iters=80):
         """
         learn function
+
         :param env: learning environment
         :param train_episodes: total number of episodes for training
         :param test_episodes: total number of episodes for testing
@@ -327,6 +352,7 @@ class TRPO:
         :param backtrack_iters: Maximum number of steps allowed in the backtracking line search
         :param backtrack_coeff: How far back to step during backtracking line search
         :param train_critic_iters: critic update iteration steps
+        
         :return: None
         """
 
