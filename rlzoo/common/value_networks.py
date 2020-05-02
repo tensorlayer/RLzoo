@@ -14,15 +14,12 @@ import numpy as np
 import copy
 
 import tensorflow as tf
-import tensorflow_probability as tfp
+# import tensorflow_probability as tfp
 import tensorlayer as tl
 from tensorlayer.layers import Dense, Input
 from tensorlayer.models import Model
 from rlzoo.common.basic_nets import *
 from gym import spaces
-
-tfd = tfp.distributions
-Normal = tfd.Normal
 
 
 class ValueNetwork(Model):

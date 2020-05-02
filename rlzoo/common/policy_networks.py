@@ -14,16 +14,13 @@ import copy
 import numpy as np
 
 import tensorflow as tf
-import tensorflow_probability as tfp
+# import tensorflow_probability as tfp
 import tensorlayer as tl
 from tensorlayer.layers import Dense, Input
 from tensorlayer.models import Model
 from rlzoo.common.basic_nets import *
 from rlzoo.common.distributions import make_dist
 from gym import spaces
-
-tfd = tfp.distributions
-Normal = tfd.Normal
 
 
 class StochasticContinuousPolicyNetwork(Model):
