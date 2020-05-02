@@ -1,2 +1,0 @@
-Deep Reinforcement Learning Book
-=================================

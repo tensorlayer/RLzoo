@@ -6,8 +6,6 @@
 Reinforcement Learning Zoo for Simple Usage
 ============================================
 
-
-
 .. image:: img/logo.png
   :width: 50 %
   :align: center
@@ -44,11 +42,11 @@ RLzoo is a collection of the most practical reinforcement learning algorithms, f
    common/common
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Other Resources
 
-   other/drlbook
-
+   other/drl_book
+   other/drl_tutorial
 
 Contributing
 ==================
@@ -62,17 +60,6 @@ Citation
 * :ref:`modindex`
 * :ref:`search`
 
-
-Other Resources
-==================
-
-    
-.. image:: http://deep-reinforcement-learning-book.github.io/assets/images/cover_v1.png
-  :width: 30 %
-  :target: https://deepreinforcementlearningbook.org
-.. image:: http://download.broadview.com.cn/ScreenShow/180371146440fada4ad2
-  :width: 30 %
-  :target: http://www.broadview.com.cn/book/5059
 
 .. image:: img/logo.png
   :width: 70 %

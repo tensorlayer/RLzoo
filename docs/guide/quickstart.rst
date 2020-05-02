@@ -30,6 +30,5 @@ Open ``./run_rlzoo.py``:
 Run the example:
 
 .. code-block:: bash
-   :linenos:
 
    python run_rlzoo.py
