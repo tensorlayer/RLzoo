@@ -1,6 +1,39 @@
 DPPO
 ===========================
 
+Example:
+-----------
+
+.. code-block:: python
+   :linenos:
+
+    EnvName = 'PongNoFrameskip-v4'
+    EnvType = 'atari'
+
+    # EnvName = 'Pendulum-v0'
+    # EnvType = 'classic_control'
+
+    # EnvName = 'BipedalWalker-v2'
+    # EnvType = 'box2d'
+
+    # EnvName = 'Ant-v2'
+    # EnvType = 'mujoco'
+
+    # EnvName = 'FetchPush-v1'
+    # EnvType = 'robotics'
+
+    # EnvName = 'FishSwim-v0'
+    # EnvType = 'dm_control'
+
+    # EnvName = 'ReachTarget'
+    # EnvType = 'rlbench'
+
+    number_workers = 2  # need to specify number of parallel workers
+    env = build_env(EnvName, EnvType, nenv=number_workers)
+    alg_params, learn_params = call_default_params(env, EnvType, 'DPPO')
+    alg = DPPO(method='penalty', **alg_params) # specify 'clip' or 'penalty' method for PPO
+    alg.learn(env=env,  mode='train', render=False, **learn_params)
+    alg.learn(env=env,  mode='test', render=True, **learn_params)
 
 Distributed Proximal Policy Optimization (Penalty)
 ----------------------------------------------------
