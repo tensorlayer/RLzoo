@@ -2,8 +2,8 @@ Distributions
 ===========================
 
 
-Distributions
----------------------------------
+Distributions for Stochastic Policy in RLzoo
+----------------------------------------------
 
 .. automodule:: rlzoo.common.distributions
    :members:
