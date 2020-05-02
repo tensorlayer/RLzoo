@@ -57,6 +57,31 @@ extensions = [
     'recommonmark'
 ]
 
+autodoc_mock_imports = [
+    'cv2',
+    'hyperdash',
+    'gridfs',
+    'horovod',
+    'hyperdash',
+    'imageio',
+    'lxml',
+    'matplotlib',
+    'nltk',
+    'numpy',
+    'PIL',
+    'progressbar',
+    'pymongo',
+    'scipy',
+    'skimage',
+    'sklearn',
+    'tensorflow',
+    'tqdm',
+    'h5py',
+
+    # TL C++ Packages
+    'tensorlayer.third_party.roi_pooling.roi_pooling.roi_pooling_ops',
+]
+
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
