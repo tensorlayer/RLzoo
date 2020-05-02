@@ -8,7 +8,7 @@ Open ``./run_rlzoo.py``:
 
     from rlzoo.common.env_wrappers import build_env
     from rlzoo.common.utils import call_default_params
-    from rlzoo.algorithms import *
+    from rlzoo.algorithms import TD3
     # choose an algorithm
     AlgName = 'TD3'
     # chose an environment
@@ -29,11 +29,7 @@ Open ``./run_rlzoo.py``:
 
 Run the example:
 
-<<<<<<< HEAD
-.. code-block:: python
-=======
 .. code-block:: bash
->>>>>>> 9a1810d76a2ce9202797b376d0ee919296330cc8
    :linenos:
 
    python run_rlzoo.py
