@@ -11,7 +11,6 @@
 <!-- 	<div align="center"><caption>Slack Invitation Link</caption></div> -->
 </a>
 <br/>
-**Read the document [here](https://rlzoo.readthedocs.io/en/latest/)**.
 
 RLzoo is a collection of the most practical reinforcement learning algorithms, frameworks and applications. It is implemented with Tensorflow 2.0 and API of neural network layers in TensorLayer 2, to provide a hands-on fast-developing approach for reinforcement learning practices and benchmarks. It supports basic toy-tests like [OpenAI Gym](https://gym.openai.com/) and [DeepMind Control Suite](https://github.com/deepmind/dm_control) with very simple configurations. Moreover, RLzoo supports robot learning benchmark environment [RLBench](https://github.com/stepjam/RLBench) based on  [Vrep](http://www.coppeliarobotics.com/)/[Pyrep](https://github.com/stepjam/PyRep) simulator. Other large-scale distributed training framework for more realistic scenarios with [Unity 3D](https://github.com/Unity-Technologies/ml-agents), 
 [Mujoco](http://www.mujoco.org/), [Bullet Physics](https://github.com/bulletphysics/bullet3), etc, will be supported in the future. A [Springer textbook](https://deepreinforcementlearningbook.org) is also provided, you can get the free PDF if your institute has Springer license.
@@ -29,6 +28,8 @@ Different from RLzoo for simple usage with **high-level APIs**, we also have a [
 
 
 We aim to make it easy to configure for all components within RL, including replacing the networks, optimizers, etc. We also  provide automatically adaptive policies and value functions in the common functions: for the observation space, the vector state or the raw-pixel (image) state are supported automatically according to the shape of the space; for the action space, the discrete action or continuous action are supported automatically according to the shape of the space as well. The deterministic or stochastic property of policy needs to be chosen according to each algorithm. Some environments with raw-pixel based observation (e.g. Atari, RLBench) may be hard to train, be patient and play around with the hyperparameters!
+
+**Read the** [**document**](https://rlzoo.readthedocs.io/en/latest/) **for detailed usage.**
 
 **Table of contents:**
 
