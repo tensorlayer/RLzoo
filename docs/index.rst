@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Reinforcement Learning Zoo for Simple Usage
+Welcome to Reinforcement Learning Zoo! 
 ============================================
 
 .. image:: img/logo.png
@@ -60,7 +60,7 @@ RLzoo is a collection of the most practical reinforcement learning algorithms, f
 Contributing
 ==================
 
-This project is under active development, if you want to join the core team, feel free to contact Zihan Ding at ....
+This project is under active development, if you want to join the core team, feel free to contact Zihan Ding at zhding[at]mail.ustc.edu.cn
 
 Citation
 ==================
