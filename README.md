@@ -29,6 +29,8 @@ Different from RLzoo for simple usage with **high-level APIs**, we also have a [
 
 We aim to make it easy to configure for all components within RL, including replacing the networks, optimizers, etc. We also  provide automatically adaptive policies and value functions in the common functions: for the observation space, the vector state or the raw-pixel (image) state are supported automatically according to the shape of the space; for the action space, the discrete action or continuous action are supported automatically according to the shape of the space as well. The deterministic or stochastic property of policy needs to be chosen according to each algorithm. Some environments with raw-pixel based observation (e.g. Atari, RLBench) may be hard to train, be patient and play around with the hyperparameters!
 
+**Read the** [**document**](https://rlzoo.readthedocs.io/en/latest/) **for detailed usage.**
+
 **Table of contents:**
 
 - [Status](#status)
