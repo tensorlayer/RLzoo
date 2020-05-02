@@ -7,5 +7,6 @@ tensorflow-probability==0.8.0
 tensorlayer==2.1.0
 gym==0.12.5
 hyperdash
+nltk
 
 
