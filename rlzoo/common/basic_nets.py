@@ -10,11 +10,11 @@ def MLP(input_dim, hidden_dim_list, w_init=tf.initializers.Orthogonal(0.2),
         activation=tf.nn.relu, *args, **kwargs):
     """Multiple fully-connected layers for approximation
 
-    Args:
-        input_dim (int): size of input tensor
-        hidden_dim_list (list[int]): a list of dimensions of hidden layers
-        w_init (callable): initialization method for weights
-        activation (callable): activation function of hidden layers
+    :param input_dim: (int) size of input tensor
+    :param hidden_dim_list: (list[int]) a list of dimensions of hidden layers
+    :param w_init: (callable) initialization method for weights
+    :param activation: (callable) activation function of hidden layers
+
     Return:
         input tensor, output tensor
     """
@@ -31,11 +31,11 @@ def MLPModel(input_dim, hidden_dim_list, w_init=tf.initializers.Orthogonal(0.2),
              activation=tf.nn.relu, *args, **kwargs):
     """Multiple fully-connected layers for approximation
 
-    Args:
-        input_dim (int): size of input tensor
-        hidden_dim_list (list[int]): a list of dimensions of hidden layers
-        w_init (callable): initialization method for weights
-        activation (callable): activation function of hidden layers
+    :param input_dim: (int) size of input tensor
+    :param hidden_dim_list: (list[int]) a list of dimensions of hidden layers
+    :param w_init: (callable) initialization method for weights
+    :param activation: (callable) activation function of hidden layers
+
     Return:
         input tensor, output tensor
     """
@@ -51,9 +51,9 @@ def CNN(input_shape, conv_kwargs=None):
     """Multiple convolutional layers for approximation
     Default setting is equal to architecture used in DQN
 
-    Args:
-        input_shape (tuple[int]): (H, W, C)
-        conv_kwargs (list[param]): list of conv parameters for tl.layers.Conv2d
+    :param input_shape: (tuple[int]) (H, W, C)
+    :param conv_kwargs: (list[param]) list of conv parameters for tl.layers.Conv2d
+
     Return:
         input tensor, output tensor
     """
@@ -90,9 +90,9 @@ def CNNModel(input_shape, conv_kwargs=None):
     """Multiple convolutional layers for approximation
     Default setting is equal to architecture used in DQN
 
-    Args:
-        input_shape (tuple[int]): (H, W, C)
-        conv_kwargs (list[param]): list of conv parameters for tl.layers.Conv2d
+    :param input_shape: (tuple[int]) (H, W, C)
+    :param conv_kwargs: (list[param]) list of conv parameters for tl.layers.Conv2d
+
     Return:
         tl.model.Model
     """

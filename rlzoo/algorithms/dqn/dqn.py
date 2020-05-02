@@ -13,8 +13,10 @@ from rlzoo.common.buffer import ReplayBuffer, PrioritizedReplayBuffer
 class DQN(object):
     """
     Papers:
+
     Mnih V, Kavukcuoglu K, Silver D, et al. Human-level control through deep
     reinforcement learning[J]. Nature, 2015, 518(7540): 529.
+
     Hessel M, Modayil J, Van Hasselt H, et al. Rainbow: Combining Improvements
     in Deep Reinforcement Learning[J]. 2017.
     """
@@ -62,22 +64,19 @@ class DQN(object):
             prioritized_replay, prioritized_alpha, prioritized_beta0,
             mode, checkpoint_path=None, save_path=None):
         """
-        :param double_q (bool): if True double DQN will be used
-        :param dueling (bool): if True dueling value estimation will be used
-        :param exploration_rate (float): fraction of entire training period over
-            which the exploration rate is annealed
-        :param exploration_final_eps (float): final value of random action probability
-        :param batch_size (int): size of a batched sampled from replay buffer for training
-        :param train_freq (int): update the model every `train_freq` steps
-        :param learning_starts (int): how many steps of the model to collect transitions
-                               for before learning starts
-        :param target_network_update_freq (int): update the target network every
-                                          `target_network_update_freq` steps
-        :param buffer_size (int): size of the replay buffer
-        :param prioritized_replay (bool): if True prioritized replay buffer will be used.
-        :param prioritized_alpha (float): alpha parameter for prioritized replay
-        :param prioritized_beta0 (float): beta parameter for prioritized replay
-        :param mode (str): train or test
+        :param double_q: (bool) if True double DQN will be used
+        :param dueling: (bool) if True dueling value estimation will be used
+        :param exploration_rate: (float) fraction of entire training period over which the exploration rate is annealed
+        :param exploration_final_eps: (float) final value of random action probability
+        :param batch_size: (int) size of a batched sampled from replay buffer for training
+        :param train_freq: (int): update the model every `train_freq` steps
+        :param learning_starts: (int) how many steps of the model to collect transitions for before learning starts
+        :param target_network_update_freq: (int) update the target network every`target_network_update_freq` steps
+        :param buffer_size: (int) size of the replay buffer
+        :param prioritized_replay: (bool) if True prioritized replay buffer will be used.
+        :param prioritized_alpha: (float) alpha parameter for prioritized replay
+        :param prioritized_beta0: (float) beta parameter for prioritized replay
+        :param mode: (str) train or test
         """
         if mode == 'train':
             print('Training...  | Algorithm: {}  | Environment: {}'.format(self.name, env.spec.id))

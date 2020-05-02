@@ -25,15 +25,15 @@ from gym import spaces
 class ValueNetwork(Model):
     def __init__(self, state_space, hidden_dim_list, w_init=tf.keras.initializers.glorot_normal(),
                  activation=tf.nn.relu, output_activation=None, trainable=True, name=None):
-        """ Value network with multiple fully-connected layers or convolutional layers (according to state shape)
+        """ 
+        Value network with multiple fully-connected layers or convolutional layers (according to state shape)
         
-        Args:
-            state_space (gym.spaces): space of the state from gym environments
-            hidden_dim_list (list[int]): a list of dimensions of hidden layers
-            w_init (callable): weights initialization
-            activation (callable): activation function
-            output_activation (callable or None): output activation function
-            trainable (bool): set training and evaluation mode
+        :param state_space: (gym.spaces) space of the state from gym environments
+        :param hidden_dim_list: (list[int]) a list of dimensions of hidden layers
+        :param w_init: (callable) weights initialization
+        :param activation: (callable) activation function
+        :param output_activation: (callable or None) output activation function
+        :param trainable: (bool) set training and evaluation mode
         """
         self._state_space = state_space
 
@@ -75,18 +75,18 @@ class MlpQNetwork(Model):
     def __init__(self, state_shape, action_shape, hidden_dim_list, \
                  w_init=tf.keras.initializers.glorot_normal(), activation=tf.nn.relu, output_activation=None,
                  trainable=True):
-        """ Q-value network with multiple fully-connected layers 
+        """ 
+        Q-value network with multiple fully-connected layers 
 
         Inputs: (state tensor, action tensor)
 
-        Args:
-            state_shape (tuple[int]): shape of the state, for example, (state_dim, ) for single-dimensional state
-            action_shape (tuple[int]): shape of the action, for example, (action_dim, ) for single-dimensional action
-            hidden_dim_list (list[int]): a list of dimensions of hidden layers
-            w_init (callable): weights initialization
-            activation (callable): activation function
-            output_activation (callable or None): output activation function
-            trainable (bool): set training and evaluation mode
+        :param state_shape: (tuple[int]) shape of the state, for example, (state_dim, ) for single-dimensional state
+        :param action_shape: (tuple[int]) shape of the action, for example, (action_dim, ) for single-dimensional action
+        :param hidden_dim_list: (list[int]) a list of dimensions of hidden layers
+        :param w_init: (callable) weights initialization
+        :param activation: (callable) activation function
+        :param output_activation: (callable or None) output activation function
+        :param trainable: (bool) set training and evaluation mode
         """
 
         input_shape = tuple(map(sum, zip(action_shape, state_shape)))
@@ -110,16 +110,16 @@ class QNetwork(Model):
     def __init__(self, state_space, action_space, hidden_dim_list,
                  w_init=tf.keras.initializers.glorot_normal(), activation=tf.nn.relu, output_activation=None,
                  trainable=True, name=None):
-        """ Q-value network with multiple fully-connected layers or convolutional layers (according to state shape)
+        """ 
+        Q-value network with multiple fully-connected layers or convolutional layers (according to state shape)
 
-        Args:
-            state_space (gym.spaces): space of the state from gym environments
-            action_space (gym.spaces): space of the action from gym environments
-            hidden_dim_list (list[int]): a list of dimensions of hidden layers
-            w_init (callable): weights initialization
-            activation (callable): activation function
-            output_activation (callable or None): output activation function
-            trainable (bool): set training and evaluation mode
+        :param state_space: (gym.spaces) space of the state from gym environments
+        :param action_space: (gym.spaces) space of the action from gym environments
+        :param hidden_dim_list: (list[int]) a list of dimensions of hidden layers
+        :param w_init: (callable) weights initialization
+        :param activation: (callable) activation function
+        :param output_activation: (callable or None) output activation function
+        :param trainable: (bool) set training and evaluation mode
         """
         self._state_space, self._action_space = state_space, action_space
 

@@ -26,18 +26,18 @@ from gym import spaces
 class StochasticContinuousPolicyNetwork(Model):
     def __init__(self, state_shape, action_shape, hidden_dim_list, w_init=tf.keras.initializers.glorot_normal(), \
                  activation=tf.nn.relu, output_activation=None, log_std_min=-20, log_std_max=2, trainable=True):
-        """ Stochastic continuous policy network with multiple fully-connected layers or convolutional layers (according to state shape)
+        """ 
+        Stochastic continuous policy network with multiple fully-connected layers or convolutional layers (according to state shape)
 
-        Args:
-            state_shape (tuple[int]): shape of the state, for example, (state_dim, ) for single-dimensional state
-            action_shape (tuple[int]): shape of the action, for example, (action_dim, ) for single-dimensional action
-            hidden_dim_list (list[int]): a list of dimensions of hidden layers
-            w_init (callable): weights initialization
-            activation (callable): activation function
-            output_activation (callable or None): output activation function
-            log_std_min (float): lower bound of standard deviation of action
-            log_std_max (float): upper bound of standard deviation of action
-            trainable (bool): set training and evaluation mode
+        :param state_shape: (tuple[int]) shape of the state, for example, (state_dim, ) for single-dimensional state
+        :param action_shape: (tuple[int]) shape of the action, for example, (action_dim, ) for single-dimensional action
+        :param hidden_dim_list: (list[int]) a list of dimensions of hidden layers
+        :param w_init: (callable) weights initialization
+        :param activation: (callable) activation function
+        :param output_activation: (callable or None) output activation function
+        :param log_std_min: (float) lower bound of standard deviation of action
+        :param log_std_max: (float) upper bound of standard deviation of action
+        :param trainable: (bool) set training and evaluation mode
         """
 
         action_dim = action_shape[0]
@@ -65,16 +65,16 @@ class StochasticContinuousPolicyNetwork(Model):
 class DeterministicContinuousPolicyNetwork(Model):
     def __init__(self, state_shape, action_shape, hidden_dim_list, w_init=tf.keras.initializers.glorot_normal(), \
                  activation=tf.nn.relu, output_activation=tf.nn.tanh, trainable=True):
-        """ Deterministic continuous policy network with multiple fully-connected layers or convolutional layers (according to state shape)
+        """ 
+        Deterministic continuous policy network with multiple fully-connected layers or convolutional layers (according to state shape)
         
-        Args:
-            state_shape (tuple[int]): shape of the state, for example, (state_dim, ) for single-dimensional state
-            action_shape (tuple[int]): shape of the action, for example, (action_dim, ) for single-dimensional action
-            hidden_dim_list (list[int]): a list of dimensions of hidden layers
-            w_init (callable): weights initialization
-            activation (callable): activation function
-            output_activation (callable or None): output activation function
-            trainable (bool): set training and evaluation mode
+        :param state_shape: (tuple[int]) shape of the state, for example, (state_dim, ) for single-dimensional state
+        :param action_shape: (tuple[int]) shape of the action, for example, (action_dim, ) for single-dimensional action
+        :param hidden_dim_list: (list[int]) a list of dimensions of hidden layers
+        :param w_init: (callable) weights initialization
+        :param activation: (callable) activation function
+        :param output_activation: (callable or None) output activation function
+        :param trainable: (bool) set training and evaluation mode
         """
 
         action_dim = action_shape[0]
@@ -100,16 +100,16 @@ class DeterministicContinuousPolicyNetwork(Model):
 class DeterministicPolicyNetwork(Model):
     def __init__(self, state_space, action_space, hidden_dim_list, w_init=tf.keras.initializers.glorot_normal(),
                  activation=tf.nn.relu, output_activation=tf.nn.tanh, trainable=True, name=None):
-        """ Deterministic continuous/discrete policy network with multiple fully-connected layers
+        """ 
+        Deterministic continuous/discrete policy network with multiple fully-connected layers
 
-        Args:
-            state_space (gym.spaces): space of the state from gym environments
-            action_space (gym.spaces): space of the action from gym environments
-            hidden_dim_list (list[int]): a list of dimensions of hidden layers
-            w_init (callable): weights initialization
-            activation (callable): activation function
-            output_activation (callable or None): output activation function
-            trainable (bool): set training and evaluation mode
+        :param state_space: (gym.spaces) space of the state from gym environments
+        :param action_space: (gym.spaces) space of the action from gym environments
+        :param hidden_dim_list: (list[int]) a list of dimensions of hidden layers
+        :param w_init: (callable) weights initialization
+        :param activation: (callable) activation function
+        :param output_activation: (callable or None) output activation function
+        :param trainable: (bool) set training and evaluation mode
         """
         self._state_space, self._action_space = state_space, action_space
 
@@ -194,23 +194,21 @@ class StochasticPolicyNetwork(Model):
     def __init__(self, state_space, action_space, hidden_dim_list, w_init=tf.keras.initializers.glorot_normal(),
                  activation=tf.nn.relu, output_activation=tf.nn.tanh, log_std_min=-20, log_std_max=2, trainable=True,
                  name=None, state_conditioned=False):
-        """ Stochastic continuous/discrete policy network with multiple fully-connected layers 
+        """ 
+        Stochastic continuous/discrete policy network with multiple fully-connected layers 
         
-        Args:
-            state_space (gym.spaces): space of the state from gym environments
-            action_space (gym.spaces): space of the action from gym environments
-            hidden_dim_list (list[int]): a list of dimensions of hidden layers
-            w_init (callable): weights initialization
-            activation (callable): activation function
-            output_activation (callable or None): output activation function
-            log_std_min (float): lower bound of standard deviation of action
-            log_std_max (float): upper bound of standard deviation of action
-            trainable (bool): set training and evaluation mode
+        :param state_space: (gym.spaces) space of the state from gym environments
+        :param action_space: (gym.spaces) space of the action from gym environments
+        :param hidden_dim_list: (list[int]) a list of dimensions of hidden layers
+        :param w_init: (callable) weights initialization
+        :param activation: (callable) activation function
+        :param output_activation: (callable or None) output activation function
+        :param log_std_min: (float) lower bound of standard deviation of action
+        :param log_std_max: (float) upper bound of standard deviation of action
+        :param trainable: (bool) set training and evaluation mode
 
-        Tips:
-            We recommend to use tf.nn.tanh for output_activation, especially for continuous action space,
+        Tips: We recommend to use tf.nn.tanh for output_activation, especially for continuous action space, \
             to ensure the final action range is exactly the same as declared in action space after action normalization.
-        
         """
         self._state_space, self._action_space = state_space, action_space
 

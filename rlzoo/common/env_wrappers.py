@@ -1,7 +1,7 @@
 """Env wrappers
 Most common wrappers can be checked from following links for usage: 
-`https://pypi.org/project/gym-vec-env`
-`https://github.com/openai/baselines/blob/master/baselines/common/*wrappers.py`
+* `https://pypi.org/project/gym-vec-env`
+* `https://github.com/openai/baselines/blob/master/baselines/common/*wrappers.py`
 """
 from collections import deque
 from functools import partial
@@ -39,16 +39,17 @@ cv2.ocl.setUseOpenCL(False)
 
 def build_env(env_id, env_type, vectorized=False,
               seed=0, reward_shaping=None, nenv=1, **kwargs):
-    """Build env based on options
-    Args:
-        env_id (str): environment id
-        env_type (str): atari, classic_control, box2d
-        vectorized (bool): whether sampling parrallel
-        seed (int): random seed for env
-        reward_shaping (callable): callable function for reward shaping
-        nenv (int): how many processes will be used in sampling
-        kwargs (dict):
-            max_episode_steps (int): the maximum episode steps
+    """
+    Build env based on options
+
+    :param env_id: (str) environment id
+    :param env_type: (str) atari, classic_control, box2d
+    :param vectorized: (bool) whether sampling parrallel
+    :param seed: (int) random seed for env
+    :param reward_shaping: (callable) callable function for reward shaping
+    :param nenv: (int) how many processes will be used in sampling
+    :param kwargs: (dict)
+    :param max_episode_steps: (int) the maximum episode steps
     """
     nenv = nenv or cpu_count() // (1 + (platform == 'darwin'))
     stack = env_type == 'atari'

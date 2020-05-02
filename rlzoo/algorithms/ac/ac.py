@@ -111,8 +111,6 @@ class AC:
     def learn(self, env, train_episodes=1000, test_episodes=500, max_steps=200,
               save_interval=100, mode='train', render=False):
         """
-        parameters
-        -----------
         :param env: learning environment
         :param train_episodes:  total number of episodes for training
         :param test_episodes:  total number of episodes for testing

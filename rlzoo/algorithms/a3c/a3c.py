@@ -208,8 +208,6 @@ class A3C():
               gamma=0.99, save_interval=500, mode='train'):
 
         '''
-        parameters
-        -----------
         :param env: a list of same learning environments
         :param train_episodes:  total number of episodes for training
         :param test_episodes:  total number of episodes for testing

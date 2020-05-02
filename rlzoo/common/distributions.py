@@ -190,8 +190,8 @@ class DiagGaussian(Distribution):
 
 def make_dist(ac_space):
     """Get distribution based on action space
-    Args:
-        ac_space (gym.spaces.Space)
+
+    :param ac_space: gym.spaces.Space
     """
     if isinstance(ac_space, spaces.Discrete):
         return Categorical(ac_space.n)

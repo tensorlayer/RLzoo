@@ -37,10 +37,18 @@ RLzoo is a collection of the most practical reinforcement learning algorithms, f
    algorithms/dppo
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Common
 
+   common/basicnets
+   common/policynets
+   common/valuenets
+   common/buffer
    common/distributions
+   common/envwrappers
+   common/envlist
+   common/mathutils
+   common/utils
 
 .. toctree::
    :maxdepth: 1
