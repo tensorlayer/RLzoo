@@ -128,7 +128,12 @@ The supported configurations for RL algorithms with corresponding environments i
 
 ## Prerequisites
 
-* python >=3.5 (python 3.6 is needed if using dm_control)
+Ensure that you have **Python >=3.5** (Python 3.6 is needed if using dm_control).
+
+```pip install -r requirements.txt```
+
+List of prerequisites:
+
 * tensorflow >= 2.0.0 or tensorflow-gpu >= 2.0.0a0
 * tensorlayer >= 2.0.1
 * tensorflow-probability

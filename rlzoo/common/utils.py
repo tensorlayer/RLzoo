@@ -22,9 +22,10 @@ import tensorflow as tf
 def plot(episode_rewards, algorithm_name, env_name):
     """
     plot the learning curve, saved as ./img/algorithm_name-env_name.png
-    :episode_rewards: array of floats
-    :algorithm_name: string
-    :env_name: string
+
+    :param episode_rewards: array of floats
+    :param algorithm_name: string
+    :param env_name: string
     """
     path = os.path.join('.', 'img')
     name = algorithm_name + '-' + env_name
@@ -43,9 +44,10 @@ def plot_save_log(episode_rewards, algorithm_name, env_name):
     """
     plot the learning curve, saved as ./img/algorithm_name-env_name.png,
     and save the rewards log as ./log/algorithm_name-env_name.npy
-    :episode_rewards: array of floats
-    :algorithm_name: string
-    :env_name: string
+
+    :param episode_rewards: array of floats
+    :param algorithm_name: string
+    :param env_name: string
     """
     path = os.path.join('.', 'log')
     name = algorithm_name + '-' + env_name
@@ -58,9 +60,10 @@ def plot_save_log(episode_rewards, algorithm_name, env_name):
 def save_model(model, model_name, algorithm_name, env_name):
     """
     save trained neural network model
-    :model: tensorlayer.models.Model
-    :model_name: string, e.g. 'model_sac_q1'
-    :algorithm_name: string, e.g. 'SAC'
+
+    :param model: tensorlayer.models.Model
+    :param model_name: string, e.g. 'model_sac_q1'
+    :param algorithm_name: string, e.g. 'SAC'
     """
     name = algorithm_name + '-' + env_name
     path = os.path.join('.', 'model', name)
@@ -72,9 +75,10 @@ def save_model(model, model_name, algorithm_name, env_name):
 def load_model(model, model_name, algorithm_name, env_name):
     """
     load saved neural network model
-    :model: tensorlayer.models.Model
-    :model_name: string, e.g. 'model_sac_q1'
-    :algorithm_name: string, e.g. 'SAC'
+
+    :param model: tensorlayer.models.Model
+    :param model_name: string, e.g. 'model_sac_q1'
+    :param algorithm_name: string, e.g. 'SAC'
     """
     name = algorithm_name + '-' + env_name
     path = os.path.join('.', 'model', name)

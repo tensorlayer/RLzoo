@@ -9,4 +9,5 @@ Replay Buffer in RLzoo
    :members:
    :undoc-members:
    :show-inheritance:
+   :special-members:
 

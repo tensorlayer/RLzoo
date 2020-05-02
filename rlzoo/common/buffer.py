@@ -54,11 +54,12 @@ import tensorlayer as tl
 class ReplayBuffer(object):
     '''
     a ring buffer for storing transitions and sampling for training
-    :state: (state_dim,)
-    :action: (action_dim,)
-    :reward: (,), scalar
-    :next_state: (state_dim,)
-    :done: (,), scalar (0 and 1) or bool (True and False)
+
+    :param state: (state_dim,)
+    :param action: (action_dim,)
+    :param reward: (,), scalar
+    :param next_state: (state_dim,)
+    :param done: (,), scalar (0 and 1) or bool (True and False)
     '''
 
     def __init__(self, capacity):
@@ -114,15 +115,13 @@ class SegmentTree(object):
                `reduce` operation which reduces `operation` over
                a contiguous subsequence of items in the array.
 
-        Paramters
-        ---------
-        capacity: int
+        :param apacity: (int)
             Total size of the array - must be a power of two.
-        operation: lambda obj, obj -> obj
+        :param operation: (lambda obj, obj -> obj)
             and operation for combining elements (eg. sum, max)
             must form a mathematical group together with the set of
             possible values for array elements (i.e. be associative)
-        neutral_element: obj
+        :param neutral_element: (obj)
             neutral element for the operation above. eg. float('-inf')
             for max and 0 for sum.
         """
@@ -151,17 +150,11 @@ class SegmentTree(object):
         """Returns result of applying `self.operation`
         to a contiguous subsequence of the array.
 
-        Parameters
-        ----------
-        start: int
-            beginning of the subsequence
-        end: int
-            end of the subsequences
+        :param start: (int) beginning of the subsequence
+        :param end: (int) end of the subsequences
 
-        Returns
-        -------
-        reduced: obj
-            result of reducing self.operation over the specified range of array.
+        Returns:
+            reduced: (obj) result of reducing self.operation over the specified range of array.
         """
         if end is None:
             end = self._capacity
@@ -201,15 +194,12 @@ class SumSegmentTree(SegmentTree):
         allows to sample indexes according to the discrete
         probability efficiently.
 
-        Parameters
-        ----------
-        perfixsum: float
+        :param perfixsum: (float)
             upperbound on the sum of array prefix
 
-        Returns
-        -------
-        idx: int
-            highest index satisfying the prefixsum constraint
+        Returns:
+            idx: (int)
+                highest index satisfying the prefixsum constraint
         """
         assert 0 <= prefixsum <= self.sum() + 1e-5
         idx = 1
@@ -237,18 +227,15 @@ class PrioritizedReplayBuffer(ReplayBuffer):  # is it succeed from the ReplayBuf
     def __init__(self, capacity, alpha, beta):
         """Create Prioritized Replay buffer.
 
-        Parameters
-        ----------
-        capacity: int
+        :param capacity: (int)
             Max number of transitions to store in the buffer. When the buffer
             overflows the old memories are dropped.
-        alpha: float
+        :param alpha: (float)
             how much prioritization is used
             (0 - no prioritization, 1 - full prioritization)
 
-        See Also
-        --------
-        ReplayBuffer.__init__
+        See Also:
+            ReplayBuffer.__init__
         """
         super(PrioritizedReplayBuffer, self).__init__(capacity)
         assert alpha >= 0
