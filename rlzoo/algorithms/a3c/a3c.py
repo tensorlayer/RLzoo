@@ -49,15 +49,13 @@ import numpy as np
 
 import gym
 import tensorflow as tf
-import tensorflow_probability as tfp
+# import tensorflow_probability as tfp
 import tensorlayer as tl
 import copy
 from tensorlayer.layers import DenseLayer, InputLayer
 from tensorlayer.models import Model
 from rlzoo.common.utils import *
 from rlzoo.common.buffer import *
-
-tfd = tfp.distributions
 
 
 # tl.logging.set_verbosity(tl.logging.DEBUG)
