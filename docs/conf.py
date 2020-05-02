@@ -12,6 +12,7 @@
 #
 import os
 import sys
+sys.path.insert(0, os.path.abspath(os.path.join("..", "rlzoo")))  # Important
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 sys.path.insert(0, os.path.join(
     os.path.dirname(os.path.dirname(os.path.realpath(__file__))), '/rlzoo'))
@@ -19,6 +20,7 @@ sys.path.insert(0, os.path.relpath("../"))
 sys.path.insert(0, os.path.abspath("../")) 
 sys.path.insert(0, os.path.relpath("../rlzoo")) 
 sys.path.insert(0, os.path.abspath("../rlzoo"))
+print(sys.path)
 
 # from rlzoo.algorithms import *
 import sphinx_rtd_theme
