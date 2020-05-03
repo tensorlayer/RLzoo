@@ -1,7 +1,7 @@
 DPPO
 ===========================
 
-Example:
+Example
 -----------
 
 .. code-block:: python

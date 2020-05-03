@@ -1,7 +1,7 @@
 VPG
 =================================
 
-Example:
+Example
 -----------
 
 .. code-block:: python

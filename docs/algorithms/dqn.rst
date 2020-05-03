@@ -1,7 +1,7 @@
 DQN and Variants
 =================================
 
-Example:
+Example
 ------------
 
 .. code-block:: python

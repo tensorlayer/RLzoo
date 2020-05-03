@@ -1,7 +1,7 @@
 PPO
 ===========================
 
-Example:
+Example
 -----------
 
 .. code-block:: python

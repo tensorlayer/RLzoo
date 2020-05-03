@@ -1,7 +1,7 @@
 SAC
 ===========================
 
-Example:
+Example
 -----------
 
 .. code-block:: python

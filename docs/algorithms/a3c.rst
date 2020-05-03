@@ -1,7 +1,7 @@
 A3C
 =================================
 
-Example:
+Example
 -----------
 
 .. code-block:: python

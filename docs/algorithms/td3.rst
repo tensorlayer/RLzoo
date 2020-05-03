@@ -1,7 +1,7 @@
 TD3
 ===========================
 
-Example:
+Example
 -----------
 
 .. code-block:: python

@@ -1,7 +1,7 @@
 TRPO
 ===========================
 
-Example:
+Example
 -----------
 
 .. code-block:: python

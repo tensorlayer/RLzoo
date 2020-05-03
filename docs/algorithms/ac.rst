@@ -1,7 +1,7 @@
 AC
 ===========================
 
-Example:
+Example
 -----------
 
 .. code-block:: python
