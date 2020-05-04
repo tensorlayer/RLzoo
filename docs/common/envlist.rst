@@ -1,6 +1,7 @@
 Environment List
 ===========================
 
+.. _env_list:
 
 List of Supported Environments in RLzoo
 ----------------------------------------

@@ -1,11 +1,14 @@
 Installation
 =================================
-Direct installation:
+
+RLzoo generally requires Python>=3.5. Also if you want to use DeepMind Control Suite environment, Python 3.6 will be required.
+
+Direct installation: 
 
 .. code-block:: bash
    :linenos:
 
-   pip install rlzoo
+   pip3 install rlzoo
 
 Install from the source code on github:
 
@@ -14,4 +17,4 @@ Install from the source code on github:
 
    git clone https://github.com/tensorlayer/RLzoo.git
    cd RLzoo
-   pip install .
+   pip3 install .

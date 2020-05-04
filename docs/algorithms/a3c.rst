@@ -7,6 +7,10 @@ Example
 .. code-block:: python
    :linenos:
 
+    from rlzoo.common.env_wrappers import build_env
+    from rlzoo.common.utils import call_default_params
+    from rlzoo.algorithms import A3C
+
     AlgName = 'A3C'
     EnvName = 'PongNoFrameskip-v4'
     EnvType = 'atari'

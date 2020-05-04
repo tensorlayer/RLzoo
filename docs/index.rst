@@ -11,10 +11,12 @@ Welcome to Reinforcement Learning Zoo!
   :align: center
   :target: https://github.com/tensorlayer/rlzoo
 
-RLzoo is a collection of the most practical reinforcement learning algorithms, frameworks and applications. It is implemented with Tensorflow 2.0 and API of neural network layers in TensorLayer 2, to provide a hands-on fast-developing approach for reinforcement learning practices and benchmarks. It supports basic toy-test environments like `OpenAI Gym <https://gym.openai.com/>`_ and `DeepMind Control Suite <https://github.com/deepmind/dm_control>`_ with very simple configurations. Moreover, RLzoo supports robot learning benchmark environment `RLBench <https://github.com/stepjam/RLBench>`_ based on Vrep/Pyrep simulator. Other large-scale distributed training framework for more realistic scenarios with Unity 3D, Mujoco, Bullet Physics, etc, will be supported in the future. A `Springer textbook <https://deepreinforcementlearningbook.org>`__ is also provided, you can get the free PDF if your institute has Springer license.
+RLzoo is a collection of the most practical reinforcement learning algorithms, frameworks and applications, released on `Github <https://github.com/tensorlayer/RLzoo>`_ in November 2019. It is implemented with Tensorflow 2.0 and API of neural network layers in TensorLayer 2, to provide a hands-on fast-developing approach for reinforcement learning practices and benchmarks. It supports basic toy-test environments like `OpenAI Gym <https://gym.openai.com/>`_ and `DeepMind Control Suite <https://github.com/deepmind/dm_control>`_ with very simple configurations. Moreover, RLzoo supports robot learning benchmark environment `RLBench <https://github.com/stepjam/RLBench>`_ based on Vrep/Pyrep simulator. Other large-scale distributed training framework for more realistic scenarios with Unity 3D, Mujoco, Bullet Physics, etc, will be supported in the future. 
+
+We also provide novices friendly `DRL Tutorials <https://github.com/tensorlayer/tensorlayer/tree/master/examples/reinforcement_learning>`_ for algorithms implementation, where each algorithm is implemented in an individual script. The tutorials serve as code examples for our Springer textbook `Deep Reinforcement Learning: Fundamentals, Research and Applications <https://deepreinforcementlearningbook.org/>`_ , you can get the free PDF if your institute has Springer license.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: User Guide
 
    guide/installation
