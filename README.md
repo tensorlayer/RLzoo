@@ -32,12 +32,12 @@ We aim to make it easy to configure for all components within RL, including repl
 **Table of contents:**
 
 - [Status](#status)
+- [Installation](#installation)
+- [Prerequisites](#prerequisites)
 - [Contents](#contents)
   - [Algorithms](#algorithms)
   - [Environments](#environments)
   - [Descriptions](#descriptions)
-- [Prerequisites](#prerequisites)
-- [Installation](#installation)
 - [Usage](#usage)
 - [Troubleshooting](#troubleshooting)
 - [Credits](#credits)
@@ -49,6 +49,33 @@ We aim to make it easy to configure for all components within RL, including repl
 <div>
 We are currently open to any suggestions or pull requests from the community to make RLzoo a better repository. Given the scope of this project, we expect there could be some issues over
 the coming months after initial release. We will keep improving the potential problems and commit when significant changes are made in the future. Current default hyperparameters for each algorithm and each environment may not be optimal, so you can play around with those hyperparameters to achieve best performances. We will release a version with optimal hyperparameters and benchmark results for all algorithms in the future.
+</div>
+</details>
+
+## Installation
+Ensure that you have **Python >=3.5** (Python 3.6 is needed if using DeepMind Control Suite).
+
+Direct installation:
+```
+pip3 install rlzoo
+```
+Install RLzoo from Git:
+```
+git clone https://github.com/tensorlayer/RLzoo.git
+cd RLzoo
+pip3 install .
+```
+
+## Prerequisites
+```pip3 install -r requirements.txt```
+<details><summary><b>List of prerequisites.</b> <i>[click to expand]</i></summary>
+<div>
+* tensorflow >= 2.0.0 or tensorflow-gpu >= 2.0.0a0
+* tensorlayer >= 2.0.1
+* tensorflow-probability
+* tf-nightly-2.0-preview
+* [Mujoco 2.0](http://www.mujoco.org/), [dm_control](https://github.com/deepmind/dm_control), [dm2gym](https://github.com/zuoxingdong/dm2gym) (if using DeepMind Control Suite environments)
+* Vrep, PyRep, RLBench (if using RLBench environments, follows [here](http://www.coppeliarobotics.com/downloads.html), [here](https://github.com/stepjam/PyRep) and [here](https://github.com/stepjam/RLBench))
 </div>
 </details>
 
@@ -127,29 +154,6 @@ The supported configurations for RL algorithms with corresponding environments i
 | DPPO                       | Discrete/Continuous | Stochastic    | On-policy  | Atari, Classic Control, Box2D, Mujoco, Robotics, DeepMind Control |
 | TRPO                       | Discrete/Continuous | Stochastic    | On-policy  | All                                                          |
 
-
-## Prerequisites
-
-Ensure that you have **Python >=3.5** (Python 3.6 is needed if using dm_control).
-
-```pip install -r requirements.txt```
-
-List of prerequisites:
-
-* tensorflow >= 2.0.0 or tensorflow-gpu >= 2.0.0a0
-* tensorlayer >= 2.0.1
-* tensorflow-probability
-* tf-nightly-2.0-preview
-* [Mujoco 2.0](http://www.mujoco.org/), [dm_control](https://github.com/deepmind/dm_control), [dm2gym](https://github.com/zuoxingdong/dm2gym) (if using DeepMind Control Suite environments)
-* Vrep, PyRep, RLBench (if using RLBench environments, follows [here](http://www.coppeliarobotics.com/downloads.html), [here](https://github.com/stepjam/PyRep) and [here](https://github.com/stepjam/RLBench))
-
-## Installation
-
-To install RLzoo package with key requirements:
-
-```
-pip install rlzoo
-```
 
 ## Usage
 
