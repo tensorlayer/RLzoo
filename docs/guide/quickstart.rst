@@ -32,3 +32,8 @@ Run the example:
 .. code-block:: bash
 
    python run_rlzoo.py
+
+
+Choice for ``AlgName``: 'DQN', 'AC', 'A3C', 'DDPG', 'TD3', 'SAC', 'PG', 'TRPO', 'PPO', 'DPPO'
+
+Choice for ``EnvType``: 'atari', 'box2d', 'classic_control', 'mujoco', 'robotics', 'dm_control', 'rlbench'
