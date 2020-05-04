@@ -244,6 +244,8 @@ python algorithms/ac/run_ac.py
 ## Contents
 ### Algorithms
 
+Choices for `AlgName`: 'DQN', 'AC', 'A3C', 'DDPG', 'TD3', 'SAC', 'PG', 'TRPO', 'PPO', 'DPPO'
+
 | Algorithms      | Papers |
 | --------------- | -------|
 |**Value-based**||
@@ -268,6 +270,8 @@ python algorithms/ac/run_ac.py
 |Soft Actor-Critic (SAC)|[Soft actor-critic algorithms and applications. Haarnoja et al. 2018.](https://arxiv.org/abs/1812.05905)|
 
 ### Environments
+
+Choices for `EnvType`: 'atari', 'box2d', 'classic_control', 'mujoco', 'robotics', 'dm_control', 'rlbench'
 
 * [**OpenAI Gym**](https://gym.openai.com/envs):
     * Atari
