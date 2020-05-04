@@ -37,7 +37,7 @@ We aim to make it easy to configure for all components within RL, including repl
 - [Contents](#contents)
   - [Algorithms](#algorithms)
   - [Environments](#environments)
-  - [Descriptions](#descriptions)
+  - [Configurations](#configuration)
 - [Usage](#usage)
 - [Troubleshooting](#troubleshooting)
 - [Credits](#credits)
@@ -134,7 +134,7 @@ pip3 install .
 </details>
 
 
-## Descriptions:
+## Configurations:
 The supported configurations for RL algorithms with corresponding environments in RLzoo are listed in the following table.
 
 | Algorithms                 | Action Space        | Policy        | Update     | Envs                                                         |
@@ -153,22 +153,47 @@ The supported configurations for RL algorithms with corresponding environments i
 
 ## Usage
 
-For usage, please check our [online documentation](https://rlzoo.readthedocs.io).
+For detailed usage, please check our [**online documentation**](https://rlzoo.readthedocs.io).
 
 ### 0. Quick Start
 Choose whatever environments with whatever RL algorithms supported in RLzoo, and enjoy the game by running following example in the root file of installed package:
 ```python
 # in the root folder of rlzoo package
-git clone https://github.com/tensorlayer/RLzoo.git
 cd RLzoo
 python run_rlzoo.py
 ```
+
+What's in `run_rlzoo.py`?
+
+```python
+from rlzoo.common.env_wrappers import build_env
+from rlzoo.common.utils import call_default_params
+from rlzoo.algorithms import TD3  # import the algorithm to use
+# choose an algorithm
+AlgName = 'TD3'
+# chose an environment
+EnvName = 'Pendulum-v0'  
+# select a corresponding environment type
+EnvType = 'classic_control'
+# build an environment with wrappers
+env = build_env(EnvName, EnvType)  
+# call default parameters for the algorithm and learning process
+alg_params, learn_params = call_default_params(env, EnvType, AlgName)  
+# instantiate the algorithm
+alg = eval(AlgName+'(**alg_params)')
+# start the training
+alg.learn(env=env, mode='train', render=False, **learn_params)  
+# test after training 
+alg.learn(env=env, mode='test', render=True, **learn_params)  
+```
+
 The main script `run_rlzoo.py` follows (almost) the same structure for all algorithms on all environments, see the [**full list of examples**](./examples.md).
 
 **General Descriptions:**
 RLzoo provides at least two types of interfaces for running the learning algorithms, with (1) implicit configurations or (2) explicit configurations. Both of them start learning program through running a python script, instead of running a long command line with all configurations shortened to be arguments of it (e.g. in Openai Baseline). Our approaches are found to be more interpretable, flexible and convenient to apply in practice. According to the level of explicitness of learning configurations, we provided two different ways of setting learning configurations in python scripts: the first one with implicit configurations uses a `default.py` script to record all configurations for each algorithm, while the second one with explicit configurations exposes all configurations to the running scripts. Both of them can run any RL algorithms on any environments supported in our repository with a simple command line.
 
-### 1. Implicit Configurations
+<details><summary><b>1. Implicit Configurations</b> <i>[click to expand]</i></summary>
+<div>
 
 RLzoo with **implicit configurations** means the configurations for learning are not explicitly contained in the main script for running (i.e. `run_rlzoo.py`), but in the `default.py` file in each algorithm folder (for example, `rlzoo/algorithms/sac/default.py` is the default parameters configuration for SAC algorithm). All configurations include (1) parameter values for the algorithm and learning process, (2) the network structures, (3) the optimizers, etc, are divided into configurations for the algorithm (stored in `alg_params`) and configurations for the learning process (stored in `learn_params`). Whenever you want to change the configurations for the algorithm or learning process, you can either go to the folder of each algorithm and modify parameters in `default.py`, or change the values in `alg_params` (a dictionary of configurations for the algorithm) and `learn_params` (a dictionary of configurations for the learning process) in `run_rlzoo.py` according to the keys. 
 
@@ -203,7 +228,11 @@ cd rlzoo
 python run_rlzoo.py
 ```
 
-### 2. Explicit Configurations
+</div>
+</details>
+
+<details><summary><b>2. Explicit Configurations</b> <i>[click to expand]</i></summary>
+<div>
 
 RLzoo with **explicit configurations** means the configurations for learning, including parameter values for the algorithm and the learning process, the network structures used in the algorithms and the optimizers etc, are explicitly displayed in the main script for running. And the main scripts for demonstration are under the folder of each algorithm, for example, `./rlzoo/algorithms/sac/run_sac.py` can be called with `python algorithms/sac/run_sac.py` from the file `./rlzoo` to run the learning process same as in above implicit configurations.
 
@@ -281,6 +310,9 @@ python algorithms/<ALGORITHM_NAME>/run_<ALGORITHM_NAME>.py
 # for example: run actor-critic
 python algorithms/ac/run_ac.py
 ```
+
+</div>
+</details>
 
 ## Troubleshooting
 
