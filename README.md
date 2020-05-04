@@ -108,36 +108,31 @@ pip3 install .
 
 ### Environments
 
-* <details><summary><b>OpenAI Gym:</b> <i>[click to expand]</i></summary>
-<div>
+* [**OpenAI Gym**](https://gym.openai.com/envs):
     * Atari
     * Box2D
     * Classic control
     * MuJoCo
     * Robotics
+
+* [**DeepMind Control Suite**](https://github.com/deepmind/dm_control)
+* [**RLBench**](https://github.com/stepjam/RLBench)
+
+<details><summary><b>Some notes on environment usage.</b> <i>[click to expand]</i></summary>
+<div>
 	
-    List of environments with types of spaces for Atari, Box2D and Classic Control is [here](https://github.com/openai/gym/wiki/Table-of-environments).
- </div>
-</details>
-
-* [**DeepMind Control Suite**](https://github.com/deepmind/dm_control):
-
-    The [dm2gym](https://github.com/zuoxingdong/dm2gym) is needed for registering environments in DeepMind Control Suite as Gym environments.
-
-* [**RLBench**](https://github.com/stepjam/RLBench): 
-
-    Full list of environments is [here](https://github.com/stepjam/RLBench/blob/master/rlbench/tasks/__init__.py). 
-
-    Installation of Vrep->PyRep->RLBench follows [here](http://www.coppeliarobotics.com/downloads.html)->[here](https://github.com/stepjam/PyRep)->[here](https://github.com/stepjam/RLBench).
-
-**Note**:
-
 * Make sure the name of environment matches the type of environment in the main script. The types of environments include: 'atari', 'box2d', 'classic_control', 'mujoco', 'robotics', 'dm_control', 'rlbench'.
 * When using the DeepMind Control Suite, install the [dm2gym](https://github.com/zuoxingdong/dm2gym) package with: `pip install dm2gym`
 
 * When using the RLBench environments, please add the path of your local rlbench repository to python: 
   ```export PYTHONPATH=PATH_TO_YOUR_LOCAL_RLBENCH_REPO```
 * A dictionary of all different environments is stored in `./rlzoo/common/env_list.py`
+* Full list of environments in RLBench is [here](https://github.com/stepjam/RLBench/blob/master/rlbench/tasks/__init__.py).
+* Installation of Vrep->PyRep->RLBench follows [here](http://www.coppeliarobotics.com/downloads.html)->[here](https://github.com/stepjam/PyRep)->[here](https://github.com/stepjam/RLBench).
+
+</div>
+</details>
+
 
 ## Descriptions:
 The supported configurations for RL algorithms with corresponding environments in RLzoo are listed in the following table.
