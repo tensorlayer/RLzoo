@@ -70,6 +70,7 @@ pip3 install .
 ```pip3 install -r requirements.txt```
 <details><summary><b>List of prerequisites.</b> <i>[click to expand]</i></summary>
 <div>
+	
 * tensorflow >= 2.0.0 or tensorflow-gpu >= 2.0.0a0
 * tensorlayer >= 2.0.1
 * tensorflow-probability
@@ -107,17 +108,17 @@ pip3 install .
 
 ### Environments
 
-* [**OpenAI Gym**](https://gym.openai.com/):  
-
+* <details><summary><b>OpenAI Gym:</b> <i>[click to expand]</i></summary>
+<div>
     * Atari
     * Box2D
     * Classic control
     * MuJoCo
     * Robotics
-
-    Full list of environments is [here](https://gym.openai.com/envs/#classic_control).
-
+	
     List of environments with types of spaces for Atari, Box2D and Classic Control is [here](https://github.com/openai/gym/wiki/Table-of-environments).
+ </div>
+</details>
 
 * [**DeepMind Control Suite**](https://github.com/deepmind/dm_control):
 
