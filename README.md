@@ -82,7 +82,7 @@ pip3 install .
 
 For detailed usage, please check our [**online documentation**](https://rlzoo.readthedocs.io).
 
-### 0. Quick Start
+### Quick Start
 Choose whatever environments with whatever RL algorithms supported in RLzoo, and enjoy the game by running following example in the root file of installed package:
 ```python
 # in the root folder of rlzoo package
