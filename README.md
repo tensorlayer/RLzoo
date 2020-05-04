@@ -26,19 +26,17 @@ Different from RLzoo for simple usage with **high-level APIs**, we also have a [
 <img src="https://github.com/tensorlayer/RLzoo/blob/master/gif/robotics.gif" height=250 width=210 > <img src="https://github.com/tensorlayer/RLzoo/blob/master/gif/dmcontrol.gif" height=250 width=210 > <img src="https://github.com/tensorlayer/RLzoo/blob/master/gif/rlbench.gif" height=250 width=210 > <img src="https://github.com/tensorlayer/tensorlayer/blob/master/img/tl_transparent_logo.png" height=180 width=210 >
 
 
-
-We aim to make it easy to configure for all components within RL, including replacing the networks, optimizers, etc. We also  provide automatically adaptive policies and value functions in the common functions: for the observation space, the vector state or the raw-pixel (image) state are supported automatically according to the shape of the space; for the action space, the discrete action or continuous action are supported automatically according to the shape of the space as well. The deterministic or stochastic property of policy needs to be chosen according to each algorithm. Some environments with raw-pixel based observation (e.g. Atari, RLBench) may be hard to train, be patient and play around with the hyperparameters!
-
 **Table of contents:**
 
 - [Status](#status)
 - [Installation](#installation)
 - [Prerequisites](#prerequisites)
+- [Usage](#usage)
 - [Contents](#contents)
   - [Algorithms](#algorithms)
   - [Environments](#environments)
   - [Configurations](#configuration)
-- [Usage](#usage)
+- [Properties](#properties)
 - [Troubleshooting](#troubleshooting)
 - [Credits](#credits)
 - [Citing](#citing)
@@ -79,77 +77,6 @@ pip3 install .
 * Vrep, PyRep, RLBench (if using RLBench environments, follows [here](http://www.coppeliarobotics.com/downloads.html), [here](https://github.com/stepjam/PyRep) and [here](https://github.com/stepjam/RLBench))
 </div>
 </details>
-
-## Contents
-### Algorithms
-
-| Algorithms      | Papers |
-| --------------- | -------|
-|**Value-based**||
-| Q-learning      | [Technical note: Q-learning. Watkins et al. 1992](http://www.gatsby.ucl.ac.uk/~dayan/papers/cjch.pdf)|
-| Deep Q-Network (DQN)| [Human-level control through deep reinforcement learning, Mnih et al. 2015.](https://www.nature.com/articles/nature14236/) |
-| Prioritized Experience Replay | [Schaul et al. Prioritized experience replay. Schaul et al. 2015.](https://arxiv.org/abs/1511.05952) |
-|Dueling DQN|[Dueling network architectures for deep reinforcement learning. Wang et al. 2015.](https://arxiv.org/abs/1511.06581)|
-|Double DQN|[Deep reinforcement learning with double q-learning. Van et al. 2016.](https://arxiv.org/abs/1509.06461)|
-|Retrace|[Safe and efficient off-policy reinforcement learning. Munos et al. 2016: ](https://arxiv.org/pdf/1606.02647.pdf)|
-|Noisy DQN|[Noisy networks for exploration. Fortunato et al. 2017.](https://arxiv.org/pdf/1706.10295.pdf)|
-| Distributed DQN (C51)| [A distributional perspective on reinforcement learning. Bellemare et al. 2017.](https://arxiv.org/pdf/1707.06887.pdf) |
-|**Policy-based**||
-|REINFORCE(PG) | [Simple statistical gradient-following algorithms for connectionist reinforcement learning. Ronald J. Williams  1992.](https://link.springer.com/article/10.1007/BF00992696)|
-| Trust Region Policy Optimization (TRPO)| [Abbeel et al. Trust region policy optimization. Schulman et al.2015.](https://arxiv.org/pdf/1502.05477.pdf) |
-| Proximal Policy Optimization (PPO) | [Proximal policy optimization algorithms. Schulman et al. 2017.](https://arxiv.org/abs/1707.06347) |
-|Distributed Proximal Policy Optimization (DPPO)|[Emergence of locomotion behaviours in rich environments. Heess et al. 2017.](https://arxiv.org/abs/1707.02286)|
-|**Actor-Critic**||
-|Actor-Critic (AC)| [Actor-critic algorithms. Konda er al. 2000.](https://papers.nips.cc/paper/1786-actor-critic-algorithms.pdf)|
-| Asynchronous Advantage Actor-Critic (A3C)| [Asynchronous methods for deep reinforcement learning. Mnih et al. 2016.](https://arxiv.org/pdf/1602.01783.pdf) |
-| Deep Deterministic Policy Gradient (DDPG) | [Continuous Control With Deep Reinforcement Learning, Lillicrap et al. 2016](https://arxiv.org/pdf/1509.02971.pdf) |
-|Twin Delayed DDPG (TD3)|[Addressing function approximation error in actor-critic methods. Fujimoto et al. 2018.](https://arxiv.org/pdf/1802.09477.pdf)|
-|Soft Actor-Critic (SAC)|[Soft actor-critic algorithms and applications. Haarnoja et al. 2018.](https://arxiv.org/abs/1812.05905)|
-
-### Environments
-
-* [**OpenAI Gym**](https://gym.openai.com/envs):
-    * Atari
-    * Box2D
-    * Classic control
-    * MuJoCo
-    * Robotics
-
-* [**DeepMind Control Suite**](https://github.com/deepmind/dm_control)
-* [**RLBench**](https://github.com/stepjam/RLBench)
-
-<details><summary><b>Some notes on environment usage.</b> <i>[click to expand]</i></summary>
-<div>
-	
-* Make sure the name of environment matches the type of environment in the main script. The types of environments include: 'atari', 'box2d', 'classic_control', 'mujoco', 'robotics', 'dm_control', 'rlbench'.
-* When using the DeepMind Control Suite, install the [dm2gym](https://github.com/zuoxingdong/dm2gym) package with: `pip install dm2gym`
-
-* When using the RLBench environments, please add the path of your local rlbench repository to python: 
-  ```export PYTHONPATH=PATH_TO_YOUR_LOCAL_RLBENCH_REPO```
-* A dictionary of all different environments is stored in `./rlzoo/common/env_list.py`
-* Full list of environments in RLBench is [here](https://github.com/stepjam/RLBench/blob/master/rlbench/tasks/__init__.py).
-* Installation of Vrep->PyRep->RLBench follows [here](http://www.coppeliarobotics.com/downloads.html)->[here](https://github.com/stepjam/PyRep)->[here](https://github.com/stepjam/RLBench).
-
-</div>
-</details>
-
-
-## Configurations:
-The supported configurations for RL algorithms with corresponding environments in RLzoo are listed in the following table.
-
-| Algorithms                 | Action Space        | Policy        | Update     | Envs                                                         |
-| -------------------------- | ------------------- | ------------- | ---------- | ------------------------------------------------------------ |
-| DQN (double, dueling, PER) | Discrete Only       | --            | Off-policy | Atari, Classic Control                                       |
-| AC                         | Discrete/Continuous | Stochastic    | On-policy  | All                                                          |
-| PG                         | Discrete/Continuous | Stochastic    | On-policy  | All                                                          |
-| DDPG                       | Continuous          | Deterministic | Off-policy | Classic Control, Box2D, Mujoco, Robotics, DeepMind Control, RLBench |
-| TD3                        | Continuous          | Deterministic | Off-policy | Classic Control, Box2D, Mujoco, Robotics, DeepMind Control, RLBench |
-| SAC                        | Continuous          | Stochastic    | Off-policy | Classic Control, Box2D, Mujoco, Robotics, DeepMind Control, RLBench |
-| A3C                        | Discrete/Continuous | Stochastic    | On-policy  | Atari, Classic Control, Box2D, Mujoco, Robotics, DeepMind Control |
-| PPO                        | Discrete/Continuous | Stochastic    | On-policy  | All                                                          |
-| DPPO                       | Discrete/Continuous | Stochastic    | On-policy  | Atari, Classic Control, Box2D, Mujoco, Robotics, DeepMind Control |
-| TRPO                       | Discrete/Continuous | Stochastic    | On-policy  | All                                                          |
-
 
 ## Usage
 
@@ -313,6 +240,98 @@ python algorithms/ac/run_ac.py
 
 </div>
 </details>
+
+## Contents
+### Algorithms
+
+| Algorithms      | Papers |
+| --------------- | -------|
+|**Value-based**||
+| Q-learning      | [Technical note: Q-learning. Watkins et al. 1992](http://www.gatsby.ucl.ac.uk/~dayan/papers/cjch.pdf)|
+| Deep Q-Network (DQN)| [Human-level control through deep reinforcement learning, Mnih et al. 2015.](https://www.nature.com/articles/nature14236/) |
+| Prioritized Experience Replay | [Schaul et al. Prioritized experience replay. Schaul et al. 2015.](https://arxiv.org/abs/1511.05952) |
+|Dueling DQN|[Dueling network architectures for deep reinforcement learning. Wang et al. 2015.](https://arxiv.org/abs/1511.06581)|
+|Double DQN|[Deep reinforcement learning with double q-learning. Van et al. 2016.](https://arxiv.org/abs/1509.06461)|
+|Retrace|[Safe and efficient off-policy reinforcement learning. Munos et al. 2016: ](https://arxiv.org/pdf/1606.02647.pdf)|
+|Noisy DQN|[Noisy networks for exploration. Fortunato et al. 2017.](https://arxiv.org/pdf/1706.10295.pdf)|
+| Distributed DQN (C51)| [A distributional perspective on reinforcement learning. Bellemare et al. 2017.](https://arxiv.org/pdf/1707.06887.pdf) |
+|**Policy-based**||
+|REINFORCE(PG) | [Simple statistical gradient-following algorithms for connectionist reinforcement learning. Ronald J. Williams  1992.](https://link.springer.com/article/10.1007/BF00992696)|
+| Trust Region Policy Optimization (TRPO)| [Abbeel et al. Trust region policy optimization. Schulman et al.2015.](https://arxiv.org/pdf/1502.05477.pdf) |
+| Proximal Policy Optimization (PPO) | [Proximal policy optimization algorithms. Schulman et al. 2017.](https://arxiv.org/abs/1707.06347) |
+|Distributed Proximal Policy Optimization (DPPO)|[Emergence of locomotion behaviours in rich environments. Heess et al. 2017.](https://arxiv.org/abs/1707.02286)|
+|**Actor-Critic**||
+|Actor-Critic (AC)| [Actor-critic algorithms. Konda er al. 2000.](https://papers.nips.cc/paper/1786-actor-critic-algorithms.pdf)|
+| Asynchronous Advantage Actor-Critic (A3C)| [Asynchronous methods for deep reinforcement learning. Mnih et al. 2016.](https://arxiv.org/pdf/1602.01783.pdf) |
+| Deep Deterministic Policy Gradient (DDPG) | [Continuous Control With Deep Reinforcement Learning, Lillicrap et al. 2016](https://arxiv.org/pdf/1509.02971.pdf) |
+|Twin Delayed DDPG (TD3)|[Addressing function approximation error in actor-critic methods. Fujimoto et al. 2018.](https://arxiv.org/pdf/1802.09477.pdf)|
+|Soft Actor-Critic (SAC)|[Soft actor-critic algorithms and applications. Haarnoja et al. 2018.](https://arxiv.org/abs/1812.05905)|
+
+### Environments
+
+* [**OpenAI Gym**](https://gym.openai.com/envs):
+    * Atari
+    * Box2D
+    * Classic control
+    * MuJoCo
+    * Robotics
+
+* [**DeepMind Control Suite**](https://github.com/deepmind/dm_control)
+* [**RLBench**](https://github.com/stepjam/RLBench)
+
+<details><summary><b>Some notes on environment usage.</b> <i>[click to expand]</i></summary>
+<div>
+	
+* Make sure the name of environment matches the type of environment in the main script. The types of environments include: 'atari', 'box2d', 'classic_control', 'mujoco', 'robotics', 'dm_control', 'rlbench'.
+* When using the DeepMind Control Suite, install the [dm2gym](https://github.com/zuoxingdong/dm2gym) package with: `pip install dm2gym`
+
+* When using the RLBench environments, please add the path of your local rlbench repository to python: 
+  ```export PYTHONPATH=PATH_TO_YOUR_LOCAL_RLBENCH_REPO```
+* A dictionary of all different environments is stored in `./rlzoo/common/env_list.py`
+* Full list of environments in RLBench is [here](https://github.com/stepjam/RLBench/blob/master/rlbench/tasks/__init__.py).
+* Installation of Vrep->PyRep->RLBench follows [here](http://www.coppeliarobotics.com/downloads.html)->[here](https://github.com/stepjam/PyRep)->[here](https://github.com/stepjam/RLBench).
+
+</div>
+</details>
+
+
+## Configurations:
+The supported configurations for RL algorithms with corresponding environments in RLzoo are listed in the following table.
+
+| Algorithms                 | Action Space        | Policy        | Update     | Envs                                                         |
+| -------------------------- | ------------------- | ------------- | ---------- | ------------------------------------------------------------ |
+| DQN (double, dueling, PER) | Discrete Only       | --            | Off-policy | Atari, Classic Control                                       |
+| AC                         | Discrete/Continuous | Stochastic    | On-policy  | All                                                          |
+| PG                         | Discrete/Continuous | Stochastic    | On-policy  | All                                                          |
+| DDPG                       | Continuous          | Deterministic | Off-policy | Classic Control, Box2D, Mujoco, Robotics, DeepMind Control, RLBench |
+| TD3                        | Continuous          | Deterministic | Off-policy | Classic Control, Box2D, Mujoco, Robotics, DeepMind Control, RLBench |
+| SAC                        | Continuous          | Stochastic    | Off-policy | Classic Control, Box2D, Mujoco, Robotics, DeepMind Control, RLBench |
+| A3C                        | Discrete/Continuous | Stochastic    | On-policy  | Atari, Classic Control, Box2D, Mujoco, Robotics, DeepMind Control |
+| PPO                        | Discrete/Continuous | Stochastic    | On-policy  | All                                                          |
+| DPPO                       | Discrete/Continuous | Stochastic    | On-policy  | Atari, Classic Control, Box2D, Mujoco, Robotics, DeepMind Control |
+| TRPO                       | Discrete/Continuous | Stochastic    | On-policy  | All                                                          |
+
+
+## Properties
+<details><summary><b>1. Automatic model construction</b> <i>[click to expand]</i></summary>
+<div>
+We aim to make it easy to configure for all components within RL, including replacing the networks, optimizers, etc. We also  provide automatically adaptive policies and value functions in the common functions: for the observation space, the vector state or the raw-pixel (image) state are supported automatically according to the shape of the space; for the action space, the discrete action or continuous action are supported automatically according to the shape of the space as well. The deterministic or stochastic property of policy needs to be chosen according to each algorithm. Some environments with raw-pixel based observation (e.g. Atari, RLBench) may be hard to train, be patient and play around with the hyperparameters!
+</div>
+</details>
+
+<details><summary><b>3. Simple and flexible API</b> <i>[click to expand]</i></summary>
+<div>
+As described in the Section of Usage, we provide at least two ways of deploying RLzoo: implicit configuration and explicit configuration process. We ensure the maximum flexiblity for different use cases with this design.
+</div>
+</details>
+
+<details><summary><b>3. Sufficient support for DRL algorithms and environments</b> <i>[click to expand]</i></summary>
+<div>
+As shown in above algorithms and environments tables.	
+</div>
+</details>
+
+
 
 ## Troubleshooting
 
