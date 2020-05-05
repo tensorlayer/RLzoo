@@ -26,7 +26,7 @@ Different from RLzoo for simple usage with **high-level APIs**, we also have a [
 <img src="https://github.com/tensorlayer/RLzoo/blob/master/gif/robotics.gif" height=250 width=210 > <img src="https://github.com/tensorlayer/RLzoo/blob/master/gif/dmcontrol.gif" height=250 width=210 > <img src="https://github.com/tensorlayer/RLzoo/blob/master/gif/rlbench.gif" height=250 width=210 > <img src="https://github.com/tensorlayer/tensorlayer/blob/master/img/tl_transparent_logo.png" height=180 width=210 >
 
 
-Please check our [Documentation](https://rlzoo.readthedocs.io). We suggest users to report bugs using Github issues. Users can also discuss how to use TensorLayer in the following slack channel.
+Please check our [Online Documentation](https://rlzoo.readthedocs.io). We suggest users to report bugs using Github issues. Users can also discuss how to use RLzoo in the following slack channel.
 
 <br/>
 
