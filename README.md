@@ -6,7 +6,7 @@
 <br/>
 <a href="https://deepreinforcementlearningbook.org" target="\_blank">
 	<div align="center">
-		<img src="http://deep-reinforcement-learning-book.github.io/assets/images/cover_v1.png" width="20%"/>
+		<img src="docs/img/rlzoo-logo.png" width="40%"/>
 	</div>
 <!-- 	<div align="center"><caption>Slack Invitation Link</caption></div> -->
 </a>
