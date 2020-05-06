@@ -13,9 +13,6 @@ class NumInput(widgets.HBox):
         range_min = 0 if range_min is None else range_min
         range_max = init_value * 2 if range_max is None else range_max
         self.range_size = max([range_max - init_value, init_value - range_min])
-
-        #         self.decimals = -np.floor(np.log10(step)).astype(np.int)  # todo wrong if step=1.1
-        #         f = 0 if self.decimals < 0 else self.decimals
         if step is None:
             fs = decimal.Decimal(str(init_value)).as_tuple().exponent
             self.decimals = -fs
@@ -24,7 +21,6 @@ class NumInput(widgets.HBox):
             fs = decimal.Decimal(str(step)).as_tuple().exponent
             fv = decimal.Decimal(str(init_value)).as_tuple().exponent
             self.decimals = -min(fs, fv)
-        #         print(decimal.Decimal(str(step)).as_tuple().exponent)
 
         self.step = step
 

@@ -6,7 +6,9 @@ import ipywidgets as widgets
 from ipywidgets import Button, Layout, AppLayout
 from ipywidgets import GridspecLayout
 
-from IPython.display import display
+from IPython.display import display, clear_output
+from IPython.core.interactiveshell import InteractiveShell
+import matplotlib.pyplot as plt
 from gym import spaces
 
 from rlzoo.common.env_list import all_env_list
@@ -15,17 +17,18 @@ from rlzoo.common.utils import *
 from rlzoo.algorithms import *
 from rlzoo.interactive.common import *
 import copy
+# from scipy import signal
 
 all_env_list = OrderedDict(sorted(all_env_list.items()))
 
 
-class EnvironmentSelector:
+class EnvironmentSelector(widgets.VBox):
     def __init__(self):
         env_list = all_env_list
         # al = list(env_list.keys())
         al = ['atari', 'classic_control', 'box2d', 'mujoco', 'robotics', 'dm_control', 'rlbench']
         description = 'Environment Selector'
-        caption = widgets.HTML(value="<font size=4><B>"+description+"</B>")
+        caption = widgets.HTML(value="<font size=4><B>" + description + "</B>")
 
         text_0 = widgets.Label("Choose your environment")
 
@@ -73,7 +76,6 @@ class EnvironmentSelector:
 
         select_box = widgets.HBox([env_select_box, env_setting_box],
                                   layout=Layout(justify_content='Center'))
-        self.frame = widgets.VBox([caption, select_box], layout=widgets.Layout(align_items='center', ))
 
         #         self.frame = widgets.VBox([select_box, widgets.Box([self.create_button],
         #                                                            layout=Layout(justify_content='Center'))])
@@ -108,7 +110,9 @@ class EnvironmentSelector:
         self.env_num.observe(change_nenv, names='value')
         self.env_type.observe(env_type_change, names='value')
 
-    #         self.create_button.on_click(create_env)
+        #         self.create_button.on_click(create_env)
+
+        super().__init__([caption, select_box], layout=widgets.Layout(align_items='center', ))
 
     @property
     def value(self):
@@ -122,7 +126,7 @@ class EnvironmentSelector:
 #     def env(self):
 #         return self._env
 
-class SpaceInfoViewer:
+class SpaceInfoViewer(widgets.Box):
     def __init__(self, sp):
         assert isinstance(sp, spaces.Space)
         if isinstance(sp, spaces.Dict):
@@ -132,10 +136,10 @@ class SpaceInfoViewer:
                 info[i, 0], info[i, 1] = widgets.Label(v[0]), widgets.Label(str(v[1]))
         else:
             info = widgets.Label(str(sp))
-        self.frame = widgets.Box([info])
+        super().__init__([info])
 
 
-class EnvInfoViewer:
+class EnvInfoViewer(widgets.VBox):
     def __init__(self, env):
         if isinstance(env, list):
             env = env[0]
@@ -148,11 +152,11 @@ class EnvInfoViewer:
             tips = 'The action space is continuous.'
 
         description = 'Environment Information'
-        caption = widgets.HTML(value="<font size=4><B>"+description+"</B>")
+        caption = widgets.HTML(value="<font size=4><B>" + description + "</B>")
 
         a00, a01 = widgets.Label('Environment name:'), widgets.Label(env.spec.id)
-        a10, a11 = widgets.Label('Observation space:'), env_obs.frame
-        a20, a21 = widgets.Label('Action space:'), env_act.frame
+        a10, a11 = widgets.Label('Observation space:'), env_obs
+        a20, a21 = widgets.Label('Action space:'), env_act
 
         if tips is None:
             # use GirdBox instead of GridspecLayout to ensure each row has a different height
@@ -172,7 +176,8 @@ class EnvInfoViewer:
                                                "a20 a21"
                                                "t0 t1"
                                                '''))
-        self.frame = widgets.VBox([caption, info], layout=widgets.Layout(align_items='center', ))
+
+        super().__init__([caption, info], layout=widgets.Layout(align_items='center', ))
 
 
 all_alg_list = ['A3C', 'AC', 'DDPG', 'DPPO', 'DQN', 'PG', 'PPO', 'SAC', 'TD3', 'TRPO']
@@ -182,10 +187,10 @@ all_alg_dict = {'discrete_action_space': ['AC', 'DQN', 'PG', 'PPO', 'TRPO'],
                 }
 
 
-class AlgorithmSelector:
+class AlgorithmSelector(widgets.VBox):
     def __init__(self, env):
         description = 'Algorithm Selector'
-        caption = widgets.HTML(value="<font size=4><B>"+description+"</B>")
+        caption = widgets.HTML(value="<font size=4><B>" + description + "</B>")
         info = 'Supported algorithms are shown below'
         if isinstance(env, list):
             #             info = 'Distributed algorithms are shown below'
@@ -208,8 +213,9 @@ class AlgorithmSelector:
             description='Algorithms:',
             disabled=False,
         )
-        self.frame = widgets.VBox([caption, widgets.Label(info), self.algo_name],
-                                  layout=widgets.Layout(align_items='center', ))
+
+        super().__init__([caption, widgets.Label(info), self.algo_name],
+                         layout=widgets.Layout(align_items='center', ))
 
     @property
     def value(self):
@@ -217,34 +223,41 @@ class AlgorithmSelector:
 
 
 def TransInput(value):
-    if isinstance(value, int) or isinstance(value, float) \
+    if isinstance(value, bool):
+        return widgets.Checkbox(value=value, description='', disabled=False, indent=False)
+    elif isinstance(value, int) or isinstance(value, float) \
             or isinstance(value, np.int16) or isinstance(value, np.float16) \
             or isinstance(value, np.int32) or isinstance(value, np.float32) \
             or isinstance(value, np.int64) or isinstance(value, np.float64) \
             or isinstance(value, np.float128):
         return NumInput(value)
-    elif isinstance(value, bool):
-        return widgets.Checkbox(value=value, description='', disabled=False, indent=False)
     else:
         return widgets.Label(value)
 
 
-class AlgoInfoViewer:
+class AlgoInfoViewer(widgets.VBox):
     def __init__(self, alg_selector, org_alg_params, org_learn_params):
         alg_params, learn_params = copy.deepcopy(org_alg_params), copy.deepcopy(org_learn_params)
 
         # ---------------- alg_params --------------- #
         description = 'Algorithm Parameters'
-        alg_caption = widgets.HTML(value="<font size=4><B>"+description+"</B>")
+        alg_caption = widgets.HTML(value="<font size=4><B>" + description + "</B>")
         net_label = widgets.Label('Network information:')
         show_net = lambda net: widgets.VBox([widgets.Label(str(layer)) for layer in net.all_layers])
+
+        n = np.ndim(alg_params['net_list'])
+        if n == 1:
+            model_net = alg_params['net_list']
+        elif n == 2:
+            model_net = alg_params['net_list'][0]
+
         net_info = widgets.VBox([widgets.VBox([widgets.Label(str(net.__class__.__name__)),
                                                show_net(net), ],
                                               layout=widgets.Layout(border=border_list[2],
                                                                     align_items='center',
                                                                     align_content='center'
                                                                     )
-                                              ) for net in alg_params['net_list']])
+                                              ) for net in model_net])
         self._net_list = alg_params['net_list']
         del alg_params['net_list']
 
@@ -276,7 +289,7 @@ class AlgoInfoViewer:
 
         alg_sel_dict = dict()
         sk = sorted(alg_params.keys())
-        n = len(sk)+1
+        n = len(sk) + 1
         alg_param_sel = widgets.GridspecLayout(n, 2)
         b = 0
         if 'method' in sk:
@@ -289,9 +302,11 @@ class AlgoInfoViewer:
         for i, k in enumerate(sk):
             module = TransInput(alg_params[k])
             alg_sel_dict[k] = module
+            if k == 'dueling':
+                module.disabled = True
             alg_param_sel[i + b, 0], alg_param_sel[i + b, 1] = widgets.Label(k), module
 
-        alg_param_box = widgets.VBox([alg_caption, stu_frame, alg_param_sel],)
+        alg_param_box = widgets.VBox([alg_caption, stu_frame, alg_param_sel], )
         name = alg_selector.value + '-' + alg_selector.env_id
         path = os.path.join('.', 'model', name)
         alg_param_sel[n - 1, 0] = widgets.Label('model save path')
@@ -302,7 +317,7 @@ class AlgoInfoViewer:
 
         # ----------------- learn_params ---------------- #
         description = 'Learn Parameters'
-        learn_caption = widgets.HTML(value="<font size=4><B>"+description+"</B>")
+        learn_caption = widgets.HTML(value="<font size=4><B>" + description + "</B>")
 
         learn_sel_dict = dict()
         sk = sorted(learn_params.keys())
@@ -339,7 +354,21 @@ class AlgoInfoViewer:
         # ================= learn_params ================ #
 
         b = widgets.Output(layout=widgets.Layout(border='solid'))
-        self.frame = widgets.VBox([alg_param_box, b, learn_param_box])
+
+        self.smooth_factor_slider = widgets.FloatSlider(
+            value=0.8,
+            min=0,
+            max=1,
+            step=0.01,
+            description='learning curve smooth factor',
+            disabled=False,
+            continuous_update=False,
+            orientation='horizontal',
+            readout=True,
+            readout_format='.2f',
+            style={'description_width': 'initial'},
+        )
+        super().__init__([alg_param_box, b, learn_param_box, b, self.smooth_factor_slider])
 
     @property
     def alg_params(self):
@@ -349,8 +378,92 @@ class AlgoInfoViewer:
         return result
 
     @property
+    def smooth_factor(self):
+        return self.smooth_factor_slider.value
+
+    @property
     def learn_params(self):
         result = dict()
         for k in self.learn_sel_dict.keys():
             result[k] = self.learn_sel_dict[k].value
         return result
+
+
+class RevOutput(widgets.Output):
+    def _append_stream_output(self, text, stream_name):
+        """Append a stream output."""
+        self.outputs = (
+                           {'output_type': 'stream', 'name': stream_name, 'text': text},
+                       ) + self.outputs
+
+    def append_display_data(self, display_object):
+        """Append a display object as an output.
+
+        Parameters
+        ----------
+        display_object : IPython.core.display.DisplayObject
+            The object to display (e.g., an instance of
+            `IPython.display.Markdown` or `IPython.display.Image`).
+        """
+        fmt = InteractiveShell.instance().display_formatter.format
+        data, metadata = fmt(display_object)
+        self.outputs = (
+                           {
+                               'output_type': 'display_data',
+                               'data': data,
+                               'metadata': metadata
+                           },
+                       ) + self.outputs
+
+
+class OutputMonitor(widgets.HBox):
+    def __init__(self, learn_params, smooth_factor):
+        max_num = learn_params['train_episodes'] if learn_params['mode'] == 'train' else learn_params['test_episodes']
+        self.progress = widgets.FloatProgress(value=0.0, min=0.0, max=max_num, description='Progress')
+
+        self.plot_out = widgets.Output(layout=widgets.Layout(width='350px',
+                                                             height='250px', ))
+        self.smooth_factor = smooth_factor
+        # self.smooth_factor = widgets.FloatSlider(
+        #     value=self.sf,
+        #     min=0,
+        #     max=1,
+        #     step=0.01,
+        #     description='smooth factor',
+        #     disabled=False,
+        #     continuous_update=False,
+        #     orientation='horizontal',
+        #     readout=True,
+        #     readout_format='.2f'
+        # )
+
+        # def link(c):
+        #     self.sf = self.smooth_factor.value
+
+        # self.smooth_factor.observe(link, 'value')
+        # plot_out = widgets.VBox([widgets.Label('Learning curve'), self.plot_out, self.smooth_factor])
+        plot_out = widgets.VBox([widgets.Label('Learning curve'), self.plot_out])
+
+        self.print_out = RevOutput(layout=widgets.Layout(overflow='scroll',
+                                                         width='60%',
+                                                         height='300px',
+                                                         # display='flex',
+                                                         # positioning='bottom',
+                                                         border='1px solid black',
+                                                         ))
+        self.plot_func([])
+        super().__init__([widgets.VBox([plot_out, self.progress]), self.print_out])
+
+    def plot_func(self, datas):
+        # datas = signal.lfilter([1 - self.smooth_factor], [1, -self.smooth_factor], datas, axis=0)
+        if datas:
+            disD = [datas[0]]
+            for d in datas[1:]:
+                disD.append(disD[-1] * self.smooth_factor + d * (1 - self.smooth_factor))
+        else:
+            disD = datas
+        with self.plot_out:
+            self.progress.value = len(disD)
+            plt.plot(disD)
+            clear_output(wait=True)
+            plt.show()
