@@ -6,7 +6,7 @@
 <br/>
 <a href="https://deepreinforcementlearningbook.org" target="\_blank">
 	<div align="center">
-		<img src="http://deep-reinforcement-learning-book.github.io/assets/images/cover_v1.png" width="20%"/>
+		<img src="docs/img/rlzoo-logo.png" width="40%"/>
 	</div>
 <!-- 	<div align="center"><caption>Slack Invitation Link</caption></div> -->
 </a>
@@ -24,6 +24,19 @@ Different from RLzoo for simple usage with **high-level APIs**, we also have a [
 <!-- <em>Gym: Robotics</em>    <em>DeepMind Control Suite </em>   <em>Gym: RLBench </em>  -->
 
 <img src="https://github.com/tensorlayer/RLzoo/blob/master/gif/robotics.gif" height=250 width=210 > <img src="https://github.com/tensorlayer/RLzoo/blob/master/gif/dmcontrol.gif" height=250 width=210 > <img src="https://github.com/tensorlayer/RLzoo/blob/master/gif/rlbench.gif" height=250 width=210 > <img src="https://github.com/tensorlayer/tensorlayer/blob/master/img/tl_transparent_logo.png" height=180 width=210 >
+
+
+Please check our [Online Documentation](https://rlzoo.readthedocs.io). We suggest users to report bugs using Github issues. Users can also discuss how to use RLzoo in the following slack channel.
+
+<br/>
+
+<a href="https://join.slack.com/t/tensorlayer/shared_invite/enQtODk1NTQ5NTY1OTM5LTQyMGZhN2UzZDBhM2I3YjYzZDBkNGExYzcyZDNmOGQzNmYzNjc3ZjE3MzhiMjlkMmNiMmM3Nzc4ZDY2YmNkMTY" target="\_blank">
+	<div align="center">
+		<img src="https://github.com/tensorlayer/tensorlayer/raw/master/img/join_slack.png" width="40%"/>
+	</div>
+</a>
+
+<br/>
 
 
 **Table of contents:**

@@ -6,8 +6,8 @@
 Welcome to Reinforcement Learning Zoo! 
 ============================================
 
-.. image:: img/logo.png
-  :width: 50 %
+.. image:: img/rlzoo-logo.png
+  :width: 40 %
   :align: center
   :target: https://github.com/tensorlayer/rlzoo
 
