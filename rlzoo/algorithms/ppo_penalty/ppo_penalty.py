@@ -11,6 +11,7 @@ Proximal Policy Optimization Algorithms, Schulman et al. 2017
 High Dimensional Continuous Control Using Generalized Advantage Estimation, Schulman et al. 2016
 Emergence of Locomotion Behaviours in Rich Environments, Heess et al. 2017
 MorvanZhou's tutorial page: https://morvanzhou.github.io/tutorials
+MorvanZhou's code: https://github.com/MorvanZhou/Reinforcement-learning-with-tensorflow/
 
 Prerequisites
 --------------
@@ -191,7 +192,8 @@ class PPO_PENALTY(object):
         load_model(self.critic, 'critic', self.name, env_name)
 
     def learn(self, env, train_episodes=1000, test_episodes=10, max_steps=200, save_interval=10, gamma=0.9,
-              mode='train', render=False, batch_size=32, a_update_steps=10, c_update_steps=10):
+              mode='train', render=False, batch_size=32, a_update_steps=10, c_update_steps=10,
+              plot_func=None):
         """
         learn function
         :param env: learning environment
@@ -205,6 +207,7 @@ class PPO_PENALTY(object):
         :param batch_size: update batch size
         :param a_update_steps: actor update iteration steps
         :param c_update_steps: critic update iteration steps
+        :param plot_func: additional function for interactive module
         :return: None
         """
 
@@ -258,6 +261,8 @@ class PPO_PENALTY(object):
                 )
 
                 reward_buffer.append(ep_r)
+                if plot_func is not None:
+                    plot_func(reward_buffer)
                 if ep and not ep % save_interval:
                     self.save_ckpt(env_name=env.spec.id)
                     plot_save_log(reward_buffer, algorithm_name=self.name, env_name=env.spec.id)
@@ -269,6 +274,7 @@ class PPO_PENALTY(object):
         elif mode == 'test':
             self.load_ckpt(env_name=env.spec.id)
             print('Testing...  | Algorithm: {}  | Environment: {}'.format(self.name, env.spec.id))
+            reward_buffer = []
             for eps in range(test_episodes):
                 ep_rs_sum = 0
                 s = env.reset()
@@ -284,6 +290,9 @@ class PPO_PENALTY(object):
                 print('Episode: {}/{}  | Episode Reward: {:.4f}  | Running Time: {:.4f}'.format(
                     eps, test_episodes, ep_rs_sum, time.time() - t0)
                 )
+            reward_buffer.append(ep_rs_sum)
+            if plot_func:
+                plot_func(reward_buffer)
         else:
             print('unknown mode type')
 

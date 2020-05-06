@@ -181,9 +181,9 @@ class SAC():
         load_model(self.target_soft_q_net2, 'model_target_q_net2', self.name, env_name)
         load_model(self.policy_net, 'model_policy_net', self.name, env_name)
 
-    def learn(self, env, train_episodes=1000, test_episodes=1000, max_steps=150, batch_size=64, explore_steps=500, \
-              update_itr=3, policy_target_update_interval=3, reward_scale=1., save_interval=20, \
-              mode='train', AUTO_ENTROPY=True, render=False):
+    def learn(self, env, train_episodes=1000, test_episodes=1000, max_steps=150, batch_size=64, explore_steps=500,
+              update_itr=3, policy_target_update_interval=3, reward_scale=1., save_interval=20,
+              mode='train', AUTO_ENTROPY=True, render=False, plot_func=None):
         '''
         parameters
         ----------
@@ -200,6 +200,7 @@ class SAC():
         mode: 'train' or 'test'
         AUTO_ENTROPY: automatically updating variable alpha for entropy
         render: if true, visualize the environment
+        plot_func: additional function for interactive module
         '''
 
         # training loop
@@ -243,6 +244,8 @@ class SAC():
                 print('Episode: {}/{}  | Episode Reward: {:.4f}  | Running Time: {:.4f}' \
                       .format(eps, train_episodes, episode_reward, time.time() - t0))
                 rewards.append(episode_reward)
+                if plot_func is not None:
+                    plot_func(rewards)
             plot_save_log(rewards, algorithm_name=self.name, env_name=env.spec.id)
             self.save_ckpt(env_name=env.spec.id)
 
@@ -277,6 +280,8 @@ class SAC():
                 print('Episode: {}/{}  | Episode Reward: {:.4f}  | Running Time: {:.4f}' \
                       .format(eps, test_episodes, episode_reward, time.time() - t0))
                 rewards.append(episode_reward)
+            if plot_func:
+                plot_func(rewards)
 
         else:
             print('unknow mode type')

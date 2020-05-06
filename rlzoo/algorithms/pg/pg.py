@@ -10,6 +10,7 @@ Reference
 ---------
 Cookbook: Barto A G, Sutton R S. Reinforcement Learning: An Introduction[J]. 1998.
 MorvanZhou's tutorial page: https://morvanzhou.github.io/tutorials/
+MorvanZhou's code: https://github.com/MorvanZhou/Reinforcement-learning-with-tensorflow/
 
 Prerequisites
 --------------
@@ -135,7 +136,7 @@ class PG:
         load_model(self.model, 'model_policy', self.name, env_name)
 
     def learn(self, env, train_episodes=200, test_episodes=100, max_steps=200, save_interval=100,
-              mode='train', render=False, gamma=0.95):
+              mode='train', render=False, gamma=0.95, plot_func=None):
         """
         parameters
         ----------
@@ -147,6 +148,7 @@ class PG:
         :param mode: train or test
         :param render: render each step
         :param gamma: reward decay
+        :param plot_func: additional function for interactive module
         :return: None
         """
 
@@ -177,6 +179,8 @@ class PG:
                     i_episode, train_episodes, ep_rs_sum, time.time() - t0)
                 )
                 reward_buffer.append(ep_rs_sum)
+                if plot_func is not None:
+                    plot_func(reward_buffer)
 
                 self.update(gamma)
 

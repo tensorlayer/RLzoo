@@ -313,7 +313,7 @@ class TRPO:
 
     def learn(self, env, train_episodes=200, test_episodes=100, max_steps=200, save_interval=10,
               gamma=0.9, mode='train', render=False, batch_size=32, backtrack_iters=10, backtrack_coeff=0.8,
-              train_critic_iters=80):
+              train_critic_iters=80, plot_func=None):
         """
         learn function
         :param env: learning environment
@@ -381,6 +381,8 @@ class TRPO:
                 )
 
                 reward_buffer.append(ep_rs_sum)
+                if plot_func is not None:
+                    plot_func(reward_buffer)
                 if ep and not ep % save_interval:
                     self.save_ckpt(env_name=env.spec.id)
                     plot_save_log(reward_buffer, self.name, env.spec.id)
@@ -392,6 +394,7 @@ class TRPO:
         elif mode == 'test':
             self.load_ckpt(env_name=env.spec.id)
             print('Testing...  | Algorithm: {}  | Environment: {}'.format(self.name, env.spec.id))
+            reward_buffer = []
             for eps in range(test_episodes):
                 ep_rs_sum = 0
                 s = env.reset()
@@ -407,5 +410,8 @@ class TRPO:
                 print('Episode: {}/{}  | Episode Reward: {:.4f}  | Running Time: {:.4f}'.format(
                     eps, test_episodes, ep_rs_sum, time.time() - t0)
                 )
+            reward_buffer.append(ep_rs_sum)
+            if plot_func:
+                plot_func(reward_buffer)
         else:
             print('unknown mode type')

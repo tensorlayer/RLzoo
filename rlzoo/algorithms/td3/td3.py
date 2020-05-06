@@ -212,7 +212,7 @@ class TD3():
     def learn(self, env, train_episodes=1000, test_episodes=1000, max_steps=150, batch_size=64, explore_steps=500,
               update_itr=3,
               reward_scale=1., save_interval=10, explore_noise_scale=1.0, eval_noise_scale=0.5, mode='train',
-              render=False):
+              render=False, plot_func=None):
         '''
         parameters
         ----------
@@ -229,7 +229,7 @@ class TD3():
         eval_noise_scale: range of action noise for evaluation of action value
         mode: 'train' or 'test'
         render: if true, visualize the environment
-
+        plot_func: additional function for interactive module
         '''
 
         # training loop
@@ -272,6 +272,8 @@ class TD3():
                 print('Episode: {}/{}  | Episode Reward: {:.4f}  | Running Time: {:.4f}' \
                       .format(eps, train_episodes, episode_reward, time.time() - t0))
                 rewards.append(episode_reward)
+                if plot_func is not None:
+                    plot_func(rewards)
             plot_save_log(rewards, algorithm_name=self.name, env_name=env.spec.id)
             self.save_ckpt(env_name=env.spec.id)
 
@@ -312,6 +314,8 @@ class TD3():
                 print('Episode: {}/{}  | Episode Reward: {:.4f}  | Running Time: {:.4f}' \
                       .format(eps, test_episodes, episode_reward, time.time() - t0))
                 rewards.append(episode_reward)
+                if plot_func is not None:
+                    plot_func(rewards)
 
         else:
             print('unknow mode type, activate test mode as default')

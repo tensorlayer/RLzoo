@@ -133,6 +133,7 @@ def call_default_params(env, envtype, alg, default_seed=True):
 def set_seed(seed, env=None):
     """ set random seed for reproduciblity """
     if isinstance(env, list):
+        assert isinstance(seed, list)
         for i in range(len(env)):
             env[i].seed(seed[i])
         seed = seed[0]  # pick one seed for np and tf

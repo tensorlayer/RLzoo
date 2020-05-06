@@ -11,6 +11,7 @@ Emergence of Locomotion Behaviours in Rich Environments, Heess et al. 2017
 Proximal Policy Optimization Algorithms, Schulman et al. 2017
 High Dimensional Continuous Control Using Generalized Advantage Estimation, Schulman et al. 2016
 MorvanZhou's tutorial page: https://morvanzhou.github.io/tutorials
+MorvanZhou's code: https://github.com/MorvanZhou/Reinforcement-learning-with-tensorflow/
 
 Prerequisites
 --------------
@@ -212,7 +213,8 @@ class DPPO_PENALTY(object):
         load_model(self.critic, 'critic', self.name, env_name)
 
     def learn(self, env, train_episodes=200, test_episodes=100, max_steps=200, save_interval=10, gamma=0.9,
-              mode='train', render=False, batch_size=32, a_update_steps=10, c_update_steps=10, n_workers=4):
+              mode='train', render=False, batch_size=32, a_update_steps=10, c_update_steps=10, n_workers=4,
+              plot_func=None):
         """
         learn function
         :param env: learning environment
@@ -227,6 +229,7 @@ class DPPO_PENALTY(object):
         :param a_update_steps: actor update iteration steps
         :param c_update_steps: critic update iteration steps
         :param n_workers: number of workers
+        :param plot_func: additional function for interactive module
         :return: None
         """
         t0 = time.time()
@@ -244,7 +247,7 @@ class DPPO_PENALTY(object):
             UPDATE_EVENT, ROLLING_EVENT = threading.Event(), threading.Event()
             UPDATE_EVENT.clear()  # not update now
             ROLLING_EVENT.set()  # start to roll out
-            workers = [Worker(wid=i, env=env[i]) for i in range(n_workers)]
+            workers = [Worker(wid=i, env=env[i], plot_func=plot_func) for i in range(n_workers)]
 
             GLOBAL_UPDATE_COUNTER, GLOBAL_EP = 0, 0
             GLOBAL_RUNNING_R = []
@@ -296,11 +299,12 @@ class Worker(object):
     Worker class for distributional running
     """
 
-    def __init__(self, wid, env):
+    def __init__(self, wid, env, plot_func):
         self.wid = wid
         self.env = env
         global GLOBAL_PPO
         self.ppo = GLOBAL_PPO
+        self.plot_func = plot_func
 
     def work(self):
         """
@@ -366,3 +370,5 @@ class Worker(object):
                     time.time() - t0
                 )
             )
+            if self.wid == 0 and self.plot_func is not None:
+                self.plot_func(GLOBAL_RUNNING_R)

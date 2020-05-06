@@ -5,6 +5,7 @@ import tensorflow as tf
 import tensorlayer as tl
 from tensorlayer.layers import Dense, Input
 from gym import spaces
+from collections import OrderedDict
 
 
 def MLP(input_dim, hidden_dim_list, w_init=tf.initializers.Orthogonal(0.2),
@@ -128,7 +129,7 @@ def CNNModel(input_shape, conv_kwargs=None):
     return tl.models.Model(inputs=ni, outputs=no)
 
 
-def CreateInputLayer(state_space):
+def CreateInputLayer(state_space, conv_kwargs=None):
     def CreateSingleInput(single_state_space):
         single_state_shape = single_state_space.shape
         # build structure
@@ -136,11 +137,11 @@ def CreateInputLayer(state_space):
             l = inputs = Input((None,) + single_state_shape, name='input_layer')
         else:
             with tf.name_scope('CNN'):
-                inputs, l = CNN(single_state_shape, conv_kwargs=None)
+                inputs, l = CNN(single_state_shape, conv_kwargs=conv_kwargs)
         return inputs, l, single_state_shape
 
     if isinstance(state_space, spaces.Dict):
-        input_dict, layer_dict, shape_dict = dict(), dict(), dict()
+        input_dict, layer_dict, shape_dict = OrderedDict(), OrderedDict(), OrderedDict()
         for k, v in state_space.spaces.items():
             input_dict[k], layer_dict[k], shape_dict[k] = CreateSingleInput(v)
         return input_dict, layer_dict, shape_dict

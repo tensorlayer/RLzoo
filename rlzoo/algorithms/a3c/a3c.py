@@ -17,8 +17,7 @@ Reference
 ----------
 Original Paper: https://arxiv.org/pdf/1602.01783.pdf
 MorvanZhou's tutorial: https://morvanzhou.github.io/tutorials/
-MorvanZhou's code: https://github.com/MorvanZhou/Reinforcement-learning-with-tensorflow/blob/master/experiments/Solve_BipedalWalker/A3C.py
-
+MorvanZhou's code: https://github.com/MorvanZhou/Reinforcement-learning-with-tensorflow/
 Environment
 -----------
 BipedalWalker-v2 : https://gym.openai.com/envs/BipedalWalker-v2
@@ -118,7 +117,7 @@ class ACNet(object):
 
 class Worker(object):
     def __init__(self, env, net_list, name, train_episodes, max_steps, gamma, update_itr, entropy_beta,
-                 render):
+                 render, plot_func):
         self.name = name
         self.AC = ACNet(net_list, name, entropy_beta)
         self.MAX_GLOBAL_EP = train_episodes
@@ -127,6 +126,7 @@ class Worker(object):
         self.env = env
         self.max_steps = max_steps
         self.render = render
+        self.plot_func = plot_func
 
     def work(self, globalAC):
         global COORD, GLOBAL_RUNNING_R, GLOBAL_EP, OPT_A, OPT_C, t0, SAVE_INTERVAL
@@ -188,6 +188,8 @@ class Worker(object):
                     break
 
             GLOBAL_RUNNING_R.append(ep_r)
+            if self.name == 'Worker_0' and self.plot_func is not None:
+                self.plot_func(GLOBAL_RUNNING_R)
             print('{}, Episode: {}/{}  | Episode Reward: {:.4f}  | Running Time: {:.4f}' \
                   .format(self.name, GLOBAL_EP, self.MAX_GLOBAL_EP, ep_r, time.time() - t0))
             GLOBAL_EP += 1
@@ -207,7 +209,7 @@ class A3C():
         self.name = 'A3C'
 
     def learn(self, env, train_episodes=1000, test_episodes=10, max_steps=150, render=False, n_workers=1, update_itr=10,
-              gamma=0.99, save_interval=500, mode='train'):
+              gamma=0.99, save_interval=500, mode='train', plot_func=None):
 
         '''
         parameters
@@ -222,7 +224,7 @@ class A3C():
         gamma: reward discount factor
         save_interval: timesteps for saving the weights and plotting the results
         mode: train or test
-
+        plot_func: additional function for interactive module
         '''
         global COORD, GLOBAL_RUNNING_R, GLOBAL_EP, OPT_A, OPT_C, t0, SAVE_INTERVAL
         SAVE_INTERVAL = save_interval
@@ -231,6 +233,7 @@ class A3C():
         GLOBAL_EP = 0  # will increase during training, stop training when it >= MAX_GLOBAL_EP
         N_WORKERS = n_workers if n_workers > 0 else multiprocessing.cpu_count()
 
+        self.plot_func = plot_func
         if mode == 'train':
             # ============================= TRAINING ===============================
             print('Training...  | Algorithm: {}  | Environment: {}'.format(self.name, env[0].spec.id))
@@ -244,7 +247,7 @@ class A3C():
                     i_name = 'Worker_%i' % i  # worker name
                     workers.append(
                         Worker(env[i], self.net_list[i + 1], i_name, train_episodes, max_steps, gamma,
-                               update_itr, self.entropy_beta, render))
+                               update_itr, self.entropy_beta, render, plot_func))
 
             # start TF threading
             worker_threads = []
