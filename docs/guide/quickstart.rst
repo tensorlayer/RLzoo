@@ -13,11 +13,11 @@ Open ``./run_rlzoo.py``:
     from rlzoo.common.utils import call_default_params
     from rlzoo.algorithms import TD3
     # choose an algorithm
-    AlgName = 'TD3'
-    # chose an environment
-    EnvName = 'Pendulum-v0'  
+    AlgName = 'TD3' 
     # select a corresponding environment type
     EnvType = 'classic_control'
+    # chose an environment
+    EnvName = 'Pendulum-v0' 
     # build an environment with wrappers
     env = build_env(EnvName, EnvType)  
     # call default parameters for the algorithm and learning process
@@ -40,6 +40,8 @@ Run the example:
 Choices for ``AlgName``: 'DQN', 'AC', 'A3C', 'DDPG', 'TD3', 'SAC', 'PG', 'TRPO', 'PPO', 'DPPO'
 
 Choices for ``EnvType``: 'atari', 'box2d', 'classic_control', 'mujoco', 'robotics', 'dm_control', 'rlbench'
+
+Choices for ``EnvName`` refers to :ref:`env_list`
 
 
 Another Usage

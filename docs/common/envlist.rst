@@ -13,7 +13,7 @@ List of Supported Environments in RLzoo
 
 
 
-.. literalinclude:: ../../rlzoo/common/env_list.py
+.. literalinclude:: rlzoo/common/env_list.py
    :language: python
    :lines: 10-
    :linenos:
