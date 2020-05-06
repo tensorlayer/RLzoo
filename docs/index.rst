@@ -22,6 +22,7 @@ We also provide novices friendly `DRL Tutorials <https://github.com/tensorlayer/
    guide/installation
    guide/quickstart
    guide/configuration
+   guide/api
 
 .. toctree::
    :maxdepth: 1
