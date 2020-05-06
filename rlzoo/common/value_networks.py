@@ -133,6 +133,9 @@ class QNetwork(Model):
             activation (callable): activation function
             output_activation (callable or None): output activation function
             trainable (bool): set training and evaluation mode
+            name (str): name the model
+            state_only (bool): only input state or not, available in discrete action space
+            dueling (bool): whether use the dueling output or not, available in discrete action space
         """
         self._state_space, self._action_space = state_space, action_space
         self.state_only = state_only
