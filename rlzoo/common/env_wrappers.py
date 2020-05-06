@@ -3,7 +3,7 @@ Most common wrappers can be checked from following links for usage:
 
 `https://pypi.org/project/gym-vec-env`
 
-`https://github.com/openai/baselines/blob/master/baselines/common/*wrappers.py`
+`https://github.com/openai/baselines/blob/master/baselines/common/wrappers.py`
 """
 from collections import deque
 from functools import partial
