@@ -144,7 +144,6 @@ class TRPO:
 
         :return: value
         """
-        s = s.astype(np.float32)
         if s.ndim < 2: s = s[np.newaxis, :]
         res = self.critic(s)[0, 0]
         return res
@@ -264,21 +263,23 @@ class TRPO:
 
         surr = ratio * badv
         aloss = -tf.reduce_mean(surr)
-        kl = self.old_dist.kl(self.actor.policy_dist.get_param())
+        kl = self.old_dist.kl(self.actor.policy_dist.param)
         # kl = tfp.distributions.kl_divergence(oldpi, pi)
         kl = tf.reduce_mean(kl)
         return aloss, kl
 
     def a_train(self, s, a, adv, oldpi_prob, backtrack_iters, backtrack_coeff):
-        s = np.array(s, np.float32)
+        s = np.array(s)
         a = np.array(a, np.float32)
         adv = np.array(adv, np.float32)
 
         with tf.GradientTape() as tape:
             aloss, kl = self.eval(s, a, adv, oldpi_prob)
         a_grad = tape.gradient(aloss, self.actor.trainable_weights)
+        # print(a_grad)
         a_grad = self.flat_concat(a_grad)
         pi_l_old = aloss
+        # print(a_grad)
 
         Hx = lambda x: self.hessian_vector_product(s, a, adv, oldpi_prob, x)
         x = self.cg(Hx, a_grad)
@@ -300,7 +301,7 @@ class TRPO:
     def hessian_vector_product(self, s, a, adv, oldpi_prob, v_ph):
         # for H = grad**2 f, compute Hx
         params = self.actor.trainable_weights
-        
+
         with tf.GradientTape() as tape1:
             with tf.GradientTape() as tape0:
                 aloss, kl = self.eval(s, a, adv, oldpi_prob)
@@ -310,7 +311,7 @@ class TRPO:
             v = tf.reduce_sum(g * v_ph)
         grad = tape1.gradient(v, params)
         hvp = self.flat_concat(grad)
-        
+
         if self.damping_coeff > 0:
             hvp += self.damping_coeff * v_ph
         return hvp
@@ -336,7 +337,7 @@ class TRPO:
 
     def learn(self, env, train_episodes=200, test_episodes=100, max_steps=200, save_interval=10,
               gamma=0.9, mode='train', render=False, batch_size=32, backtrack_iters=10, backtrack_coeff=0.8,
-              train_critic_iters=80):
+              train_critic_iters=80, plot_func=None):
         """
         learn function
 
@@ -379,18 +380,20 @@ class TRPO:
 
                     # update ppo
                     if (t + 1) % batch_size == 0 or t == max_steps - 1 or done:
-                        try:
-                            v_s_ = self.get_v(s_)
-                        except:
-                            v_s_ = self.get_v(s_[np.newaxis, :])  # for raw-pixel input
+                        if done:
+                            v_s_ = 0
+                        else:
+                            try:
+                                v_s_ = self.get_v(s_)
+                            except:
+                                v_s_ = self.get_v(s_[np.newaxis, :])  # for raw-pixel input
                         discounted_r = []
                         for r in buffer_r[::-1]:
                             v_s_ = r + gamma * v_s_
                             discounted_r.append(v_s_)
                         discounted_r.reverse()
-                        bs = buffer_s if len(buffer_s[0].shape) > 1 else np.vstack(
-                            buffer_s)  # no vstack for raw-pixel input
-                        ba, br = np.vstack(buffer_a), np.array(discounted_r)[:, np.newaxis]
+                        bs = buffer_s
+                        ba, br = buffer_a, np.array(discounted_r)[:, np.newaxis]
                         buffer_s, buffer_a, buffer_r = [], [], []
                         self.update(bs, ba, br, train_critic_iters, backtrack_iters, backtrack_coeff)
                     if done:
@@ -404,6 +407,8 @@ class TRPO:
                 )
 
                 reward_buffer.append(ep_rs_sum)
+                if plot_func is not None:
+                    plot_func(reward_buffer)
                 if ep and not ep % save_interval:
                     self.save_ckpt(env_name=env.spec.id)
                     plot_save_log(reward_buffer, self.name, env.spec.id)
@@ -415,6 +420,7 @@ class TRPO:
         elif mode == 'test':
             self.load_ckpt(env_name=env.spec.id)
             print('Testing...  | Algorithm: {}  | Environment: {}'.format(self.name, env.spec.id))
+            reward_buffer = []
             for eps in range(test_episodes):
                 ep_rs_sum = 0
                 s = env.reset()
@@ -430,5 +436,8 @@ class TRPO:
                 print('Episode: {}/{}  | Episode Reward: {:.4f}  | Running Time: {:.4f}'.format(
                     eps, test_episodes, ep_rs_sum, time.time() - t0)
                 )
+            reward_buffer.append(ep_rs_sum)
+            if plot_func:
+                plot_func(reward_buffer)
         else:
             print('unknown mode type')

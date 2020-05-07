@@ -9,6 +9,8 @@ Reference
 Deterministic Policy Gradient Algorithms, Silver et al. 2014
 Continuous Control With Deep Reinforcement Learning, Lillicrap et al. 2016
 MorvanZhou's tutorial page: https://morvanzhou.github.io/tutorials/
+MorvanZhou's code: https://github.com/MorvanZhou/Reinforcement-learning-with-tensorflow/
+
 Prerequisites
 -------------
 tensorflow >=2.0.0a0
@@ -182,7 +184,8 @@ class DDPG(object):
         load_model(self.critic_target, 'model_target_q_net', self.name, env_name)
 
     def learn(self, env, train_episodes=200, test_episodes=100, max_steps=200, save_interval=10, explore_steps=500,
-              mode='train', render=False, batch_size=32, gamma=0.9, noise_scale=1., noise_scale_decay=0.995):
+              mode='train', render=False, batch_size=32, gamma=0.9, noise_scale=1., noise_scale_decay=0.995,
+              plot_func=None):
         """
         learn function
 
@@ -198,7 +201,7 @@ class DDPG(object):
         :param gamma: reward decay factor
         :param noise_scale: range of action noise for exploration
         :param noise_scale_decay: noise scale decay factor
-
+        :param plot_func: additional function for interactive module
         :return: None
         """
 
@@ -227,7 +230,6 @@ class DDPG(object):
                     self.store_transition(s, a, r, s_, done)
                     if len(self.buffer) >= self.replay_buffer_size:
                         self.update(batch_size, gamma)
-
                         noise_scale *= noise_scale_decay
                     s = s_
                     ep_reward += r
@@ -243,6 +245,8 @@ class DDPG(object):
                 )
 
                 reward_buffer.append(ep_reward)
+                if plot_func is not None:
+                    plot_func(reward_buffer)
                 if i and not i % save_interval:
                     self.save_ckpt(env_name=env.spec.id)
                     plot_save_log(reward_buffer, algorithm_name=self.name, env_name=env.spec.id)
@@ -254,7 +258,8 @@ class DDPG(object):
         elif mode == 'test':
             self.load_ckpt(env_name=env.spec.id)
             print('Testing...  | Algorithm: {}  | Environment: {}'.format(self.name, env.spec.id))
-            for eps in range(test_episodes):
+            reward_buffer = []
+            for eps in range(1, test_episodes+1):
                 ep_rs_sum = 0
                 s = env.reset()
                 for step in range(max_steps):
@@ -269,5 +274,8 @@ class DDPG(object):
                 print('Episode: {}/{}  | Episode Reward: {:.4f}  | Running Time: {:.4f}'.format(
                     eps, test_episodes, ep_rs_sum, time.time() - t0)
                 )
+            reward_buffer.append(ep_rs_sum)
+            if plot_func:
+                plot_func(reward_buffer)
         else:
             print('unknown mode type')

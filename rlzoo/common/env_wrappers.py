@@ -87,9 +87,9 @@ def _make_env(env_id, env_type, seed, reward_shaping, frame_stack, **kwargs):
     check_name_in_list(env_id, env_type)  # check existence of env_id in env_type
     if env_type == 'atari':
         env = gym.make(env_id)
-        assert 'NoFrameskip' in env.spec.id
         env = NoopResetEnv(env, noop_max=30)
-        env = MaxAndSkipEnv(env, skip=4)
+        if 'NoFrameskip' in env.spec.id:
+            env = MaxAndSkipEnv(env, skip=4)
         env = Monitor(env)
         # deepmind wrap
         env = EpisodicLifeEnv(env)
@@ -114,7 +114,8 @@ def _make_env(env_id, env_type, seed, reward_shaping, frame_stack, **kwargs):
         env = DmObsTrans(env)
     elif env_type == 'rlbench':
         from rlzoo.common.build_rlbench_env import RLBenchEnv
-        env = RLBenchEnv(env_id)
+        state_type = kwargs.get('state_type')
+        env = RLBenchEnv(env_id) if state_type is None else RLBenchEnv(env_id, state_type)
     else:
         raise NotImplementedError
 

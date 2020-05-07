@@ -95,7 +95,6 @@ class TD3():
 
         :param eval_noise_scale: as the trick of target policy smoothing, for generating noisy actions.
         '''
-        state = state.astype(np.float32)
         if target:
             action = self.target_policy_net(state)
         else:
@@ -214,7 +213,7 @@ class TD3():
     def learn(self, env, train_episodes=1000, test_episodes=1000, max_steps=150, batch_size=64, explore_steps=500,
               update_itr=3,
               reward_scale=1., save_interval=10, explore_noise_scale=1.0, eval_noise_scale=0.5, mode='train',
-              render=False):
+              render=False, plot_func=None):
         '''
         :param env: learning environment
         :param train_episodes:  total number of episodes for training
@@ -229,7 +228,7 @@ class TD3():
         :param eval_noise_scale: range of action noise for evaluation of action value
         :param mode: 'train' or 'test'
         :param render: if true, visualize the environment
-
+        :param plot_func: additional function for interactive module
         '''
 
         # training loop
@@ -240,7 +239,6 @@ class TD3():
             t0 = time.time()
             for eps in range(train_episodes):
                 state = env.reset()
-                state = state.astype(np.float32)
                 episode_reward = 0
 
                 for step in range(max_steps):
@@ -250,7 +248,6 @@ class TD3():
                         action = self.sample_action()
 
                     next_state, reward, done, _ = env.step(action)
-                    next_state = next_state.astype(np.float32)
                     if render: env.render()
                     done = 1 if done == True else 0
 
@@ -274,6 +271,8 @@ class TD3():
                 print('Episode: {}/{}  | Episode Reward: {:.4f}  | Running Time: {:.4f}' \
                       .format(eps, train_episodes, episode_reward, time.time() - t0))
                 rewards.append(episode_reward)
+                if plot_func is not None:
+                    plot_func(rewards)
             plot_save_log(rewards, algorithm_name=self.name, env_name=env.spec.id)
             self.save_ckpt(env_name=env.spec.id)
 
@@ -294,13 +293,11 @@ class TD3():
 
             for eps in range(test_episodes):
                 state = env.reset()
-                state = state.astype(np.float32)
                 episode_reward = 0
 
                 for step in range(max_steps):
                     action = self.get_action_greedy(state)
                     next_state, reward, done, _ = env.step(action)
-                    next_state = next_state.astype(np.float32)
                     if render: env.render()
                     done = 1 if done == True else 0
 
@@ -308,14 +305,13 @@ class TD3():
                     episode_reward += reward
                     frame_idx += 1
 
-                    # if frame_idx % 50 == 0:
-                    #     plot(frame_idx, rewards)
-
                     if done:
                         break
                 print('Episode: {}/{}  | Episode Reward: {:.4f}  | Running Time: {:.4f}' \
                       .format(eps, test_episodes, episode_reward, time.time() - t0))
                 rewards.append(episode_reward)
+                if plot_func is not None:
+                    plot_func(rewards)
 
         else:
             print('unknow mode type, activate test mode as default')

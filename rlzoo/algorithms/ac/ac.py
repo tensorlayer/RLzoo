@@ -20,6 +20,7 @@ Reference
 ----------
 paper: https://papers.nips.cc/paper/1786-actor-critic-algorithms.pdf
 View more on MorvanZhou's tutorial page: https://morvanzhou.github.io/tutorials/
+MorvanZhou's code: https://github.com/MorvanZhou/Reinforcement-learning-with-tensorflow/
 
 Environment
 ------------
@@ -109,7 +110,7 @@ class AC:
         load_model(self.critic, 'model_critic', self.name, env_name)
 
     def learn(self, env, train_episodes=1000, test_episodes=500, max_steps=200,
-              save_interval=100, mode='train', render=False):
+              save_interval=100, mode='train', render=False, plot_func=None):
         """
         :param env: learning environment
         :param train_episodes:  total number of episodes for training
@@ -118,6 +119,7 @@ class AC:
         :param save_interval: time steps for saving the weights and plotting the results
         :param mode: 'train' or 'test'
         :param render:  if true, visualize the environment
+        :param plot_func: additional function for interactive module
         """
 
         t0 = time.time()
@@ -125,7 +127,7 @@ class AC:
             print('Training...  | Algorithm: {}  | Environment: {}'.format(self.name, env.spec.id))
             reward_buffer = []
             for i_episode in range(train_episodes):
-                s = env.reset().astype(np.float32)
+                s = env.reset()
                 ep_rs_sum = 0  # rewards of all steps
 
                 for step in range(max_steps):
@@ -149,7 +151,8 @@ class AC:
                         break
 
                 reward_buffer.append(ep_rs_sum)
-
+                if plot_func is not None:
+                    plot_func(reward_buffer)
                 print('Episode: {}/{}  | Episode Reward: {:.4f}  | Running Time: {:.4f}' \
                       .format(i_episode, train_episodes, ep_rs_sum, time.time() - t0))
 
@@ -164,14 +167,15 @@ class AC:
             self.load_ckpt(env_name=env.spec.id)
             print('Testing...  | Algorithm: {}  | Environment: {}'.format(self.name, env.spec.id))
 
+            reward_buffer = []
             for i_episode in range(test_episodes):
-                s = env.reset().astype(np.float32)
+                s = env.reset()
                 ep_rs_sum = 0  # rewards of all steps
                 for step in range(max_steps):
                     if render: env.render()
                     a = self.get_action_greedy(s)
                     s_new, r, done, info = env.step(a)
-                    s_new = s_new.astype(np.float32)
+                    s_new = s_new
 
                     ep_rs_sum += r
                     s = s_new
@@ -179,6 +183,9 @@ class AC:
                     if done:
                         break
 
+                reward_buffer.append(ep_rs_sum)
+                if plot_func:
+                    plot_func(reward_buffer)
                 print('Episode: {}/{}  | Episode Reward: {:.4f}  | Running Time: {:.4f}'.format(
                     i_episode, test_episodes, ep_rs_sum, time.time() - t0))
 

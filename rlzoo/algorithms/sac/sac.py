@@ -62,7 +62,6 @@ class SAC():
 
     def evaluate(self, state, epsilon=1e-6):
         ''' generate action with state for calculating gradients '''
-        state = state.astype(np.float32)
         _ = self.policy_net(state)
         mean, log_std = self.policy_net.policy_dist.get_param()  # as SAC uses TanhNorm instead of normal distribution, need original mean_std
         std = tf.math.exp(log_std)  # no clip in evaluation, clip affects gradients flow
@@ -83,11 +82,11 @@ class SAC():
 
     def get_action(self, state):
         ''' generate action with state for interaction with envronment '''
-        return self.policy_net(np.array([state.astype(np.float32)])).numpy()[0]
+        return self.policy_net(np.array([state])).numpy()[0]
 
     def get_action_greedy(self, state):
         ''' generate action with state for interaction with envronment '''
-        return self.policy_net(np.array([state.astype(np.float32)]), greedy=True).numpy()[0]
+        return self.policy_net(np.array([state]), greedy=True).numpy()[0]
 
     def sample_action(self, ):
         ''' generate random actions for exploration '''
@@ -182,9 +181,9 @@ class SAC():
         load_model(self.target_soft_q_net2, 'model_target_q_net2', self.name, env_name)
         load_model(self.policy_net, 'model_policy_net', self.name, env_name)
 
-    def learn(self, env, train_episodes=1000, test_episodes=1000, max_steps=150, batch_size=64, explore_steps=500, \
-              update_itr=3, policy_target_update_interval=3, reward_scale=1., save_interval=20, \
-              mode='train', AUTO_ENTROPY=True, render=False):
+    def learn(self, env, train_episodes=1000, test_episodes=1000, max_steps=150, batch_size=64, explore_steps=500,
+              update_itr=3, policy_target_update_interval=3, reward_scale=1., save_interval=20,
+              mode='train', AUTO_ENTROPY=True, render=False, plot_func=None):
         '''
         :param env: learning environment
         :param train_episodes:  total number of episodes for training
@@ -199,6 +198,7 @@ class SAC():
         :param mode: 'train' or 'test'
         :param AUTO_ENTROPY: automatically updating variable alpha for entropy
         :param render: if true, visualize the environment
+        :param plot_func: additional function for interactive module
         '''
 
         # training loop
@@ -209,7 +209,6 @@ class SAC():
             t0 = time.time()
             for eps in range(train_episodes):
                 state = env.reset()
-                state = state.astype(np.float32)
                 episode_reward = 0
 
                 for step in range(max_steps):
@@ -219,7 +218,6 @@ class SAC():
                         action = self.sample_action()
 
                     next_state, reward, done, _ = env.step(action)
-                    next_state = next_state.astype(np.float32)
                     if render: env.render()
                     done = 1 if done == True else 0
 
@@ -244,6 +242,8 @@ class SAC():
                 print('Episode: {}/{}  | Episode Reward: {:.4f}  | Running Time: {:.4f}' \
                       .format(eps, train_episodes, episode_reward, time.time() - t0))
                 rewards.append(episode_reward)
+                if plot_func is not None:
+                    plot_func(rewards)
             plot_save_log(rewards, algorithm_name=self.name, env_name=env.spec.id)
             self.save_ckpt(env_name=env.spec.id)
 
@@ -262,13 +262,11 @@ class SAC():
 
             for eps in range(test_episodes):
                 state = env.reset()
-                state = state.astype(np.float32)
                 episode_reward = 0
 
                 for step in range(max_steps):
                     action = self.get_action_greedy(state)
                     next_state, reward, done, _ = env.step(action)
-                    next_state = next_state.astype(np.float32)
                     if render: env.render()
                     done = 1 if done == True else 0
 
@@ -280,6 +278,8 @@ class SAC():
                 print('Episode: {}/{}  | Episode Reward: {:.4f}  | Running Time: {:.4f}' \
                       .format(eps, test_episodes, episode_reward, time.time() - t0))
                 rewards.append(episode_reward)
+            if plot_func:
+                plot_func(rewards)
 
         else:
             print('unknow mode type')

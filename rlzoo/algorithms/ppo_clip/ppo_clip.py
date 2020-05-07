@@ -11,6 +11,7 @@ Proximal Policy Optimization Algorithms, Schulman et al. 2017
 High Dimensional Continuous Control Using Generalized Advantage Estimation, Schulman et al. 2016
 Emergence of Locomotion Behaviours in Rich Environments, Heess et al. 2017
 MorvanZhou's tutorial page: https://morvanzhou.github.io/tutorials
+MorvanZhou's code: https://github.com/MorvanZhou/Reinforcement-learning-with-tensorflow/
 
 Prerequisites
 --------------
@@ -72,9 +73,12 @@ class PPO_CLIP(object):
 
         :return: None
         """
-        tfs = np.array(tfs, np.float32)
-        tfa = np.array(tfa, np.float32)
-        tfadv = np.array(tfadv, np.float32)
+        try:
+            tfs = np.array(tfs, np.float32)
+            tfa = np.array(tfa, np.float32)
+            tfadv = np.array(tfadv, np.float32)
+        except:
+            pass
 
         with tf.GradientTape() as tape:
             _ = self.actor(tfs)
@@ -168,8 +172,11 @@ class PPO_CLIP(object):
 
         :return: value
         """
-        s = s.astype(np.float32)
-        if s.ndim < 2: s = s[np.newaxis, :]
+        try:
+            s = s.astype(np.float32)
+            if s.ndim < 2: s = s[np.newaxis, :]
+        except:
+            pass
         res = self.critic(s)[0, 0]
         return res
 
@@ -192,7 +199,8 @@ class PPO_CLIP(object):
         load_model(self.critic, 'critic', self.name, env_name)
 
     def learn(self, env, train_episodes=200, test_episodes=100, max_steps=200, save_interval=10,
-              gamma=0.9, mode='train', render=False, batch_size=32, a_update_steps=10, c_update_steps=10):
+              gamma=0.9, mode='train', render=False, batch_size=32, a_update_steps=10, c_update_steps=10,
+              plot_func=None):
         """
         learn function
 
@@ -207,7 +215,7 @@ class PPO_CLIP(object):
         :param batch_size: udpate batchsize
         :param a_update_steps: actor update iteration steps
         :param c_update_steps: critic update iteration steps
-        
+        :param plot_func: additional function for interactive module
         :return: None
         """
 
@@ -234,18 +242,24 @@ class PPO_CLIP(object):
 
                     # update ppo
                     if (t + 1) % batch_size == 0 or t == max_steps - 1 or done:
-                        try:
-                            v_s_ = self.get_v(s_)
-                        except:
-                            v_s_ = self.get_v(s_[np.newaxis, :])   # for raw-pixel input
+                        if done:
+                            v_s_ = 0
+                        else:
+                            try:
+                                v_s_ = self.get_v(s_)
+                            except:
+                                v_s_ = self.get_v([s_])   # for raw-pixel input
+
                         discounted_r = []
                         for r in buffer_r[::-1]:
                             v_s_ = r + gamma * v_s_
                             discounted_r.append(v_s_)
                         discounted_r.reverse()
-                        bs = buffer_s if len(buffer_s[0].shape)>1 else np.vstack(buffer_s) # no vstack for raw-pixel input
+                        # bs = buffer_s if len(buffer_s[0].shape)>1 else np.vstack(buffer_s) # no vstack for raw-pixel input
+                        bs = buffer_s
                         ba, br = np.vstack(buffer_a), np.array(discounted_r)[:, np.newaxis]
                         buffer_s, buffer_a, buffer_r = [], [], []
+
                         self.update(bs, ba, br, a_update_steps, c_update_steps)
                     if done:
                         break
@@ -258,6 +272,8 @@ class PPO_CLIP(object):
                 )
 
                 reward_buffer.append(ep_rs_sum)
+                if plot_func is not None:
+                    plot_func(reward_buffer)
                 if ep and not ep % save_interval:
                     self.save_ckpt(env_name=env.spec.id)
                     plot_save_log(reward_buffer, algorithm_name=self.name, env_name=env.spec.id)
@@ -269,6 +285,7 @@ class PPO_CLIP(object):
         elif mode == 'test':
             self.load_ckpt(env_name=env.spec.id)
             print('Testing...  | Algorithm: {}  | Environment: {}'.format(self.name, env.spec.id))
+            reward_buffer = []
             for eps in range(test_episodes):
                 ep_rs_sum = 0
                 s = env.reset()
@@ -284,5 +301,8 @@ class PPO_CLIP(object):
                 print('Episode: {}/{}  | Episode Reward: {:.4f}  | Running Time: {:.4f}'.format(
                     eps, test_episodes, ep_rs_sum, time.time() - t0)
                 )
+                reward_buffer.append(ep_rs_sum)
+                if plot_func:
+                    plot_func(reward_buffer)
         else:
             print('unknown mode type')

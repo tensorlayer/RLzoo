@@ -10,6 +10,7 @@ Reference
 ---------
 Cookbook: Barto A G, Sutton R S. Reinforcement Learning: An Introduction[J]. 1998.
 MorvanZhou's tutorial page: https://morvanzhou.github.io/tutorials/
+MorvanZhou's code: https://github.com/MorvanZhou/Reinforcement-learning-with-tensorflow/
 
 Prerequisites
 --------------
@@ -61,7 +62,7 @@ class PG:
 
         :return: act
         """
-        return self.model(np.array([s], np.float32))[0].numpy()
+        return self.model([s])[0].numpy()
 
     def get_action_greedy(self, s):
         """
@@ -71,7 +72,7 @@ class PG:
 
         :return: act
         """
-        return self.model(np.array([s], np.float32), greedy=True).numpy()[0]
+        return self.model([s], greedy=True).numpy()[0]
 
     def store_transition(self, s, a, r):
         """
@@ -83,7 +84,7 @@ class PG:
 
         :return:
         """
-        self.buffer.append([np.array(s, np.float32), np.array(a, np.float32), np.array(r, np.float32)])
+        self.buffer.append([s, np.array(a, np.float32), np.array(r, np.float32)])
 
     def update(self, gamma):
         """
@@ -95,13 +96,9 @@ class PG:
         s, a, r = zip(*self.buffer)
         s, a, r = np.array(s), np.array(a), np.array(r).flatten()
         discounted_ep_rs_norm = self._discount_and_norm_rewards(r, gamma)
-        # print(discounted_ep_rs_norm)
 
         with tf.GradientTape() as tape:
-            try:
-                self.model(np.vstack(s))
-            except:
-                self.model(s)  # no stack for raw-pixel atari
+            self.model(s)
             neg_log_prob = self.model.policy_dist.neglogp(a)
             loss = tf.reduce_mean(neg_log_prob * discounted_ep_rs_norm)  # reward guided loss
 
@@ -126,7 +123,9 @@ class PG:
 
         # normalize episode rewards
         discounted_ep_rs -= np.mean(discounted_ep_rs)
-        discounted_ep_rs /= np.std(discounted_ep_rs)
+        std = np.std(discounted_ep_rs)
+        if std != 0:
+            discounted_ep_rs /= np.std(discounted_ep_rs)
         discounted_ep_rs = discounted_ep_rs[:, np.newaxis]
         return discounted_ep_rs
 
@@ -147,7 +146,7 @@ class PG:
         load_model(self.model, 'model_policy', self.name, env_name)
 
     def learn(self, env, train_episodes=200, test_episodes=100, max_steps=200, save_interval=100,
-              mode='train', render=False, gamma=0.95):
+              mode='train', render=False, gamma=0.95, plot_func=None):
         """
         :param env: learning environment
         :param train_episodes: total number of episodes for training
@@ -157,7 +156,7 @@ class PG:
         :param mode: train or test
         :param render: render each step
         :param gamma: reward decay
-        
+        :param plot_func: additional function for interactive module
         :return: None
         """
 
@@ -174,7 +173,6 @@ class PG:
                 for step in range(max_steps):
                     if render:
                         env.render()
-
                     action = self.get_action(observation)
                     observation_, reward, done, info = env.step(action)
                     self.store_transition(observation, action, reward)
@@ -189,6 +187,8 @@ class PG:
                     i_episode, train_episodes, ep_rs_sum, time.time() - t0)
                 )
                 reward_buffer.append(ep_rs_sum)
+                if plot_func is not None:
+                    plot_func(reward_buffer)
 
                 self.update(gamma)
 

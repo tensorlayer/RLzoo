@@ -10,8 +10,8 @@ import operator
 import os
 import random
 import copy
-
 import numpy as np
+from collections import OrderedDict
 
 import tensorflow as tf
 # import tensorflow_probability as tfp
@@ -127,21 +127,21 @@ class DeterministicPolicyNetwork(Model):
         else:
             raise NotImplementedError
 
-        self._state_shape = state_space.shape
+        obs_inputs, current_layer, self._state_shape = CreateInputLayer(state_space)
 
-        # build structure
-        if len(self._state_shape) == 1:
-            l = inputs = Input((None,) + self._state_shape, name='input_layer')
-        else:
-            with tf.name_scope('CNN'):
-                inputs, l = CNN(self._state_shape, conv_kwargs=None)
+        if isinstance(state_space, spaces.Dict):
+            assert isinstance(obs_inputs, dict)
+            assert isinstance(current_layer, dict)
+            self.input_dict = obs_inputs
+            obs_inputs = list(obs_inputs.values())
+            current_layer = tl.layers.Concat(-1)(list(current_layer.values()))
 
         with tf.name_scope('MLP'):
             for i, dim in enumerate(hidden_dim_list):
-                l = Dense(n_units=dim, act=activation, W_init=w_init, name='hidden_layer%d' % (i + 1))(l)
+                current_layer = Dense(n_units=dim, act=activation, W_init=w_init, name='hidden_layer%d' % (i + 1))(current_layer)
 
         with tf.name_scope('Output'):
-            outputs = Dense(n_units=self._action_shape[0], act=output_activation, W_init=w_init)(l)
+            outputs = Dense(n_units=self._action_shape[0], act=output_activation, W_init=w_init, name='outputs')(current_layer)
 
             if isinstance(self._action_space, spaces.Discrete):
                 outputs = tl.layers.Lambda(lambda x: tf.argmax(tf.nn.softmax(x), axis=-1))(outputs)
@@ -151,18 +151,22 @@ class DeterministicPolicyNetwork(Model):
                                                                       self._action_space.high))(outputs)
 
         # make model
-        super().__init__(inputs=inputs, outputs=outputs, name=name)
+        super().__init__(inputs=obs_inputs, outputs=outputs, name=name)
+        print('Policy network created')
         if trainable:
             self.train()
         else:
             self.eval()
 
     def __call__(self, states, *args, **kwargs):
-        if np.shape(states)[1:] != self.state_shape:
-            raise ValueError(
-                'Input state shape error. shape can be {} but your shape is {}'.format((None,) + self.state_shape,
-                                                                                       np.shape(states)))
-        states = np.array(states, dtype=np.float32)
+        if isinstance(self._state_space, spaces.Dict):
+            states = np.array(states).transpose([1, 0]).tolist()
+        else:
+            if np.shape(states)[1:] != self.state_shape:
+                raise ValueError(
+                    'Input state shape error. shape can be {} but your shape is {}'.format((None,) + self.state_shape,
+                                                                                           np.shape(states)))
+            states = np.array(states, dtype=np.float32)
         return super().__call__(states, *args, **kwargs)
 
     def random_sample(self):
@@ -230,28 +234,31 @@ class StochasticPolicyNetwork(Model):
         else:
             raise NotImplementedError
 
-        self._state_shape = state_space.shape
         self._state_conditioned = state_conditioned
 
+        obs_inputs, current_layer, self._state_shape = CreateInputLayer(state_space)
+
         # build structure
-        if len(self._state_shape) == 1:
-            l = inputs = Input((None,) + self._state_shape, name='input_layer')
-        else:
-            with tf.name_scope('CNN'):
-                inputs, l = CNN(self._state_shape, conv_kwargs=None)
+        if isinstance(state_space, spaces.Dict):
+            assert isinstance(obs_inputs, dict)
+            assert isinstance(current_layer, dict)
+            self.input_dict = obs_inputs
+            obs_inputs = list(obs_inputs.values())
+            current_layer = tl.layers.Concat(-1)(list(current_layer.values()))
 
         with tf.name_scope('MLP'):
             for i, dim in enumerate(hidden_dim_list):
-                l = Dense(n_units=dim, act=activation, W_init=w_init, name='hidden_layer%d' % (i + 1))(l)
+                current_layer = Dense(n_units=dim, act=activation,
+                                      W_init=w_init, name='hidden_layer%d' % (i + 1))(current_layer)
 
         with tf.name_scope('Output'):
             if isinstance(action_space, spaces.Discrete):
-                outputs = Dense(n_units=self.policy_dist.ndim, act=output_activation, W_init=w_init)(l)
+                outputs = Dense(n_units=self.policy_dist.ndim, act=output_activation, W_init=w_init)(current_layer)
             elif isinstance(action_space, spaces.Box):
-                mu = Dense(n_units=self.policy_dist.ndim, act=output_activation, W_init=w_init)(l)
+                mu = Dense(n_units=self.policy_dist.ndim, act=output_activation, W_init=w_init)(current_layer)
 
                 if self._state_conditioned:
-                    log_sigma = Dense(n_units=self.policy_dist.ndim, act=None, W_init=w_init)(l)
+                    log_sigma = Dense(n_units=self.policy_dist.ndim, act=None, W_init=w_init)(current_layer)
                     log_sigma = tl.layers.Lambda(lambda x: tf.clip_by_value(x, log_std_min, log_std_max))(log_sigma)
                     outputs = [mu, log_sigma]
                 else:
@@ -261,7 +268,7 @@ class StochasticPolicyNetwork(Model):
                 raise NotImplementedError
 
         # make model
-        super().__init__(inputs=inputs, outputs=outputs, name=name)
+        super().__init__(inputs=obs_inputs, outputs=outputs, name=name)
         if isinstance(self._action_space, spaces.Box) and not self._state_conditioned:
             self.trainable_weights.append(self._log_sigma)
 
@@ -271,11 +278,14 @@ class StochasticPolicyNetwork(Model):
             self.eval()
 
     def __call__(self, states, *args, greedy=False, **kwargs):
-        if np.shape(states)[1:] != self.state_shape:
-            raise ValueError(
-                'Input state shape error. Shape should be {} but your shape is {}'.format((None,) + self.state_shape,
-                                                                                          np.shape(states)))
-        states = np.array(states, dtype=np.float32)
+        if isinstance(self._state_space, spaces.Dict):
+            states = np.array(states).transpose([1, 0]).tolist()
+        else:
+            if np.shape(states)[1:] != self.state_shape:
+                raise ValueError(
+                    'Input state shape error. Shape should be {} but your shape is {}'.format((None,) + self.state_shape,
+                                                                                              np.shape(states)))
+            states = np.array(states, dtype=np.float32)
         params = super().__call__(states, *args, **kwargs)
         if isinstance(self._action_space, spaces.Box) and not self._state_conditioned:
             params = params, self._log_sigma
@@ -318,3 +328,47 @@ class StochasticPolicyNetwork(Model):
     @property
     def action_shape(self):
         return copy.deepcopy(self._action_shape)
+
+
+if __name__ == '__main__':
+    import gym
+    from rlzoo.common.env_wrappers import *
+    from rlzoo.common.value_networks import *
+    # EnvName = 'PongNoFrameskip-v4'
+    # EnvName = 'Pong-v4'
+    # EnvType = 'atari'
+
+    EnvName = 'CartPole-v0'
+    # EnvName = 'Pendulum-v0'
+    EnvType = 'classic_control'
+
+    # EnvName = 'BipedalWalker-v2'
+    # EnvType = 'box2d'
+
+    # EnvName = 'Ant-v2'
+    # EnvType = 'mujoco'
+
+    # EnvName = 'FetchPush-v1'
+    # EnvType = 'robotics'
+
+    # EnvName = 'FishSwim-v0'
+    # EnvType = 'dm_control'
+
+    # EnvName = 'ReachTarget'
+    # EnvType = 'rlbench'
+    # env = build_env(EnvName, EnvType, nenv=2)
+
+    # env = build_env(EnvName, EnvType, state_type='vision', nenv=2)
+    # env = build_env(EnvName, EnvType, state_type='vision')
+    env = build_env(EnvName, EnvType)
+    s = env.reset()
+    print(s)
+
+    # policy_net = DeterministicPolicyNetwork(env.observation_space, env.action_space, [64, 64])
+    policy_net = StochasticPolicyNetwork(env.observation_space, env.action_space, [64, 64])
+    a = policy_net([s, s])
+    print(a)
+    # q_net = QNetwork(env.observation_space, env.action_space, [64, 64], state_only=False, dueling=False)
+    # q = q_net([[s], a])
+    print('-'*100)
+    # print(q)

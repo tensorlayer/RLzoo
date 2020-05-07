@@ -11,6 +11,7 @@ Emergence of Locomotion Behaviours in Rich Environments, Heess et al. 2017
 Proximal Policy Optimization Algorithms, Schulman et al. 2017
 High Dimensional Continuous Control Using Generalized Advantage Estimation, Schulman et al. 2016
 MorvanZhou's tutorial page: https://morvanzhou.github.io/tutorials
+MorvanZhou's code: https://github.com/MorvanZhou/Reinforcement-learning-with-tensorflow/
 
 Prerequisites
 --------------
@@ -78,10 +79,6 @@ class DPPO_CLIP(object):
 
         :return:
         """
-        tfs = np.array(tfs, np.float32)
-        tfa = np.array(tfa, np.float32)
-        tfadv = np.array(tfadv, np.float32)
-
         with tf.GradientTape() as tape:
             _ = self.actor(tfs)
             pi_prob = tf.exp(self.actor.policy_dist.logp(tfa))
@@ -139,9 +136,10 @@ class DPPO_CLIP(object):
             if GLOBAL_EP < EP_MAX:
                 UPDATE_EVENT.wait()  # wait until get batch of data
                 data = [QUEUE.get() for _ in range(QUEUE.qsize())]  # collect data from all workers
+
                 s, a, r = zip(*data)
                 s, a, r = np.vstack(s), np.vstack(a), np.vstack(r)
-                s, a, r = np.array(s, np.float32), np.array(a, np.float32), np.array(r, np.float32)
+                s, a, r = np.array(s), np.array(a, np.float32), np.array(r, np.float32)
 
                 adv = self.cal_adv(s, r)
                 # adv = (adv - adv.mean())/(adv.std()+1e-6)     # sometimes helpful
@@ -218,7 +216,8 @@ class DPPO_CLIP(object):
         load_model(self.critic, 'critic', self.name, env_name)
 
     def learn(self, env, train_episodes=200, test_episodes=100, max_steps=200, save_interval=10, gamma=0.9,
-              mode='train', render=False, batch_size=32, a_update_steps=10, c_update_steps=10, n_workers=4):
+              mode='train', render=False, batch_size=32, a_update_steps=10, c_update_steps=10, n_workers=4,
+              plot_func=None):
         """
         learn function
 
@@ -234,7 +233,7 @@ class DPPO_CLIP(object):
         :param a_update_steps: actor update iteration steps
         :param c_update_steps: critic update iteration steps
         :param n_workers: number of workers
-
+        :param plot_func: additional function for interactive module
         :return: None
         """
         t0 = time.time()
@@ -253,7 +252,7 @@ class DPPO_CLIP(object):
             UPDATE_EVENT, ROLLING_EVENT = threading.Event(), threading.Event()
             UPDATE_EVENT.clear()  # not update now
             ROLLING_EVENT.set()  # start to roll out
-            workers = [Worker(wid=i, env=env[i]) for i in range(n_workers)]
+            workers = [Worker(wid=i, env=env[i], plot_func=plot_func) for i in range(n_workers)]
 
             GLOBAL_UPDATE_COUNTER, GLOBAL_EP = 0, 0
             GLOBAL_RUNNING_R = []
@@ -279,6 +278,7 @@ class DPPO_CLIP(object):
                 env = env[0]
             print('Testing...  | Algorithm: {}  | Environment: {}'.format(self.name, env.spec.id))
             self.load_ckpt(env_name=env.spec.id)
+            reward_buffer = []
             for eps in range(test_episodes):
                 ep_rs_sum = 0
                 s = env.reset()
@@ -294,6 +294,10 @@ class DPPO_CLIP(object):
                 print('Episode: {}/{}  | Episode Reward: {:.4f}  | Running Time: {:.4f}'.format(
                     eps, test_episodes, ep_rs_sum, time.time() - t0)
                 )
+
+                reward_buffer.append(ep_rs_sum)
+                if plot_func is not None:
+                    plot_func(reward_buffer)
         else:
             print('unknown mode type')
 
@@ -303,12 +307,13 @@ class Worker(object):
     Worker class for distributional running
     """
 
-    def __init__(self, wid, env):
+    def __init__(self, wid, env, plot_func):
         self.wid = wid
         self.env = env
         # self.env.seed(wid * 100 + RANDOMSEED)
         global GLOBAL_PPO
         self.ppo = GLOBAL_PPO
+        self.plot_func = plot_func
 
     def work(self):
         """
@@ -339,18 +344,20 @@ class Worker(object):
 
                 GLOBAL_UPDATE_COUNTER += 1  # count to minimum batch size, no need to wait other workers
                 if t == EP_LEN - 1 or GLOBAL_UPDATE_COUNTER >= MIN_BATCH_SIZE or done:
-                    try:
-                        v_s_ = self.ppo.get_v(s_)
-                    except:
-                        v_s_ = self.ppo.get_v(s_[np.newaxis, :])  # for raw-pixel input
+                    if done:
+                        v_s_ = 0
+                    else:
+                        try:
+                            v_s_ = self.ppo.get_v(s_)
+                        except:
+                            v_s_ = self.ppo.get_v(s_[np.newaxis, :])  # for raw-pixel input
                     discounted_r = []  # compute discounted reward
                     for r in buffer_r[::-1]:
                         v_s_ = r + GAMMA * v_s_
                         discounted_r.append(v_s_)
                     discounted_r.reverse()
-                    bs = buffer_s if len(buffer_s[0].shape) > 1 else np.vstack(
-                        buffer_s)  # no vstack for raw-pixel input
-                    ba, br = np.vstack(buffer_a), np.array(discounted_r)[:, np.newaxis]
+                    bs = buffer_s
+                    ba, br = buffer_a, np.array(discounted_r)[:, np.newaxis]
                     buffer_s, buffer_a, buffer_r = [], [], []
                     QUEUE.put((bs, ba, br))  # put data in the queue
                     if GLOBAL_UPDATE_COUNTER >= MIN_BATCH_SIZE:
@@ -372,4 +379,9 @@ class Worker(object):
                     time.time() - t0
                 )
             )
+<<<<<<< HEAD
 
+=======
+            if self.wid == 0 and self.plot_func is not None:
+                self.plot_func(GLOBAL_RUNNING_R)
+>>>>>>> RLBench
