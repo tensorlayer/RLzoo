@@ -379,9 +379,5 @@ class Worker(object):
                     time.time() - t0
                 )
             )
-<<<<<<< HEAD
-
-=======
             if self.wid == 0 and self.plot_func is not None:
                 self.plot_func(GLOBAL_RUNNING_R)
->>>>>>> RLBench
