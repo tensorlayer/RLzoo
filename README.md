@@ -71,7 +71,7 @@ the coming months after initial release. We will keep improving the potential pr
 	Changes: 
 	* Add interactive training configuration;
 	* Better support RLBench environment, with multi-head network architectures to support dictionary as observation type;
-	* Make the code much cleaner.
+	* Make the code cleaner.
 * 0.0.1
 </div>
 </details>
