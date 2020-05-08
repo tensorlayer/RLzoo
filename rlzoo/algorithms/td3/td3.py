@@ -1,4 +1,4 @@
-'''
+"""
 Twin Delayed DDPG (TD3)
 ------------------------
 DDPG suffers from problems like overestimate of Q-values and sensitivity to hyper-parameters.
@@ -35,25 +35,13 @@ tensorlayer >=2.0.0
 pip install box2d box2d-kengz --user
 
 
-'''
-
-import argparse
-import math
-import random
+"""
 import time
 
-import matplotlib.pyplot as plt
-import numpy as np
-
-import gym
-import tensorflow as tf
 import tensorflow_probability as tfp
 import tensorlayer as tl
-from tensorlayer.layers import Dense
-from tensorlayer.models import Model
 from rlzoo.common.utils import *
 from rlzoo.common.buffer import *
-from rlzoo.common.value_networks import *
 from rlzoo.common.policy_networks import *
 
 tfd = tfp.distributions
@@ -66,7 +54,7 @@ tl.logging.set_verbosity(tl.logging.DEBUG)
 
 
 class TD3():
-    ''' twin-delayed ddpg '''
+    """ twin-delayed ddpg """
 
     def __init__(self, net_list, optimizers_list, replay_buffer_capacity=5e5, policy_target_update_interval=5):
         self.name = 'TD3'
@@ -90,11 +78,11 @@ class TD3():
         [self.q_optimizer1, self.q_optimizer2, self.policy_optimizer] = optimizers_list
 
     def evaluate(self, state, eval_noise_scale, target=False):
-        ''' 
+        """
         generate action with state for calculating gradients;
 
         :param eval_noise_scale: as the trick of target policy smoothing, for generating noisy actions.
-        '''
+        """
         if target:
             action = self.target_policy_net(state)
         else:
@@ -109,7 +97,7 @@ class TD3():
         return action
 
     def get_action(self, state, explore_noise_scale):
-        ''' generate action with state for interaction with envronment '''
+        """ generate action with state for interaction with envronment """
         action = self.policy_net(np.array([state]))
         action = action.numpy()[0]
 
@@ -121,21 +109,21 @@ class TD3():
         return action.numpy()
 
     def get_action_greedy(self, state):
-        ''' generate action with state for interaction with envronment '''
+        """ generate action with state for interaction with envronment """
         return self.policy_net(np.array([state])).numpy()[0]
 
     def sample_action(self):
-        ''' generate random actions for exploration '''
+        """ generate random actions for exploration """
         return self.policy_net.random_sample()
 
     def target_ini(self, net, target_net):
-        ''' hard-copy update for initializing target networks '''
+        """ hard-copy update for initializing target networks """
         for target_param, param in zip(target_net.trainable_weights, net.trainable_weights):
             target_param.assign(param)
         return target_net
 
     def target_soft_update(self, net, target_net, soft_tau):
-        ''' soft update the target net with Polyak averaging '''
+        """ soft update the target net with Polyak averaging """
         for target_param, param in zip(target_net.trainable_weights, net.trainable_weights):
             target_param.assign(  # copy weight value into target parameters
                 target_param * (1.0 - soft_tau) + param * soft_tau
@@ -143,7 +131,7 @@ class TD3():
         return target_net
 
     def update(self, batch_size, eval_noise_scale, reward_scale=1., gamma=0.9, soft_tau=1e-2):
-        ''' update all networks in TD3 '''
+        """ update all networks in TD3 """
         self.update_cnt += 1
         state, action, reward, next_state, done = self.replay_buffer.sample(batch_size)
 
@@ -181,9 +169,9 @@ class TD3():
                 new_action = self.evaluate(
                     state, eval_noise_scale=0.0, target=False
                 )  # no noise, deterministic policy gradients
-                # ''' implementation 1 '''
+                # """ implementation 1 """
                 # predicted_new_q_value = tf.minimum(self.q_net1([state, new_action]),self.q_net2([state, new_action]))
-                ''' implementation 2 '''
+                """ implementation 2 """
                 predicted_new_q_value = self.q_net1([state, new_action])
                 policy_loss = -tf.reduce_mean(predicted_new_q_value)
             p_grad = p_tape.gradient(policy_loss, self.policy_net.trainable_weights)
@@ -214,7 +202,7 @@ class TD3():
               update_itr=3,
               reward_scale=1., save_interval=10, explore_noise_scale=1.0, eval_noise_scale=0.5, mode='train',
               render=False, plot_func=None):
-        '''
+        """
         :param env: learning environment
         :param train_episodes:  total number of episodes for training
         :param test_episodes:  total number of episodes for testing
@@ -229,7 +217,7 @@ class TD3():
         :param mode: 'train' or 'test'
         :param render: if true, visualize the environment
         :param plot_func: additional function for interactive module
-        '''
+        """
 
         # training loop
         if mode == 'train':

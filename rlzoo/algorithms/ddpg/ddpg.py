@@ -20,15 +20,8 @@ tensorlayer >=2.0.0
 
 import time
 
-import numpy as np
-
-import tensorflow as tf
-import tensorlayer as tl
-import gym
-
 from rlzoo.common.utils import *
 from rlzoo.common.buffer import *
-from rlzoo.common.value_networks import *
 from rlzoo.common.policy_networks import *
 
 

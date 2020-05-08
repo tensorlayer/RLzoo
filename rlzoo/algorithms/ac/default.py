@@ -7,7 +7,7 @@ from rlzoo.common.policy_networks import *
 from gym import spaces
 from rlzoo.common.utils import set_seed
 
-''' 
+""" 
 full list of algorithm parameters (alg_params)
 -----------------------------------------------
 net_list: a list of networks (value and policy) used in the algorithm, from common functions or customization
@@ -26,7 +26,7 @@ save_interval: time steps for saving the weights and plotting the results
 mode: 'train' or 'test'
 render:  if true, visualize the environment
 ------------------------------------------------
-'''
+"""
 
 
 def atari(env, default_seed=True):

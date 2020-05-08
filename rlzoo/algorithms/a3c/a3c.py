@@ -39,20 +39,10 @@ pip install box2d box2d-kengz --user
 
 """
 
-import argparse
 import multiprocessing
 import threading
 import time
 
-import numpy as np
-
-import gym
-import tensorflow as tf
-# import tensorflow_probability as tfp
-import tensorlayer as tl
-import copy
-from tensorlayer.layers import DenseLayer, InputLayer
-from tensorlayer.models import Model
 from rlzoo.common.utils import *
 from rlzoo.common.buffer import *
 
@@ -69,7 +59,7 @@ class ACNet(object):
     def update_global(
             self, buffer_s, buffer_a, buffer_v_target, globalAC
     ):  # refer to the global Actor-Crtic network for updating it with samples
-        ''' update the global critic '''
+        """ update the global critic """
         with tf.GradientTape() as tape:
             self.v = self.critic(buffer_s)
             self.v_target = buffer_v_target
@@ -78,7 +68,7 @@ class ACNet(object):
         self.c_grads = tape.gradient(self.c_loss, self.critic.trainable_weights)
         OPT_C.apply_gradients(zip(self.c_grads, globalAC.critic.trainable_weights))  # local grads applies to global net
         del tape  # Drop the reference to the tape
-        ''' update the global actor '''
+        """ update the global actor """
         with tf.GradientTape() as tape:
             self.actor(buffer_s)
             self.a_his = buffer_a  # float32
@@ -195,9 +185,9 @@ class Worker(object):
 
 class A3C():
     def __init__(self, net_list, optimizers_list, entropy_beta=0.005):
-        '''
+        """
         :param entropy_beta: factor for entropy boosted exploration
-        '''
+        """
         self.net_list = net_list
         self.optimizers_list = optimizers_list
         self.GLOBAL_AC = ACNet(self.net_list[0], 'global', entropy_beta)  # we only need its params
@@ -207,7 +197,7 @@ class A3C():
     def learn(self, env, train_episodes=1000, test_episodes=10, max_steps=150, render=False, n_workers=1, update_itr=10,
               gamma=0.99, save_interval=500, mode='train', plot_func=None):
 
-        '''
+        """
         :param env: a list of same learning environments
         :param train_episodes:  total number of episodes for training
         :param test_episodes:  total number of episodes for testing
@@ -219,7 +209,7 @@ class A3C():
         :param save_interval: timesteps for saving the weights and plotting the results
         :param mode: train or test
         :param plot_func: additional function for interactive module
-        '''
+        """
         global COORD, GLOBAL_RUNNING_R, GLOBAL_EP, OPT_A, OPT_C, t0, SAVE_INTERVAL
         SAVE_INTERVAL = save_interval
         COORD = tf.train.Coordinator()

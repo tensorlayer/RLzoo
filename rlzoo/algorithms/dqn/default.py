@@ -1,13 +1,9 @@
-import tensorflow as tf
-import tensorlayer as tl
-import copy
 from gym.spaces import Discrete
 
-from rlzoo.common import basic_nets
 from rlzoo.common.utils import set_seed
 from rlzoo.common.value_networks import *
 
-''' 
+""" 
 full list of algorithm parameters (alg_params)
 -----------------------------------------------
 -----------------------------------------------
@@ -31,7 +27,7 @@ prioritized_alpha (float): alpha parameter for prioritized replay
 prioritized_beta0 (float): beta parameter for prioritized replay
 mode (str): train or test
 -----------------------------------------------
-'''
+"""
 
 
 def atari(env, default_seed=False, **kwargs):

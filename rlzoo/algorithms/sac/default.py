@@ -1,14 +1,7 @@
-import tensorflow as tf
-import tensorlayer as tl
-
-from rlzoo.common import math_utils
-from rlzoo.common.value_networks import *
 from rlzoo.common.policy_networks import *
-from rlzoo.common.distributions import make_dist
-from gym import spaces
 from rlzoo.common.utils import set_seed
 
-''' 
+""" 
 full list of algorithm parameters (alg_params)
 -----------------------------------------------
 net_list: a list of networks (value and policy) used in the algorithm, from common functions or customization
@@ -31,7 +24,7 @@ mode: 'train'  or 'test'
 AUTO_ENTROPY: automatically udpating variable alpha for entropy
 render: if true, visualize the environment
 -----------------------------------------------
-'''
+"""
 
 
 def classic_control(env, default_seed=True):

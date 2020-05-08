@@ -1,6 +1,7 @@
+import decimal
+
 import ipywidgets as widgets
 import numpy as np
-import decimal
 
 border_list = [None, 'hidden', 'dotted', 'dashed', 'solid', 'double',
                'groove', 'ridge', 'inset', 'outset', 'inherit']

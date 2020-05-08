@@ -1,9 +1,10 @@
 """Definition of parametrized distributions. Adapted from openai/baselines"""
+import copy
+from functools import wraps
+
 import numpy as np
 import tensorflow as tf
 from gym import spaces
-import copy
-from functools import wraps
 
 
 def expand_dims(func):

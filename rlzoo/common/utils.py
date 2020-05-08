@@ -6,17 +6,15 @@ tensorflow==2.0.0a0
 tensorlayer==2.0.1
 
 """
-import operator
 import os
 import re
+
 import gym
-
 import matplotlib.pyplot as plt
-from importlib import import_module
 import numpy as np
-
 import tensorlayer as tl
 import tensorflow as tf
+from importlib import import_module
 
 
 def plot(episode_rewards, algorithm_name, env_name):

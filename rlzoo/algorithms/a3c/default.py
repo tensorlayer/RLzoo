@@ -1,12 +1,7 @@
-import tensorflow as tf
-import tensorlayer as tl
-
-from rlzoo.common import math_utils
-from rlzoo.common.value_networks import *
 from rlzoo.common.policy_networks import *
 from rlzoo.common.utils import set_seed
 
-''' 
+""" 
 full list of algorithm parameters (alg_params)
 -----------------------------------------------
 net_list: a list of networks (value and policy) used in the algorithm, from common functions or customization
@@ -25,7 +20,7 @@ gamma: reward discount factor
 save_interval: timesteps for saving the weights and plotting the results
 mode: train or test
 ------------------------------------------------
-'''
+"""
 
 
 def atari(env, default_seed=True):

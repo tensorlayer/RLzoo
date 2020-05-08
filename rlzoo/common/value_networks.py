@@ -6,21 +6,14 @@ tensorflow==2.0.0a0
 tensorlayer==2.0.1
 
 """
-import operator
-import os
-import random
-from collections import OrderedDict
-
-import numpy as np
 import copy
 
-import tensorflow as tf
-# import tensorflow_probability as tfp
+import numpy as np
 import tensorlayer as tl
 from tensorlayer.layers import Dense, Input
 from tensorlayer.models import Model
+
 from rlzoo.common.basic_nets import *
-from gym import spaces
 
 
 class ValueNetwork(Model):

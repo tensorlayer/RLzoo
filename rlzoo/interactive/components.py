@@ -1,23 +1,17 @@
 from __future__ import print_function
+import copy
 from collections import OrderedDict
-from threading import Event
 
-import ipywidgets as widgets
-from ipywidgets import Button, Layout, AppLayout
+from ipywidgets import Layout
 from ipywidgets import GridspecLayout
 
-from IPython.display import display, clear_output
+from IPython.display import clear_output
 from IPython.core.interactiveshell import InteractiveShell
-import matplotlib.pyplot as plt
 from gym import spaces
 
 from rlzoo.common.env_list import all_env_list
-from rlzoo.common.env_wrappers import *
 from rlzoo.common.utils import *
-from rlzoo.algorithms import *
 from rlzoo.interactive.common import *
-import copy
-# from scipy import signal
 
 all_env_list = OrderedDict(sorted(all_env_list.items()))
 
@@ -161,21 +155,21 @@ class EnvInfoViewer(widgets.VBox):
         if tips is None:
             # use GirdBox instead of GridspecLayout to ensure each row has a different height
             info = widgets.GridBox(children=[a00, a01, a10, a11, a20, a21],
-                                   layout=Layout(grid_template_areas='''
+                                   layout=Layout(grid_template_areas="""
                                                "a00 a01"
                                                "a10 a11"
                                                "a20 a21"
-                                               '''))
+                                               """))
         else:
             t0 = widgets.Label('Tips:')
             t1 = widgets.Label(tips)
             info = widgets.GridBox(children=[a00, a01, a10, a11, a20, a21, t0, t1],
-                                   layout=Layout(grid_template_areas='''
+                                   layout=Layout(grid_template_areas="""
                                                "a00 a01"
                                                "a10 a11"
                                                "a20 a21"
                                                "t0 t1"
-                                               '''))
+                                               """))
 
         super().__init__([caption, info], layout=widgets.Layout(align_items='center', ))
 
@@ -282,10 +276,10 @@ class AlgoInfoViewer(widgets.VBox):
         del alg_params['optimizers_list']
 
         stu_frame = widgets.GridBox(children=[net_label, net_info, opt_label, opt_info],
-                                    layout=Layout(grid_template_areas='''
+                                    layout=Layout(grid_template_areas="""
                                            "net_label net_info"
                                            "opt_label opt_info"
-                                           '''))
+                                           """))
 
         alg_sel_dict = dict()
         sk = sorted(alg_params.keys())

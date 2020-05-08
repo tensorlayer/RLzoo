@@ -6,25 +6,16 @@ tensorflow==2.0.0a0
 tensorlayer==2.0.1
 
 """
-import operator
-import os
-import random
-import copy
-import numpy as np
-from collections import OrderedDict
-
-import tensorflow as tf
-# import tensorflow_probability as tfp
 import tensorlayer as tl
 from tensorlayer.layers import Dense, Input
 from tensorlayer.models import Model
+
 from rlzoo.common.basic_nets import *
 from rlzoo.common.distributions import make_dist
-from gym import spaces
 
 
 class StochasticContinuousPolicyNetwork(Model):
-    def __init__(self, state_shape, action_shape, hidden_dim_list, w_init=tf.keras.initializers.glorot_normal(), \
+    def __init__(self, state_shape, action_shape, hidden_dim_list, w_init=tf.keras.initializers.glorot_normal(),
                  activation=tf.nn.relu, output_activation=None, log_std_min=-20, log_std_max=2, trainable=True):
         """ 
         Stochastic continuous policy network with multiple fully-connected layers or convolutional layers (according to state shape)
@@ -170,7 +161,7 @@ class DeterministicPolicyNetwork(Model):
         return super().__call__(states, *args, **kwargs)
 
     def random_sample(self):
-        ''' generate random actions for exploration '''
+        """ generate random actions for exploration """
 
         if isinstance(self._action_space, spaces.Discrete):
             return np.random.choice(self._action_space.n, 1)[0]
@@ -306,7 +297,7 @@ class StochasticPolicyNetwork(Model):
         return result
 
     def random_sample(self):
-        ''' generate random actions for exploration '''
+        """ generate random actions for exploration """
 
         if isinstance(self._action_space, spaces.Discrete):
             return np.random.choice(self._action_space.n, 1)[0]

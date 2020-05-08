@@ -4,8 +4,6 @@ Deep Q Network
 import random
 from copy import deepcopy
 
-import numpy as np
-import tensorflow as tf
 from rlzoo.common.utils import *
 from rlzoo.common.buffer import ReplayBuffer, PrioritizedReplayBuffer
 

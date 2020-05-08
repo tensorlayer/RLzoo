@@ -1,4 +1,4 @@
-'''
+"""
 Soft Actor-Critic
 using target Q instead of V net: 2 Q net, 2 target Q net, 1 policy net
 adding alpha loss
@@ -10,25 +10,14 @@ tensorflow-probability 0.6.0
 tensorlayer 2.0.0
 &&
 pip install box2d box2d-kengz --user
-'''
+"""
 
-import argparse
-import math
-import random
 import time
 
-import matplotlib.pyplot as plt
-import numpy as np
-
-import gym
-import tensorflow as tf
 import tensorflow_probability as tfp
 import tensorlayer as tl
-from tensorlayer.layers import Dense
-from tensorlayer.models import Model
 from rlzoo.common.utils import *
 from rlzoo.common.buffer import *
-from rlzoo.common.value_networks import *
 from rlzoo.common.policy_networks import *
 
 tfd = tfp.distributions
@@ -38,7 +27,7 @@ tl.logging.set_verbosity(tl.logging.DEBUG)
 
 
 class SAC():
-    ''' Soft Actor-Critic '''
+    """ Soft Actor-Critic """
 
     def __init__(self, net_list, optimizers_list, replay_buffer_capacity=5e5):
         self.replay_buffer = ReplayBuffer(replay_buffer_capacity)
@@ -61,7 +50,7 @@ class SAC():
         [self.soft_q_optimizer1, self.soft_q_optimizer2, self.policy_optimizer, self.alpha_optimizer] = optimizers_list
 
     def evaluate(self, state, epsilon=1e-6):
-        ''' generate action with state for calculating gradients '''
+        """ generate action with state for calculating gradients """
         _ = self.policy_net(state)
         mean, log_std = self.policy_net.policy_dist.get_param()  # as SAC uses TanhNorm instead of normal distribution, need original mean_std
         std = tf.math.exp(log_std)  # no clip in evaluation, clip affects gradients flow
@@ -81,25 +70,25 @@ class SAC():
         return action, log_prob, z, mean, log_std
 
     def get_action(self, state):
-        ''' generate action with state for interaction with envronment '''
+        """ generate action with state for interaction with envronment """
         return self.policy_net(np.array([state])).numpy()[0]
 
     def get_action_greedy(self, state):
-        ''' generate action with state for interaction with envronment '''
+        """ generate action with state for interaction with envronment """
         return self.policy_net(np.array([state]), greedy=True).numpy()[0]
 
     def sample_action(self, ):
-        ''' generate random actions for exploration '''
+        """ generate random actions for exploration """
         return self.policy_net.random_sample()
 
     def target_ini(self, net, target_net):
-        ''' hard-copy update for initializing target networks '''
+        """ hard-copy update for initializing target networks """
         for target_param, param in zip(target_net.trainable_weights, net.trainable_weights):
             target_param.assign(param)
         return target_net
 
     def target_soft_update(self, net, target_net, soft_tau):
-        ''' soft update the target net with Polyak averaging '''
+        """ soft update the target net with Polyak averaging """
         for target_param, param in zip(target_net.trainable_weights, net.trainable_weights):
             target_param.assign(  # copy weight value into target parameters
                 target_param * (1.0 - soft_tau) + param * soft_tau
@@ -107,7 +96,7 @@ class SAC():
         return target_net
 
     def update(self, batch_size, reward_scale=10., auto_entropy=True, target_entropy=-2, gamma=0.99, soft_tau=1e-2):
-        ''' update all networks in SAC '''
+        """ update all networks in SAC """
         state, action, reward, next_state, done = self.replay_buffer.sample(batch_size)
 
         reward = reward[:, np.newaxis]  # expand dim
@@ -140,10 +129,10 @@ class SAC():
         # Training Policy Function
         with tf.GradientTape() as p_tape:
             new_action, log_prob, z, mean, log_std = self.evaluate(state)
-            ''' implementation 1 '''
+            """ implementation 1 """
             predicted_new_q_value = tf.minimum(self.soft_q_net1([state, new_action]),
                                                self.soft_q_net2([state, new_action]))
-            ''' implementation 2 '''
+            """ implementation 2 """
             # predicted_new_q_value = self.soft_q_net1([state, new_action])
             policy_loss = tf.reduce_mean(self.alpha * log_prob - predicted_new_q_value)
         p_grad = p_tape.gradient(policy_loss, self.policy_net.trainable_weights)
@@ -166,7 +155,7 @@ class SAC():
         self.target_soft_q_net2 = self.target_soft_update(self.soft_q_net2, self.target_soft_q_net2, soft_tau)
 
     def save_ckpt(self, env_name):
-        ''' save trained weights '''
+        """ save trained weights """
         save_model(self.soft_q_net1, 'model_q_net1', self.name, env_name)
         save_model(self.soft_q_net2, 'model_q_net2', self.name, env_name)
         save_model(self.target_soft_q_net1, 'model_target_q_net1', self.name, env_name)
@@ -174,7 +163,7 @@ class SAC():
         save_model(self.policy_net, 'model_policy_net', self.name, env_name)
 
     def load_ckpt(self, env_name):
-        ''' load trained weights '''
+        """ load trained weights """
         load_model(self.soft_q_net1, 'model_q_net1', self.name, env_name)
         load_model(self.soft_q_net2, 'model_q_net2', self.name, env_name)
         load_model(self.target_soft_q_net1, 'model_target_q_net1', self.name, env_name)
@@ -184,7 +173,7 @@ class SAC():
     def learn(self, env, train_episodes=1000, test_episodes=1000, max_steps=150, batch_size=64, explore_steps=500,
               update_itr=3, policy_target_update_interval=3, reward_scale=1., save_interval=20,
               mode='train', AUTO_ENTROPY=True, render=False, plot_func=None):
-        '''
+        """
         :param env: learning environment
         :param train_episodes:  total number of episodes for training
         :param test_episodes:  total number of episodes for testing
@@ -199,7 +188,7 @@ class SAC():
         :param AUTO_ENTROPY: automatically updating variable alpha for entropy
         :param render: if true, visualize the environment
         :param plot_func: additional function for interactive module
-        '''
+        """
 
         # training loop
         if mode == 'train':

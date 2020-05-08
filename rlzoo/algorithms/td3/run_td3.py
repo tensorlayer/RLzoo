@@ -1,13 +1,7 @@
-import gym
-import tensorflow as tf
-# from common.env_wrappers import DummyVecEnv
-from rlzoo.common.utils import make_env
 from rlzoo.algorithms.td3.td3 import TD3
-import numpy as np
-from rlzoo.common.value_networks import *
 from rlzoo.common.policy_networks import *
 
-''' load environment '''
+""" load environment """
 env = gym.make('Pendulum-v0').unwrapped
 # env = DummyVecEnv([lambda: env])  # The algorithms require a vectorized/wrapped environment to run
 action_shape = env.action_space.shape
@@ -18,7 +12,7 @@ np.random.seed(seed)
 tf.random.set_seed(seed)
 env.seed(seed)
 
-''' build networks for the algorithm '''
+""" build networks for the algorithm """
 num_hidden_layer = 2  # number of hidden layers for the networks
 hidden_dim = 64  # dimension of hidden layers for the networks
 with tf.name_scope('TD3'):
@@ -42,7 +36,7 @@ with tf.name_scope('TD3'):
                                                        hidden_dim_list=num_hidden_layer * [hidden_dim])
 net_list = [q_net1, q_net2, target_q_net1, target_q_net2, policy_net, target_policy_net]
 
-''' choose optimizers '''
+""" choose optimizers """
 q_lr, policy_lr = 3e-4, 3e-4  # q_lr: learning rate of the Q network; policy_lr: learning rate of the policy network
 q_optimizer1 = tf.optimizers.Adam(q_lr)
 q_optimizer2 = tf.optimizers.Adam(q_lr)
@@ -50,7 +44,7 @@ policy_optimizer = tf.optimizers.Adam(policy_lr)
 optimizers_list = [q_optimizer1, q_optimizer2, policy_optimizer]
 
 model = TD3(net_list, optimizers_list)
-''' 
+""" 
 full list of arguments for the algorithm
 ----------------------------------------
 net_list: a list of networks (value and policy) used in the algorithm, from common functions or customization
@@ -60,12 +54,12 @@ action_dim: dimension of action for the environment
 replay_buffer_capacity: the size of buffer for storing explored samples
 policy_target_update_interval: delayed interval for updating the target policy
 action_range: value of each action in [-action_range, action_range]
-'''
+"""
 
 model.learn(env, train_episodes=100, max_steps=150, batch_size=64, explore_steps=500, update_itr=3,
             reward_scale=1., save_interval=10, explore_noise_scale=1.0, eval_noise_scale=0.5, mode='train',
             render=False)
-''' 
+""" 
 full list of parameters for training
 ---------------------------------------
 env: learning environment
@@ -82,6 +76,6 @@ eval_noise_scale: range of action noise for evaluation of action value
 mode: 'train' or 'test'
 render: if true, visualize the environment
 
-'''
+"""
 # test
 model.learn(env, test_episodes=10, max_steps=150, mode='test', render=True)

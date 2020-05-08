@@ -21,12 +21,6 @@ tensorlayer >=2.0.0
 """
 import time
 
-import numpy as np
-
-import gym
-import tensorflow as tf
-import tensorlayer as tl
-
 from rlzoo.common.utils import *
 from rlzoo.common.policy_networks import *
 

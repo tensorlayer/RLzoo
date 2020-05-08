@@ -1,15 +1,17 @@
-from rlbench.environment import Environment
-from rlbench.action_modes import ArmActionMode, ActionMode
-from rlbench.observation_config import ObservationConfig
+import sys
+from collections import OrderedDict
+
+import numpy as np
+from gym import spaces
+
 from pyrep.const import RenderMode
 from pyrep.objects.dummy import Dummy
 from pyrep.objects.vision_sensor import VisionSensor
-from collections import OrderedDict
+from rlbench.environment import Environment
+from rlbench.action_modes import ArmActionMode, ActionMode
+from rlbench.observation_config import ObservationConfig
 from rlbench.tasks import *
-import numpy as np
-import gym
-from gym import spaces
-import sys
+
 
 # Don't forget to add: export PYTHONPATH=PATH_TO_YOUR_LOCAL_RLBENCH_REPO
 

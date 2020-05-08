@@ -42,18 +42,11 @@ tensorflow >=2.0.0a0
 tensorlayer >=2.0.0
 
 """
-import argparse
 import time
 
-import numpy as np
-
-import gym
-import tensorflow as tf
 import tensorlayer as tl
-from tensorlayer.models import Model
+
 from rlzoo.common.utils import *
-from rlzoo.common.buffer import *
-from rlzoo.common.value_networks import *
 from rlzoo.common.policy_networks import *
 
 tl.logging.set_verbosity(tl.logging.DEBUG)
