@@ -6,6 +6,7 @@ tensorflow==2.0.0a0
 tensorlayer==2.0.1
 
 """
+import inspect
 import operator
 import random
 
@@ -242,3 +243,64 @@ class PrioritizedReplayBuffer(ReplayBuffer):  # is it succeed from the ReplayBuf
             self._it_min[idx] = priority ** self._alpha
 
             self._max_priority = max(self._max_priority, priority)
+
+
+class HindsightReplayBuffer(ReplayBuffer):
+    """Hindsight Experience Replay
+    In this buffer, state is a tuple consists of (observation, goal)
+    """
+    GOAL_FUTURE = 'future'
+    GOAL_EPISODE = 'episode'
+    GOAL_RANDOM = 'random'
+
+    def __init__(self, capacity, hindsight_freq, goal_type, reward_func, done_func):
+        """
+        :param hindsight_freq (int): How many hindsight transitions will be generated for each real transition
+        :param goal_type (str): The generatation method of hindsight goals. Should be HER_GOAL_*
+        :param reward_func (callable): goal (np.array) X next_state (np.array) -> reward (float)
+        :param done_func (callable): goal (np.array) X next_state (np.array) -> done_flag (bool)
+        """
+        super().__init__(capacity)
+        self.hindsight_freq = hindsight_freq
+        self.goal_type = goal_type
+        self.reward_func = reward_func
+        self.done_func = done_func
+
+    def _sample_goals(self, episode, t):
+        goals = []
+        episode_len = len(episode)
+        for _ in range(self.hindsight_freq):
+            if self.goal_type == HindsightReplayBuffer.GOAL_FUTURE:
+                index = random.choice(range(t + 1, episode_len))
+                source = episode
+            elif self.goal_type == HindsightReplayBuffer.GOAL_EPISODE:
+                index = random.choice(range(episode_len))
+                source = episode
+            elif self.goal_type == HindsightReplayBuffer.GOAL_RANDOM:
+                index = random.choice(range(len(self)))
+                source = self.buffer
+            else:
+                raise ValueError("Invalid goal type %s" % self.goal_type)
+            goals.append(source[index][0][0])  # return the observation
+        return goals
+
+    def push(self, *args, **kwargs):
+        if inspect.stack()[1][3] != 'push_episode':
+            raise ValueError("Please use `push_episode` methods in HER")
+        else:
+            super().push(*args, **kwargs)
+
+    def push_episode(self, states, actions, rewards, next_states, dones):
+        episode = list(zip(states, actions, rewards, next_states, dones))
+        episode_len = len(states)
+        for t, (state, action, reward, next_state, done) in enumerate(episode):
+            self.push(state, action, reward, next_state, done)
+            if self.goal_type == HindsightReplayBuffer.GOAL_FUTURE and t == episode_len - 1:
+                break
+            for goal in self._sample_goals(episode, t):
+                s = (state[0], goal)
+                a = action
+                r = self.reward_func(goal, next_state[0])
+                s_ = (next_state[0], goal)
+                d = self.done_func(goal, next_state[0])
+                self.push(s, a, r, s_, d)
