@@ -267,6 +267,10 @@ python algorithms/ac/run_ac.py
 </div>
 </details>
 
+### Interactive Configuration
+We also provide an interactive learning configuration with Jupyter Notebook, where you can select the algorithm, environment, and general learning settings with simple clicking on dropdown lists and sliders! A video demonstrating the usage is as follow.
+
+
 ## Contents
 ### Algorithms
 
