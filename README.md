@@ -268,7 +268,7 @@ python algorithms/ac/run_ac.py
 </details>
 
 ### Interactive Configuration
-We also provide an interactive learning configuration with Jupyter Notebook, where you can select the algorithm, environment, and general learning settings with simple clicking on dropdown lists and sliders! A video demonstrating the usage is as following. The interactive mode can be used with `rlzoo/interactive/main.ipynb` by running `jupyter notebook` to open it.
+We also provide an interactive learning configuration with Jupyter Notebook, where you can select the algorithm, environment, and general learning settings with simple clicking on dropdown lists and sliders! A video demonstrating the usage is as following. The interactive mode can be used with [`rlzoo/interactive/main.ipynb`](https://github.com/tensorlayer/RLzoo/blob/master/rlzoo/interactive/main.ipynb) by running `jupyter notebook` to open it.
 
 ![Interactive Video](https://github.com/tensorlayer/RLzoo/blob/master/gif/interactive.gif)
 
@@ -366,6 +366,14 @@ As described in the Section of Usage, we provide at least two ways of deploying 
 As shown in above algorithms and environments tables.	
 </div>
 </details>
+
+<details><summary><b>4. Interactive reinforcement learning configuration.</b> <i>[click to expand]</i></summary>
+<div>
+	
+As shown in the interactive use case in Section of Usage, a jupyter notebook is provided for more intuitively configuring the whole process of deploying the learning process ([`rlzoo/interactive/main.ipynb`](https://github.com/tensorlayer/RLzoo/blob/master/rlzoo/interactive/main.ipynb))
+</div>
+</details>
+
 
 
 
