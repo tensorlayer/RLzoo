@@ -1,4 +1,5 @@
 from rlzoo.common.policy_networks import *
+from rlzoo.common.value_networks import *
 from rlzoo.common.utils import set_seed
 
 """ 

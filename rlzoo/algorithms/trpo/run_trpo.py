@@ -1,6 +1,8 @@
 from rlzoo.common.utils import set_seed
 from rlzoo.algorithms.trpo.trpo import TRPO
 from rlzoo.common.policy_networks import *
+from rlzoo.common.value_networks import *
+import gym
 
 """ load environment """
 env = gym.make('Pendulum-v0').unwrapped

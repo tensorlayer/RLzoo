@@ -1,6 +1,8 @@
 from rlzoo.common.utils import set_seed
 from rlzoo.algorithms.ac.ac import AC
+from rlzoo.common.value_networks import *
 from rlzoo.common.policy_networks import *
+import gym
 
 """ load environment """
 # env = gym.make('CartPole-v0').unwrapped

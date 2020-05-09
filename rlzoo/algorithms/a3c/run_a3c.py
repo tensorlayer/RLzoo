@@ -1,5 +1,7 @@
 from rlzoo.algorithms.a3c.a3c import A3C
 from rlzoo.common.policy_networks import *
+from rlzoo.common.value_networks import *
+import gym
 
 """ load environment """
 env_id = 'BipedalWalker-v2'

@@ -43,6 +43,7 @@ import tensorlayer as tl
 from rlzoo.common.utils import *
 from rlzoo.common.buffer import *
 from rlzoo.common.policy_networks import *
+from rlzoo.common.value_networks import *
 
 tfd = tfp.distributions
 Normal = tfd.Normal
@@ -63,6 +64,14 @@ class TD3():
         # get all networks
         [self.q_net1, self.q_net2, self.target_q_net1, self.target_q_net2, self.policy_net,
          self.target_policy_net] = net_list
+
+        assert isinstance(self.q_net1, QNetwork)
+        assert isinstance(self.q_net2, QNetwork)
+        assert isinstance(self.target_q_net1, QNetwork)
+        assert isinstance(self.target_q_net2, QNetwork)
+        assert isinstance(self.policy_net, DeterministicPolicyNetwork)
+        assert isinstance(self.target_policy_net, DeterministicPolicyNetwork)
+        assert isinstance(self.policy_net.action_space, gym.spaces.Box)
 
         print('Q Network (1,2): ', self.q_net1)
         print('Policy Network: ', self.policy_net)

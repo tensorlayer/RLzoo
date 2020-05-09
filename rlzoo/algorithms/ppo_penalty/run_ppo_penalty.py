@@ -1,6 +1,8 @@
 from rlzoo.common.utils import make_env, set_seed
 from rlzoo.algorithms.ppo_penalty.ppo_penalty import PPO_PENALTY
 from rlzoo.common.policy_networks import *
+from rlzoo.common.value_networks import *
+import gym
 
 
 """ load environment """

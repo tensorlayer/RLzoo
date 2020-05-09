@@ -141,6 +141,7 @@ def _make_vec_env(env_id, env_type, nenv, seed,
 
 class DmObsTrans(gym.Wrapper):
     """ Observation process for DeepMind Control Suite environments """
+
     def __init__(self, env):
         self.env = env
         super(DmObsTrans, self).__init__(env)
@@ -619,3 +620,18 @@ class NormalizedActions(gym.ActionWrapper):
         action = np.clip(action, low, high)
 
         return action
+
+
+def close_env(env):
+    """
+    close environment or environment list
+    """
+    try:
+        env.close()
+    except:
+        pass
+    try:
+        for e in env:
+            e.close()
+    except:
+        pass

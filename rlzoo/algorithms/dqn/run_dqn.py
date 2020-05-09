@@ -2,6 +2,8 @@ import gym
 
 from rlzoo.algorithms.dqn.dqn import DQN
 from rlzoo.algorithms.dqn.default import *
+from rlzoo.common.value_networks import *
+import gym
 
 """ load environment """
 env = gym.make('CartPole-v0').unwrapped
