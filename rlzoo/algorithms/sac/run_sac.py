@@ -1,5 +1,7 @@
 from rlzoo.algorithms.sac.sac import SAC
 from rlzoo.common.policy_networks import *
+from rlzoo.common.value_networks import *
+import gym
 
 """ load environment """
 env = gym.make('Pendulum-v0').unwrapped

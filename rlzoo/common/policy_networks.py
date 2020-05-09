@@ -6,8 +6,9 @@ tensorflow==2.0.0a0
 tensorlayer==2.0.1
 
 """
+import copy
+import numpy as np
 import tensorlayer as tl
-from tensorlayer.layers import Dense, Input
 from tensorlayer.models import Model
 
 from rlzoo.common.basic_nets import *

@@ -6,6 +6,7 @@ from copy import deepcopy
 
 from rlzoo.common.utils import *
 from rlzoo.common.buffer import ReplayBuffer, PrioritizedReplayBuffer
+from rlzoo.common.value_networks import *
 
 
 class DQN(object):
@@ -33,6 +34,7 @@ class DQN(object):
         :param prioritized_alpha (float): alpha parameter for prioritized replay
         :param prioritized_beta0 (float): beta parameter for prioritized replay
         """
+        assert isinstance(net_list[0], QNetwork)
         self.name = 'DQN'
         if prioritized_replay:
             self.buffer = PrioritizedReplayBuffer(

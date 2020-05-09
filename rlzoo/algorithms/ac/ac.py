@@ -47,6 +47,7 @@ import time
 import tensorlayer as tl
 
 from rlzoo.common.utils import *
+from rlzoo.common.value_networks import *
 from rlzoo.common.policy_networks import *
 
 tl.logging.set_verbosity(tl.logging.DEBUG)

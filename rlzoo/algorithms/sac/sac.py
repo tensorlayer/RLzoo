@@ -19,6 +19,7 @@ import tensorlayer as tl
 from rlzoo.common.utils import *
 from rlzoo.common.buffer import *
 from rlzoo.common.policy_networks import *
+from rlzoo.common.value_networks import *
 
 tfd = tfp.distributions
 Normal = tfd.Normal
@@ -36,6 +37,14 @@ class SAC():
         # get all networks
         [self.soft_q_net1, self.soft_q_net2, self.target_soft_q_net1, self.target_soft_q_net2,
          self.policy_net] = net_list
+
+        assert isinstance(self.soft_q_net1, QNetwork)
+        assert isinstance(self.soft_q_net2, QNetwork)
+        assert isinstance(self.target_soft_q_net1, QNetwork)
+        assert isinstance(self.target_soft_q_net2, QNetwork)
+        assert isinstance(self.policy_net, StochasticPolicyNetwork)
+        assert isinstance(self.policy_net.action_space, gym.spaces.Box)
+
         self.action_dim = self.policy_net.action_shape[0]
 
         self.log_alpha = tf.Variable(0, dtype=np.float32, name='log_alpha')

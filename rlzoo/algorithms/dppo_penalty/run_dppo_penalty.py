@@ -1,6 +1,8 @@
 from rlzoo.common.utils import set_seed
 from rlzoo.algorithms.dppo_penalty.dppo_penalty import DPPO_PENALTY
 from rlzoo.common.policy_networks import *
+from rlzoo.common.value_networks import *
+import gym
 
 
 n_workers = 4

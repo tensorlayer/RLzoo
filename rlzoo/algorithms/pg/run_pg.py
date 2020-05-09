@@ -1,5 +1,6 @@
 from rlzoo.algorithms.pg.pg import PG
 from rlzoo.common.policy_networks import *
+import gym
 
 """ load environment """
 env = gym.make('CartPole-v0').unwrapped
