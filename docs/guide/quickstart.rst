@@ -112,3 +112,14 @@ For providing more flexibility, we provide another usage example of RLzoo with m
 
     # test after training
     model.learn(env, test_episodes=100, max_steps=200,  mode='test', render=True)
+
+
+
+Interactive Configuration
+--------------------------
+
+We also provide an interactive learning configuration with Jupyter Notebook and *ipywidgets*, where you can select the algorithm, environment, and general learning settings with simple clicking on dropdown lists and sliders! 
+A video demonstrating the usage is as following. 
+The interactive mode can be used with `rlzoo/interactive/main.ipynb <https://github.com/tensorlayer/RLzoo/blob/master/rlzoo/interactive/main.ipynb>`_ by running ``$jupyter notebook`` to open it.
+
+.. image:: ../../gif/interactive.gif
