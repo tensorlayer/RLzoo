@@ -69,7 +69,7 @@ the coming months after initial release. We will keep improving the potential pr
 * 1.0.0 (Current version)
 
 	Changes: 
-	* Add interactive training configuration;
+	* Add [interactive training configuration](https://github.com/tensorlayer/RLzoo/blob/master/rlzoo/interactive/main.ipynb);
 	* Better support RLBench environment, with multi-head network architectures to support dictionary as observation type;
 	* Make the code cleaner.
 * 0.0.1
@@ -267,7 +267,7 @@ python algorithms/ac/run_ac.py
 </div>
 </details>
 
-### Interactive Configuration
+### Interactive Configurations
 We also provide an interactive learning configuration with Jupyter Notebook, where you can select the algorithm, environment, and general learning settings with simple clicking on dropdown lists and sliders! A video demonstrating the usage is as following. The interactive mode can be used with [`rlzoo/interactive/main.ipynb`](https://github.com/tensorlayer/RLzoo/blob/master/rlzoo/interactive/main.ipynb) by running `jupyter notebook` to open it.
 
 ![Interactive Video](https://github.com/tensorlayer/RLzoo/blob/master/gif/interactive.gif)
