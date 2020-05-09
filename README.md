@@ -268,7 +268,7 @@ python algorithms/ac/run_ac.py
 </details>
 
 ### Interactive Configurations
-We also provide an interactive learning configuration with Jupyter Notebook, where you can select the algorithm, environment, and general learning settings with simple clicking on dropdown lists and sliders! A video demonstrating the usage is as following. The interactive mode can be used with [`rlzoo/interactive/main.ipynb`](https://github.com/tensorlayer/RLzoo/blob/master/rlzoo/interactive/main.ipynb) by running `jupyter notebook` to open it.
+We also provide an interactive learning configuration with Jupyter Notebook and *ipywidgets*, where you can select the algorithm, environment, and general learning settings with simple clicking on dropdown lists and sliders! A video demonstrating the usage is as following. The interactive mode can be used with [`rlzoo/interactive/main.ipynb`](https://github.com/tensorlayer/RLzoo/blob/master/rlzoo/interactive/main.ipynb) by running `$jupyter notebook` to open it.
 
 ![Interactive Video](https://github.com/tensorlayer/RLzoo/blob/master/gif/interactive.gif)
 
