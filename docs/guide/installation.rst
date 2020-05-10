@@ -8,7 +8,7 @@ Direct installation:
 .. code-block:: bash
    :linenos:
 
-   pip3 install rlzoo
+   pip3 install rlzoo==1.0.0
 
 Install from the source code on github:
 
