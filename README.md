@@ -81,7 +81,7 @@ Ensure that you have **Python >=3.5** (Python 3.6 is needed if using DeepMind Co
 
 Direct installation:
 ```
-pip3 install rlzoo
+pip3 install rlzoo==1.0.0
 ```
 Install RLzoo from Git:
 ```
