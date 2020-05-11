@@ -66,7 +66,7 @@ the coming months after initial release. We will keep improving the potential pr
 <details><summary><b>Version History</b> <i>[click to expand]</i></summary>
 <div>
 	
-* 1.0.0 (Current version)
+* 1.0.1 (Current version)
 
 	Changes: 
 	* Add [interactive training configuration](https://github.com/tensorlayer/RLzoo/blob/master/rlzoo/interactive/main.ipynb);
@@ -81,7 +81,7 @@ Ensure that you have **Python >=3.5** (Python 3.6 is needed if using DeepMind Co
 
 Direct installation:
 ```
-pip3 install rlzoo==1.0.0
+pip3 install rlzoo --upgrade
 ```
 Install RLzoo from Git:
 ```
