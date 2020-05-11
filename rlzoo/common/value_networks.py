@@ -10,7 +10,7 @@ import copy
 
 import numpy as np
 import tensorlayer as tl
-from tensorlayer.layers import Dense, Input
+from tensorlayer.layers import BatchNorm, Dense, Input
 from tensorlayer.models import Model
 
 from rlzoo.common.basic_nets import *
@@ -260,3 +260,127 @@ class QNetwork(Model):
     def action_shape(self):
         return copy.deepcopy(self._action_shape)
 
+
+class NAFLayer(tl.layers.Layer):
+    def __init__(self, action_dim, name=None):
+        super(NAFLayer, self).__init__(name)
+        self.action_dim = action_dim
+
+    def forward(self, inputs):
+        L, u, mu, value = inputs
+        pivot = 0
+        rows = []
+        for idx in range(self.action_dim):
+            offset = self.action_dim - idx
+            diag = tf.exp(tf.slice(L, (0, pivot), (-1, 1)))
+            nondiag = tf.slice(L, (0, pivot + 1), (-1, offset - 1))
+            row = tf.pad(tf.concat([diag, nondiag], 1), ((0, 0), (idx, 0)))
+            pivot += offset
+            rows.append(row)
+        L_T = tf.stack(rows, axis=1)
+        P = tf.matmul(tf.transpose(L_T, (0, 2, 1)), L_T)  # L L^T
+        temp = tf.expand_dims(u - mu, -1)
+        adv = tf.squeeze(-0.5 * tf.matmul(tf.transpose(temp, [0, 2, 1]), tf.matmul(P, temp)), -1)
+        return adv + value
+
+    def build(self, inputs_shape=None):
+        pass
+
+
+class NAFQNetwork(Model):
+    def __init__(self, state_space, action_space, hidden_dim_list,
+                 w_init=tf.keras.initializers.glorot_normal(), activation=tf.nn.tanh, trainable=True, name=None):
+        """ NAF Q-value network with multiple fully-connected layers
+
+        :param state_space: (gym.spaces) space of the state from gym environments
+        :param action_space: (gym.spaces) space of the action from gym environments
+        :param hidden_dim_list: (list[int]) a list of dimensions of hidden layers
+        :param w_init: (callable) weights initialization
+        :param activation: (callable) activation function
+        :param trainable: (bool) set training and evaluation mode
+        :param name: (str) name the model
+        """
+        assert isinstance(action_space, spaces.Box)
+        self._state_space, self._action_space = state_space, action_space
+        self._action_shape = self._action_space.shape
+        assert len(self._action_shape) == 1
+        act_inputs = Input((None,) + self._action_shape, name='Act_Input_Layer')
+
+        # create state input layer
+        obs_inputs, current_layer, self._state_shape = CreateInputLayer(state_space)
+
+        # concat multi-head state
+        if isinstance(state_space, spaces.Dict):
+            assert isinstance(obs_inputs, dict)
+            assert isinstance(current_layer, dict)
+            self.input_dict = obs_inputs
+            obs_inputs = list(obs_inputs.values())
+            current_layer = tl.layers.Concat(-1)(list(current_layer.values()))
+
+        # calculate value
+        current_layer = BatchNorm()(current_layer)
+        with tf.name_scope('NAF_VALUE_MLP'):
+            for i, dim in enumerate(hidden_dim_list):
+                current_layer = Dense(n_units=dim, act=activation, W_init=w_init,
+                                      name='mlp_hidden_layer%d' % (i + 1))(current_layer)
+            value = Dense(n_units=1, W_init=w_init, name='naf_value_mlp_output')(current_layer)
+
+        # calculate advantange and Q-value
+        dim = self._action_shape[0]
+        with tf.name_scope('NAF_ADVANTAGE'):
+            mu = Dense(n_units=dim, act=activation, W_init=w_init, name='mu')(current_layer)
+            L = Dense(n_units=int((dim * (dim + 1)) / 2), W_init=w_init, name='L')(current_layer)
+            qvalue = NAFLayer(dim)([L, act_inputs, mu, value])
+
+        super().__init__(inputs=[obs_inputs, act_inputs], outputs=qvalue, name=name)
+        if trainable:
+            self.train()
+        else:
+            self.eval()
+
+    def __call__(self, inputs, *args, **kwargs):
+        states, actions = inputs
+
+        # states and actions must have the same length
+        if len(states) != len(actions):
+            raise ValueError(
+                'Length of states and actions not match. States length is {} but actions length is {}'.format(
+                    len(states),
+                    len(actions)))
+
+        if isinstance(self._state_space, spaces.Dict):
+            states = np.array(states).transpose([1, 0]).tolist()  # batch states to multi-head
+            ssv = list(self._state_shape.values())
+            # check state shape
+            for i, each_head in enumerate(states):
+                if np.shape(each_head)[1:] != ssv[i]:
+                    raise ValueError('Input state shape error.')
+
+        else:
+            if np.shape(states)[1:] != self.state_shape:
+                raise ValueError(
+                    'Input state shape error. Shape can be {} but your shape is {}'.format((None,) + self.state_shape,
+                                                                                           np.shape(states)))
+            states = np.array(states, dtype=np.float32)
+
+        actions = tf.convert_to_tensor(actions, dtype=tf.float32)
+        if isinstance(self._state_space, spaces.Dict):
+            return super().__call__(states + [actions], *args, **kwargs)
+        else:
+            return super().__call__([states, actions], *args, **kwargs)
+
+    @property
+    def state_space(self):
+        return copy.deepcopy(self._state_space)
+
+    @property
+    def action_space(self):
+        return copy.deepcopy(self._action_space)
+
+    @property
+    def state_shape(self):
+        return copy.deepcopy(self._state_shape)
+
+    @property
+    def action_shape(self):
+        return copy.deepcopy(self._action_shape)
