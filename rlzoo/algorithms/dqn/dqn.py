@@ -89,7 +89,7 @@ class DQN(object):
         b_o, b_a, b_r, b_o_, b_d = transitions
         b_d = tf.cast(b_d, tf.float32)
         b_a = tf.cast(b_a, tf.int64)
-        b_r = tf.cast(b_a, tf.float32)
+        b_r = tf.cast(b_r, tf.float32)
         if self.double_q:
             b_a_ = tf.one_hot(tf.argmax(self.network(b_o_), 1), self.network.action_shape[0])
             b_q_ = (1 - b_d) * tf.reduce_sum(self.target_network(b_o_) * b_a_, 1)
