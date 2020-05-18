@@ -65,7 +65,7 @@ class SAC():
         std = tf.math.exp(log_std)  # no clip in evaluation, clip affects gradients flow
 
         normal = Normal(0, 1)
-        z = normal.sample()
+        z = normal.sample(mean.shape)
         action_0 = tf.math.tanh(mean + std * z)  # TanhNormal distribution as actions; reparameterization trick
         # according to original paper, with an extra last term for normalizing different action range
         log_prob = Normal(mean, std).log_prob(mean + std * z) - tf.math.log(1. - action_0 ** 2 + epsilon)
@@ -80,11 +80,14 @@ class SAC():
 
     def get_action(self, state):
         """ generate action with state for interaction with envronment """
-        return self.policy_net(np.array([state])).numpy()[0]
+        action, _, _, _, _ = self.evaluate(np.array([state]))
+        return action.numpy()[0]
 
     def get_action_greedy(self, state):
         """ generate action with state for interaction with envronment """
-        return self.policy_net(np.array([state]), greedy=True).numpy()[0]
+        mean = self.policy_net(np.array([state]), greedy=True).numpy()[0]
+        action = tf.math.tanh(mean) * self.policy_net.policy_dist.action_scale + self.policy_net.policy_dist.action_mean
+        return action
 
     def sample_action(self, ):
         """ generate random actions for exploration """
