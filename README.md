@@ -66,7 +66,12 @@ the coming months after initial release. We will keep improving the potential pr
 <details><summary><b>Version History</b> <i>[click to expand]</i></summary>
 <div>
 	
-* 1.0.1 (Current version)
+* 1.0.2 (Current version)
+
+	Changes:
+	* Fix bugs in SAC algorithm
+	
+* 1.0.1 
 
 	Changes: 
 	* Add [interactive training configuration](https://github.com/tensorlayer/RLzoo/blob/master/rlzoo/interactive/main.ipynb);
