@@ -32,7 +32,9 @@ with tf.name_scope('SAC'):
                                       hidden_dim_list=num_hidden_layer * [hidden_dim])
     with tf.name_scope('Policy'):
         policy_net = StochasticPolicyNetwork(env.observation_space, env.action_space,
-                                             hidden_dim_list=num_hidden_layer * [hidden_dim], state_conditioned=True)
+                                             hidden_dim_list=num_hidden_layer * [hidden_dim], 
+                                             output_activation=None,
+                                             state_conditioned=True)
 net_list = [soft_q_net1, soft_q_net2, target_soft_q_net1, target_soft_q_net2, policy_net]
 
 """ choose optimizers """
