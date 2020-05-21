@@ -26,7 +26,7 @@ copyright = '2020, Zihan Ding, Tianyang Yu, Yanhua Huang, Hongming Zhang, Hao Do
 author = 'Zihan Ding, Tianyang Yu, Yanhua Huang, Hongming Zhang, Hao Dong'
 
 # The full version, including alpha/beta/rc tags
-release = '1.0.2'
+release = '1.0.3'
 
 
 # -- General configuration ---------------------------------------------------

@@ -65,12 +65,13 @@ the coming months after initial release. We will keep improving the potential pr
 
 <details><summary><b>Version History</b> <i>[click to expand]</i></summary>
 <div>
-	
-* 1.0.2 (Current version)
 
-	Changes:
-	* Fix bugs in SAC algorithm
-	
+* 1.0.3 (Current version)
+
+  Changes:
+
+  * Fix bugs in SAC algorithm
+
 * 1.0.1 
 
 	Changes: 
@@ -99,7 +100,7 @@ pip3 install .
 ```pip3 install -r requirements.txt```
 <details><summary><b>List of prerequisites.</b> <i>[click to expand]</i></summary>
 <div>
-	
+
 * tensorflow >= 2.0.0 or tensorflow-gpu >= 2.0.0a0
 * tensorlayer >= 2.0.1
 * tensorflow-probability
@@ -322,7 +323,7 @@ Choices for `EnvType`: 'atari', 'box2d', 'classic_control', 'mujoco', 'robotics'
 
 <details><summary><b>Some notes on environment usage.</b> <i>[click to expand]</i></summary>
 <div>
-	
+
 * Make sure the name of environment matches the type of environment in the main script. The types of environments include: 'atari', 'box2d', 'classic_control', 'mujoco', 'robotics', 'dm_control', 'rlbench'.
 * When using the DeepMind Control Suite, install the [dm2gym](https://github.com/zuoxingdong/dm2gym) package with: `pip install dm2gym`
 
@@ -374,7 +375,7 @@ As shown in above algorithms and environments tables.
 
 <details><summary><b>4. Interactive reinforcement learning configuration.</b> <i>[click to expand]</i></summary>
 <div>
-	
+
 As shown in the interactive use case in Section of Usage, a jupyter notebook is provided for more intuitively configuring the whole process of deploying the learning process ([`rlzoo/interactive/main.ipynb`](https://github.com/tensorlayer/RLzoo/blob/master/rlzoo/interactive/main.ipynb))
 </div>
 </details>

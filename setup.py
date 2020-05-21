@@ -16,7 +16,7 @@ except:
 
 setup(
     name = "rlzoo",
-    version = "0.0.1",
+    version = "1.0.3",
     include_package_data=True,
     author='Zihan Ding, Tianyang Yu, Yanhua Huang, Hongming Zhang, Hao Dong',
     author_email='zhding@mail.ustc.edu.cn',
