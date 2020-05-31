@@ -110,10 +110,10 @@ class RLBenchEnv():
                     np.array(obs.wrist_rgb, np.float32),
                     np.array(obs.front_rgb, np.float32), ])
         else:
-            result = []
+            result = ['tag']
             for name in self._state_type:
                 result.append(np.array(getattr(obs, name), np.float32))
-            return np.array(result)
+            return np.delete(np.array(result,), 0, 0)
 
     def seed(self, seed_value):
         # set seed as in openai.gym env
