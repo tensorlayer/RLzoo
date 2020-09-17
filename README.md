@@ -86,10 +86,12 @@ the coming months after initial release. We will keep improving the potential pr
 ## Installation
 Ensure that you have **Python >=3.5** (Python 3.6 is needed if using DeepMind Control Suite).
 
-Direct installation:
+<!--- Direct installation: 
 ```
 pip3 install rlzoo --upgrade
 ```
+--->
+
 Install RLzoo from Git:
 ```
 git clone https://github.com/tensorlayer/RLzoo.git
