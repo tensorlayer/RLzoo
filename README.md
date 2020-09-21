@@ -120,8 +120,8 @@ For detailed usage, please check our [**online documentation**](https://rlzoo.re
 ### Quick Start
 Choose whatever environments with whatever RL algorithms supported in RLzoo, and enjoy the game by running following example in the root file of installed package:
 ```python
-# in the root folder of rlzoo package
-cd RLzoo
+# in the root folder of RLzoo package
+cd rlzoo
 python run_rlzoo.py
 ```
 
