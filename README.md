@@ -404,13 +404,11 @@ Our core contributors include:
 ## Citing
 
 ```
-@misc{RLzoo,
-  author = {Zihan Ding, Tianyang Yu, Yanhua Huang, Hongming Zhang, Hao Dong},
-  title = {Reinforcement Learning Algorithms Zoo},
-  year = {2019},
-  publisher = {GitHub},
-  journal = {GitHub repository},
-  howpublished = {\url{https://github.com/tensorlayer/RLzoo}},
+@article{ding2020rlzoo,
+  title={RLzoo: A Comprehensive and Adaptive Reinforcement Learning Library},
+  author={Ding, Zihan and Yu, Tianyang and Huang, Yanhua and Zhang, Hongming and Mai, Luo and Dong, Hao},
+  journal={arXiv preprint arXiv:2009.08644},
+  year={2020}
 }
 ```
 
