@@ -27,7 +27,7 @@ Different from RLzoo for simple usage with **high-level APIs**, we also have a [
 <img src="https://github.com/tensorlayer/tensorlayer/blob/master/img/tl_transparent_logo.png" height=180 width=205 >
 
 
-Please check our [Online Documentation](https://rlzoo.readthedocs.io). We suggest users to report bugs using Github issues. Users can also discuss how to use RLzoo in the following slack channel.
+Please check our [**Online Documentation**](https://rlzoo.readthedocs.io) for detailed usage and the [**Arxiv paper**](https://arxiv.org/abs/2009.08644) for the high-level description of design choices plus comparisons with other RL libraries. We suggest users to report bugs using Github issues. Users can also discuss how to use RLzoo in the following slack channel.
 
 <br/>
 
