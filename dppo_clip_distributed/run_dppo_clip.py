@@ -10,7 +10,7 @@ from dppo_clip_distributed.dppo_sampler import DPPOSampler
 from functools import partial
 
 
-def make_network(observation_space, action_space, name='DPPO_CLIP'):
+def build_network(observation_space, action_space, name='DPPO_CLIP'):
     """ build networks for the algorithm """
     hidden_dim = 64
     num_hidden_layer = 2
@@ -23,7 +23,7 @@ def make_network(observation_space, action_space, name='DPPO_CLIP'):
     return critic, actor
 
 
-def make_opt(actor_lr=1e-4, critic_lr=2e-4):
+def build_opt(actor_lr=1e-4, critic_lr=2e-4):
     return [tf.optimizers.Adam(critic_lr), tf.optimizers.Adam(actor_lr)]
 
 
@@ -43,19 +43,22 @@ def make_sampler_process(num, create_env_func, should_stop):
 def make_infer_server_process(
         build_net_func, create_env_func, sample_pipe_list, traj_queue, should_stop, should_update, barrier,
         net_param_pipe):
+    build_net_func = partial(build_net_func, 'DPPO_CLIP_INFER_SERVER')
     infer_server = DPPOInferServer(build_net_func, net_param_pipe)
     p = mp.Process(target=infer_server.run,
                    args=(create_env_func, sample_pipe_list, traj_queue, should_stop, should_update, barrier))
     p.daemon = True
-    return [infer_server]
+    return [p]
 
 
 def make_learner_process(
         num, build_net_func, traj_queue, grad_queue, should_stop_event, should_update_event, barrier,
         net_param_pipe_list):
     process_list = []
+    l = len(str(num))
     for i in range(num):
-        learner = DPPOLearner(build_net_func, net_param_pipe_list[i])
+        net_func = partial(build_net_func, 'DPPO_CLIP_LEARNER_{}'.format(str(i).zfill(l)))
+        learner = DPPOLearner(net_func, net_param_pipe_list[i])
         p = mp.Process(
             target=learner.run, args=(traj_queue, grad_queue, should_stop_event, should_update_event, barrier))
         p.daemon = True
@@ -66,6 +69,7 @@ def make_learner_process(
 def make_global_manager(
         build_net_func, build_opt_func, n_nets, traj_queue, grad_queue, should_stop, should_update, barrier, ):
     param_pipe_a, param_pipe_b = zip(*[mp.Pipe() for _ in range(n_nets)])
+    build_net_func = partial(build_net_func, 'DPPO_CLIP_GLOBAL')
     global_manager = DPPOGlobalManager(build_net_func, build_opt_func, param_pipe_a)
     p = mp.Process(target=global_manager.run, args=(traj_queue, grad_queue, should_stop, should_update, barrier,))
     p.daemon = True
@@ -76,10 +80,10 @@ if __name__ == '__main__':
 
     n_sampler = 3
     name = 'DPPO_CLIP'
-    build_env = partial(build_env, ('CartPole-v0', 'classic_control'))
+    build_env = partial(build_env, 'CartPole-v0', 'classic_control')
     env = build_env()
     observation_space, action_space = env.observation_space, env.action_space
-    build_network = partial(make_network, (observation_space, action_space, name))
+    build_network = partial(build_network, observation_space, action_space)
 
     traj_queue = mp.Queue(maxsize=10000)
     should_stop_event = mp.Event()
@@ -94,7 +98,8 @@ if __name__ == '__main__':
     process_list = []
 
     p_list, param_pipe_b = make_global_manager(
-        build_env, make_opt, n_learner + 1, traj_queue, grad_queue, should_stop_event, should_update_event, barrier)
+        build_network, build_opt, n_learner + 1, traj_queue, grad_queue, should_stop_event, should_update_event,
+        barrier)
     process_list.extend(p_list)
 
     p_list, sample_pipe_list = make_sampler_process(
@@ -113,5 +118,9 @@ if __name__ == '__main__':
     )
     process_list.extend(p_list)
 
+    for p in process_list:
+        p.start()
+
     while True:
-        print(grad_queue[0].qsize)
+        print('traj_queue', traj_queue.qsize())
+        print('grad_queue', grad_queue[0].qsize())
