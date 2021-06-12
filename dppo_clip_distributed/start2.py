@@ -31,37 +31,23 @@ def range1(n):
     return range(1, n + 1)
 
 
-def train(agent):
-    n_steps = 1
-    for i in range1(n_steps):
-        print('step %d' % (i))
-        # model = agent.request(rlzoo.Role.Server,
-        #                       0,
-        #                       'model',
-        #                       shape=[1],
-        #                       dtype=tf.float32)
-        # x = tf.Variable([10], dtype=tf.float32)
-        # y = agent.role_all_reduce(x)
-        # print(x)
-        # print(y)
-
-
 def run_leaner(agent, args):
-    agent.barrier()
-    train(agent)
-
+    for i in range(args.step):
+        print('%s step %d' % (rlzoo.show_role_name(agent.role()), i))
+        weight = tf.Variable([1, 2, 3], dtype=tf.int32)
+        weight = agent.role_all_reduce(weight)
+        print('weight: %s' % (weight))
 
 # action :: server -> actor
 # state :: actor -> server
 
 def run_actor(agent, args): # sampler
-    agent.barrier()
-
     action_q, state_q = agent.new_queue_pair((rlzoo.Role.Server, 0), (rlzoo.Role.Actor, agent.role_rank()))
 
 
     for i in range(args.step):
-        print('step %d' % (i))
+        print('%s step %d' % (rlzoo.show_role_name(agent.role()), i))
+
         a = action_q.get(dtype=tf.int32, shape=(1,))
         print('action: %s' % (a))
 
@@ -73,18 +59,13 @@ def run_actor(agent, args): # sampler
 
 
 def run_server(agent, args):
-    # model = tf.Variable([10], dtype=tf.float32)
-    # agent.save(model, name='model')
-    # print('saved')
-    agent.barrier()  # save before barrier
-
-    # create queue after barrier
     qs = [agent.new_queue_pair((rlzoo.Role.Server, 0), (rlzoo.Role.Actor, i)) for i in range(agent.role_size(rlzoo.Role.Actor))]
     print(qs)
     action_qs, state_qs = zip(*qs)
 
     for i in range(args.step):
-        print('step %d' % (i))
+        print('%s step %d' % (rlzoo.show_role_name(agent.role()), i))
+
         for i, aq in enumerate(action_qs):
             a = tf.Variable([i], dtype=tf.int32)
             aq.put(a)
@@ -101,6 +82,8 @@ def main():
     agent = rlzoo.Agent(n_leaners=args.l, n_actors=args.a, n_servers=args.s)
 
     print('%s : %d/%d' % (agent.role(), agent.role_rank(), agent.role_size()))
+
+    agent.barrier()
 
     if agent.role() == rlzoo.Role.Leaner:
         run_leaner(agent, args)

@@ -14,6 +14,14 @@ class Role(enum.Enum):
     Server = 3
 
 
+def show_role_name(role):
+    return {
+        Role.Leaner: 'leaner',
+        Role.Actor: 'actor',
+        Role.Server: 'server',
+    }[role]
+
+
 def _interval(n, offset=0):
     return list(range(offset, offset + n))
 
