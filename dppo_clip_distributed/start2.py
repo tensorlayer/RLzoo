@@ -32,11 +32,23 @@ def range1(n):
 
 
 def run_leaner(agent, args):
+    if agent.role_rank() == 0:
+        param_q = agent.new_queue((rlzoo.Role.Leaner, 0), (rlzoo.Role.Server, 0))
+
+    # TODO: init model
+
     for i in range(args.step):
         print('%s step %d' % (rlzoo.show_role_name(agent.role()), i))
+
+
         weight = tf.Variable([1, 2, 3], dtype=tf.int32)
+
+        if agent.role_rank() == 0:
+            param_q.put(weight)
+
         weight = agent.role_all_reduce(weight)
         print('weight: %s' % (weight))
+
 
 # action :: server -> actor
 # state :: actor -> server
@@ -59,12 +71,17 @@ def run_actor(agent, args): # sampler
 
 
 def run_server(agent, args):
+    param_q = agent.new_queue((rlzoo.Role.Leaner, 0), (rlzoo.Role.Server, 0))
+
     qs = [agent.new_queue_pair((rlzoo.Role.Server, 0), (rlzoo.Role.Actor, i)) for i in range(agent.role_size(rlzoo.Role.Actor))]
-    print(qs)
     action_qs, state_qs = zip(*qs)
 
     for i in range(args.step):
         print('%s step %d' % (rlzoo.show_role_name(agent.role()), i))
+
+        weight = param_q.get(dtype=tf.int32, shape=(3,))
+        print(weight)
+        # TODO: update weight
 
         for i, aq in enumerate(action_qs):
             a = tf.Variable([i], dtype=tf.int32)
