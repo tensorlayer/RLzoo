@@ -5,6 +5,7 @@ from kungfu.python import current_cluster_size, current_rank
 from kungfu.tensorflow.ops import (barrier, request_variable,
                                    request_variable_with_template,
                                    save_variable, subset_all_reduce)
+from kungfu.tensorflow.ops.queue import new_queue
 
 
 class Role(enum.Enum):
@@ -56,11 +57,14 @@ class Agent:
     def role(self):
         return self._role
 
-    def rank(self):
+    def role_rank(self):
         return self._role_rank
 
-    def size(self):
-        return self._role_size
+    def role_size(self, role=None):
+        if role is None:
+            return self._role_size
+        else:
+            return self._role_sizes[role]
 
     # collective APIs
     def barrier(self):
@@ -97,6 +101,19 @@ class Agent:
     #     target = self._to_global_rank(role, role_rank)
     #     pass
 
+    def new_queue(self, src, dst):
+        """create a uni-direction queue."""
+        role1, rank1 = src
+        role2, rank2 = dst
+        srcRank = self._to_global_rank(role1, rank1)
+        dstRank = self._to_global_rank(role2, rank2)
+        return new_queue(srcRank, dstRank)
+
+    def new_queue_pair(self, a, b):
+        """create a pair of queues."""
+        q1 = self.new_queue(a, b)
+        q2 = self.new_queue(b, a)
+        return q1, q2
 
 class LeanerExample:
     pass
