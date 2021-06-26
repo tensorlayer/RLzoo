@@ -111,7 +111,7 @@ def run_server(agent, args, training_conf, env_conf, agent_conf):
     curr_reward_list = []
     tmp_eps_reward = 0
     while curr_step < total_step:
-        tmp_eps_reward = 0  # todo env with no end
+        # tmp_eps_reward = 0  # todo env with no end
         for _ in range(traj_len):
             curr_step += agent.role_size(Role.Actor)
 
@@ -145,15 +145,15 @@ def run_server(agent, args, training_conf, env_conf, agent_conf):
             train_cnt += 1
 
             # todo env with end
-            # avg_eps_reward = None
-            # if curr_reward_list:
-            #     avg_eps_reward = np.mean(curr_reward_list)
-            #     curr_reward_list.clear()
-            #     total_reward_list.append(avg_eps_reward)
+            avg_eps_reward = None
+            if curr_reward_list:
+                avg_eps_reward = np.mean(curr_reward_list)
+                curr_reward_list.clear()
+                total_reward_list.append(avg_eps_reward)
 
             # todo env with no end
-            avg_eps_reward = tmp_eps_reward
-            total_reward_list.append(np.array(avg_eps_reward))
+            # avg_eps_reward = tmp_eps_reward
+            # total_reward_list.append(np.array(avg_eps_reward))
 
             print('Training iters: {}, steps so far: {}, average eps reward: {}'.format(
                 train_cnt, curr_step, np.array(avg_eps_reward)))
