@@ -49,7 +49,7 @@ Please check our [**Online Documentation**](https://rlzoo.readthedocs.io) for de
 - [Contents](#contents)
   - [Algorithms](#algorithms)
   - [Environments](#environments)
-  - [Configurations](#configuration)
+  - [Configurations](#configurations)
 - [Properties](#properties)
 - [Troubleshooting](#troubleshooting)
 - [Credits](#credits)
@@ -66,8 +66,13 @@ the coming months after initial release. We will keep improving the potential pr
 
 <details><summary><b>Version History</b> <i>[click to expand]</i></summary>
 <div>
+* 1.0.4 (Current version)
 
-* 1.0.3 (Current version)
+  Changes:
+
+  * Add distributed training for DPPO algorithm, using Kungfu
+
+* 1.0.3 
 
   Changes:
 
