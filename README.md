@@ -49,7 +49,7 @@ Please check our [**Online Documentation**](https://rlzoo.readthedocs.io) for de
 - [Contents](#contents)
   - [Algorithms](#algorithms)
   - [Environments](#environments)
-  - [Configurations](#configuration)
+  - [Configurations](#configurations)
 - [Properties](#properties)
 - [Troubleshooting](#troubleshooting)
 - [Credits](#credits)
@@ -66,8 +66,14 @@ the coming months after initial release. We will keep improving the potential pr
 
 <details><summary><b>Version History</b> <i>[click to expand]</i></summary>
 <div>
+	
+* 1.0.4 (Current version)
 
-* 1.0.3 (Current version)
+  Changes:
+
+  * Add distributed training for DPPO algorithm, using Kungfu
+
+* 1.0.3 
 
   Changes:
 
@@ -279,6 +285,148 @@ python algorithms/ac/run_ac.py
 We also provide an interactive learning configuration with Jupyter Notebook and *ipywidgets*, where you can select the algorithm, environment, and general learning settings with simple clicking on dropdown lists and sliders! A video demonstrating the usage is as following. The interactive mode can be used with [`rlzoo/interactive/main.ipynb`](https://github.com/tensorlayer/RLzoo/blob/master/rlzoo/interactive/main.ipynb) by running `$ jupyter notebook` to open it.
 
 ![Interactive Video](https://github.com/tensorlayer/RLzoo/blob/master/gif/interactive.gif)
+	
+	
+### Distributed Training
+RLzoo supports distributed training frameworks across multiple computational nodes with multiple CPUs/GPUs, using the [Kungfu](https://github.com/lsds/KungFu) package. The installation of Kungfu requires to install *CMake* and *Golang* first, details see the [website of Kungfu](https://github.com/lsds/KungFu).
+An example for distributed training is contained in folder `rlzoo/distributed`, by running the following command, you will launch the distributed training process: 
+```bash
+rlzoo/distributed/run_dis_train.sh
+```
+<details><summary><b>Code in Bash script</b> <i>[click to expand]</i></summary>
+<div>
+	
+```bash
+#!/bin/sh
+set -e
+
+cd $(dirname $0)
+
+kungfu_flags() {
+    echo -q
+    echo -logdir logs
+
+    local ip1=127.0.0.1
+    local np1=$np
+
+    local ip2=127.0.0.10
+    local np2=$np
+    local H=$ip1:$np1,$ip2:$np2
+    local m=cpu,gpu
+
+    echo -H $ip1:$np1
+}
+
+prun() {
+    local np=$1
+    shift
+    kungfu-run $(kungfu_flags) -np $np $@
+}
+
+n_learner=2
+n_actor=2
+n_server=1
+
+flags() {
+    echo -l $n_learner
+    echo -a $n_actor
+    echo -s $n_server
+}
+
+rl_run() {
+    local n=$((n_learner + n_actor + n_server))
+    prun $n python3 training_components.py $(flags)
+}
+
+main() {
+    rl_run
+}
+
+main
+```
+The script specifies the ip addresses for different computational nodes, as well as the number of policy learners (updating the models), actors (sampling through interaction with environments) and inference servers (policy forward inference during sampling process) as `n_learner`, `n_actor` and `n_server` respectively. 
+	
+</div>
+</details>
+
+Other training details are specified in an individual Python script named `training_components.py` **within the same directory** as `run_dis_train.sh`, which can be seen as following.
+
+<details><summary><b>Code in Python script</b> <i>[click to expand]</i></summary>
+<div>
+	
+```python
+from rlzoo.common.env_wrappers import build_env
+from rlzoo.common.policy_networks import *
+from rlzoo.common.value_networks import *
+from rlzoo.algorithms.dppo_clip_distributed.dppo_clip import DPPO_CLIP
+from functools import partial
+
+# Specify the training configurations
+training_conf = {
+    'total_step': int(1e7),  # overall training timesteps
+    'traj_len': 200,         # length of the rollout trajectory
+    'train_n_traj': 2,       # update the models after every certain number of trajectories for each learner 
+    'save_interval': 10,     # saving the models after every certain number of updates
+}
+
+# Specify the environment and launch it
+env_name, env_type = 'CartPole-v0', 'classic_control'
+env_maker = partial(build_env, env_name, env_type)
+temp_env = env_maker()
+obs_shape, act_shape = temp_env.observation_space.shape, temp_env.action_space.shape
+
+env_conf = {
+    'env_name': env_name,
+    'env_type': env_type,
+    'env_maker': env_maker,
+    'obs_shape': obs_shape,
+    'act_shape': act_shape,
+}
+
+
+def build_network(observation_space, action_space, name='DPPO_CLIP'):
+    """ build networks for the algorithm """
+    hidden_dim = 256
+    num_hidden_layer = 2
+    critic = ValueNetwork(observation_space, [hidden_dim] * num_hidden_layer, name=name + '_value')
+
+    actor = StochasticPolicyNetwork(observation_space, action_space,
+                                    [hidden_dim] * num_hidden_layer,
+                                    trainable=True,
+                                    name=name + '_policy')
+    return critic, actor
+
+
+def build_opt(actor_lr=1e-4, critic_lr=2e-4):
+    """ choose the optimizer for learning """
+    import tensorflow as tf
+    return [tf.optimizers.Adam(critic_lr), tf.optimizers.Adam(actor_lr)]
+
+
+net_builder = partial(build_network, temp_env.observation_space, temp_env.action_space)
+opt_builder = partial(build_opt, )
+
+agent_conf = {
+    'net_builder': net_builder,
+    'opt_builder': opt_builder,
+    'agent_generator': partial(DPPO_CLIP, net_builder, opt_builder),
+}
+del temp_env
+
+from rlzoo.distributed.start_dis_role import main
+
+print('Start Training.')
+main(training_conf, env_conf, agent_conf)
+print('Training Finished.')
+	
+```
+Users can specify the environment, network architectures, optimizers and other training detains in this script.
+	
+</div>
+</details>
+	
+Note: if RLzoo is installed, you can create the two scripts `run_dis_train.sh` and `training_components.py` in whatever directory to launch distributed training, as long as the two scripts are in the same directory.
+	
 
 
 ## Contents
@@ -399,7 +547,11 @@ Our core contributors include:
 [Tianyang Yu](https://github.com/Tokarev-TT-33),
 [Yanhua Huang](https://github.com/Officium),
 [Hongming Zhang](https://github.com/initial-h),
+[Guo Li](https://github.com/lgarithm),
+Quancheng Guo,
+[Luo Mai](https://github.com/luomai),
 [Hao Dong](https://github.com/zsdonghao)
+
 
 ## Citing
 
