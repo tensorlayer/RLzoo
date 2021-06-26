@@ -66,6 +66,7 @@ the coming months after initial release. We will keep improving the potential pr
 
 <details><summary><b>Version History</b> <i>[click to expand]</i></summary>
 <div>
+	
 * 1.0.4 (Current version)
 
   Changes:
