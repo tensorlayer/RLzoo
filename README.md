@@ -344,7 +344,7 @@ main() {
 
 main
 ```
-The script specifies the ip addresses for different computational nodes, as well as the number of policy learners (updating the models), actors (sampling through interaction with environments) and inference servers (policy forward inference during sampling process) as `n_learner`, `n_actor` and `n_server` respectively. 
+The script specifies the ip addresses for different computational nodes, as well as the number of policy learners (updating the models), actors (sampling through interaction with environments) and inference servers (policy forward inference during sampling process) as `n_learner`, `n_actor` and `n_server` respectively. `n_server` can only be 1 at current version.
 	
 </div>
 </details>
