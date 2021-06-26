@@ -183,7 +183,7 @@ def run_server(agent, args, training_conf, env_conf, agent_conf):
 
     # save the final model
     rl_agent.save_ckpt(env_name)
-    print('server finished')
+    print('Server Finished.')
 
 
 def main(training_conf, env_conf, agent_conf):
@@ -201,6 +201,6 @@ def main(training_conf, env_conf, agent_conf):
     elif agent.role() == Role.Server:
         run_server(agent, args, training_conf, env_conf, agent_conf)
     else:
-        raise RuntimeError('invalid role')
+        raise RuntimeError('Invalid Role.')
 
     agent.barrier()

@@ -4,15 +4,15 @@ from rlzoo.common.value_networks import *
 from rlzoo.algorithms.dppo_clip_distributed.dppo_clip import DPPO_CLIP
 from functools import partial
 
-# constants
+# Specify the training configurations
 training_conf = {
-    'total_step': int(1e7),
-    'traj_len': 200,
-    'train_n_traj': 2,
-    'save_interval': 10,
+    'total_step': int(1e7),  # overall training timesteps
+    'traj_len': 200,         # length of the rollout trajectory
+    'train_n_traj': 2,       # update the models after every certain number of trajectories for each learner 
+    'save_interval': 10,     # saving the models after every certain number of updates
 }
 
-# launch env settings
+# Specify the environment and launch it
 env_name, env_type = 'CartPole-v0', 'classic_control'
 env_maker = partial(build_env, env_name, env_type)
 temp_env = env_maker()
@@ -41,6 +41,7 @@ def build_network(observation_space, action_space, name='DPPO_CLIP'):
 
 
 def build_opt(actor_lr=1e-4, critic_lr=2e-4):
+    """ choose the optimizer for learning """
     import tensorflow as tf
     return [tf.optimizers.Adam(critic_lr), tf.optimizers.Adam(actor_lr)]
 
@@ -57,6 +58,6 @@ del temp_env
 
 from rlzoo.distributed.start_dis_role import main
 
-print('start training')
+print('Start Training.')
 main(training_conf, env_conf, agent_conf)
-print('finished')
+print('Training Finished.')
