@@ -580,6 +580,13 @@ and
 	
 ## Other Resources
 <br/>
+<a href="http://www.broadview.com.cn/book/6544" target="\_blank">
+	<div align="center">
+		<img src="http://download.broadview.com.cn/ScreenShow/2106dcc52ead176cb568" width="20%"/>
+	</div>
+<!-- 	<div align="center"><caption>Slack Invitation Link</caption></div> -->
+</a>
+	
 <a href="https://deepreinforcementlearningbook.org" target="\_blank">
 	<div align="center">
 		<img src="http://deep-reinforcement-learning-book.github.io/assets/images/cover_v1.png" width="20%"/>
@@ -587,7 +594,7 @@ and
 <!-- 	<div align="center"><caption>Slack Invitation Link</caption></div> -->
 </a>
 <br/>
-
+	
 <br/>
 <a href="https://deepreinforcementlearningbook.org" target="\_blank">
 	<div align="center">
