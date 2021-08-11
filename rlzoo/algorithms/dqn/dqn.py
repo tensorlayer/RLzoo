@@ -176,7 +176,7 @@ class DQN(object):
                     if render:
                         env.render()
                     eps = 1 - (1 - exploration_final_eps) * \
-                          min(1, i / exploration_rate * (train_episodes * max_steps))
+                          min(1, i / (exploration_rate * train_episodes * max_steps))
                     a = self.get_action(o, eps)
 
                     # execute action and feed to replay buffer
