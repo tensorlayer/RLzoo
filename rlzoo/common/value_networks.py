@@ -184,7 +184,7 @@ class QNetwork(Model):
             elif isinstance(self._action_space, spaces.Box):
                 outputs = Dense(n_units=1, act=output_activation, W_init=w_init)(current_layer)
             else:
-                raise ValueError("State Shape Not Accepted!")
+                raise ValueError("Action Shape Not Accepted!")
 
         if isinstance(state_space, spaces.Dict):
             if self.state_only:
