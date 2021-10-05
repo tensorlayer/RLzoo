@@ -39,6 +39,8 @@ Please check our [**Online Documentation**](https://rlzoo.readthedocs.io) for de
 
 <br/>
 
+[*News*] RLzoo's paper is accepted at ACM Multimedia 2021 Open Source Software Competition! See a simple [presentation slide](https://github.com/tensorlayer/RLzoo/blob/master/gif/ACM_MM2021_Presentation_Slide.pdf) describing the key characteristics of RLzoo.
+
 
 **Table of contents:**
 
