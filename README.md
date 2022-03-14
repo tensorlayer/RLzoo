@@ -24,7 +24,7 @@ Different from RLzoo for simple usage with **high-level APIs**, we also have a [
 <!-- <em>Gym: Robotics</em>    <em>DeepMind Control Suite </em>   <em>Gym: RLBench </em>  -->
 
 <img src="https://github.com/tensorlayer/RLzoo/blob/master/gif/robotics.gif" height=250 width=205 > <img src="https://github.com/tensorlayer/RLzoo/blob/master/gif/dmcontrol.gif" height=250 width=205 > <img src="https://github.com/tensorlayer/RLzoo/blob/master/gif/rlbench.gif" height=250 width=205 > 
-<img src="https://github.com/tensorlayer/tensorlayer/blob/master/img/tl_transparent_logo.png" height=180 width=205 >
+<img src="https://github.com/tensorlayer/tensorlayer/blob/master/img/tl_transparent_logo.png" height=180 width=200 >
 
 
 Please check our [**Online Documentation**](https://rlzoo.readthedocs.io) for detailed usage and the [**Arxiv paper**](https://arxiv.org/abs/2009.08644) for the high-level description of design choices plus comparisons with other RL libraries. We suggest users to report bugs using Github issues. Users can also discuss how to use RLzoo in the following slack channel.
