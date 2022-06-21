@@ -1,5 +1,5 @@
 matplotlib==3.0.3
-numpy==1.16.3
+numpy==1.22.0
 opencv-python==4.1.0.25
 pygame==1.9.6
 tensorflow-gpu==2.1.0
