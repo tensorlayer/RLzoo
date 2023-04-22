@@ -1,6 +1,6 @@
 matplotlib==3.0.3
 numpy==1.16.3
-opencv-python==4.1.0.25
+opencv-python==4.2.0.32
 pygame==1.9.6
 tensorflow-gpu==2.1.0
 tensorflow-probability==0.8.0
